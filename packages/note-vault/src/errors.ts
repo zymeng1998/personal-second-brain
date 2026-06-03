@@ -23,3 +23,18 @@ export class RawNoteWriteError extends Error {
     if (details !== undefined) this.details = details;
   }
 }
+
+/** Raised when a mutation (overwrite/delete) is refused because the target is L0 raw. */
+export type RawImmutabilityErrorCode = "overwrite_rejected" | "delete_rejected";
+
+export class RawImmutabilityError extends Error {
+  readonly code: RawImmutabilityErrorCode;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: RawImmutabilityErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "RawImmutabilityError";
+    this.code = code;
+    if (details !== undefined) this.details = details;
+  }
+}

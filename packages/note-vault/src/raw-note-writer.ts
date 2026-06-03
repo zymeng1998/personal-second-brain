@@ -9,10 +9,11 @@
  * the writer never rewrites it.
  */
 import { mkdir, writeFile } from "node:fs/promises";
-import { isAbsolute, join } from "node:path";
+import { isAbsolute } from "node:path";
 import { isUlid } from "@sb/interfaces";
 import type { Ulid } from "@sb/interfaces";
 import { RawNoteWriteError } from "./errors.js";
+import { rawDir, rawNotePath } from "./raw-paths.js";
 
 /**
  * Capture source kinds. Mirrors the `source` enum in
@@ -116,12 +117,10 @@ export async function writeRawNote(input: WriteRawNoteInput): Promise<WriteRawNo
     throw new RawNoteWriteError("invalid_slug", `slug is not filename-safe: ${String(slug)}`, { slug });
   }
 
-  const rawDir = join(workspace, "vault", "00_Raw");
-  const filename = slug !== undefined ? `${id}--${slug}.md` : `${id}.md`;
-  const filePath = join(rawDir, filename);
+  const filePath = rawNotePath(workspace, id, slug);
 
   // Ensure the target directory exists (idempotent; never touches existing files).
-  await mkdir(rawDir, { recursive: true });
+  await mkdir(rawDir(workspace), { recursive: true });
 
   // Verbatim body: frontmatter, one blank line, then the exact content (no trailing rewrite).
   const data = `${buildFrontmatter(input)}\n\n${content}`;

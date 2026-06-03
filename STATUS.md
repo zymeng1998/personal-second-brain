@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1C — Vault Write Path (IN PROGRESS — SB-011 `Done`; next SB-012 immutability guard)
+**Phase:** Phase 1D — Event Log Write Path (IN PROGRESS — SB-011/012 `Done`; next SB-014)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -12,9 +12,28 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Stop point — SB-011 `Done` (Phase 1C, EPIC-CORE-003) — committed
-- **Current story:** SB-011 — raw note write contract. **Status:** `Done` (atomic commit).
-  **Next story:** SB-012 — raw immutability guard (start only on human approval).
+## Phase 1C COMPLETE — SB-012 `Done` (EPIC-CORE-003 Done). Now starting SB-014 (Phase 1D).
+- **SB-012 — raw immutability guard. Status:** `Done` (atomic commit + pushed). Phase 1C complete.
+  **Prev:** SB-011 `Done` + pushed (`59d9333`).
+- **Scope delivered:** the single guarded path that makes L0 raw immutable via the vault API.
+  `guardRawImmutable(workspace, path, op)` throws `RawImmutabilityError` for any path under
+  `vault/00_Raw/`; `updateRawNote`/`deleteRawNote` always reject (`overwrite_rejected`/`delete_rejected`)
+  and never touch the file. Create-time overwrite is already blocked by the writer's exclusive-create
+  (`already_exists`). Extracted `raw-paths.ts` to single-source the raw filename convention (the SB-011
+  writer now uses it; behavior unchanged, re-verified by its tests).
+- **Out of scope (SB-012):** OS-level filesystem permissions; guarding non-raw (L1+) folders.
+- **Files changed (SB-012):** `packages/note-vault/src/{raw-immutability.ts,raw-paths.ts}` (new),
+  `packages/note-vault/src/{errors.ts,index.ts,raw-note-writer.ts}` (edited),
+  `packages/note-vault/test/raw-immutability.test.ts` (new), `packages/note-vault/package.json` (test
+  script runs both files), `packages/note-vault/README.md`, `docs/planning/{story_backlog.md,
+  phase_1_story_map.md}`, `STATUS.md`. (No new deps → no `pnpm-lock.yaml` change.)
+- **Validation run (green):** `pnpm --filter @sb/note-vault test` → **13/13 pass** (8 SB-011 + 5 SB-012:
+  overwrite-rejected+unchanged, updateRawNote rejected+unchanged, delete rejected+file-remains+unchanged,
+  new note still creates, `isRawPath` true for 00_Raw / false for 00_Inbox + events);
+  `pnpm --filter @sb/note-vault build` (`tsc --noEmit`) → exit 0; domain-leakage grep → only generic
+  "client" + anti-leakage rules + the negative `source:"broker"` test (no real leakage).
+- **Next recommended action:** human reviews the guard + tests; on approval, commit SB-012 atomically
+  (`feat: raw immutability guard (SB-012)`). That completes Phase 1C → next is Phase 1D (SB-014 event append).
 - **Scope delivered (narrowed by human instruction):** the **low-level raw write primitive only** —
   `writeRawNote()` in `@sb/note-vault`. Creates an immutable L0 raw note at
   `<workspace>/vault/00_Raw/<ULID>.md` (or `<ULID>--<slug>.md`); frontmatter `id/type:raw/layer:0/created`

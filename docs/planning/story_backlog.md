@@ -20,7 +20,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 |---|---|---|---|---|---|
 | EPIC-CORE-001 | Workspace & Local-First Foundation | 1A | P0 | In Progress | Create the external workspace tree safely; no real data. |
 | EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Review | Finalize frontmatter v1, event v1, capture interface v0. (All 3 stories Done; awaiting 1B human review.) |
-| EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | In Progress | Raw note write contract + immutability guard (L0). |
+| EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Done | Raw note write contract + immutability guard (L0). |
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Backlog | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Backlog | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Backlog | Frontmatter validation + immutability checks. |
@@ -51,7 +51,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — |
 | SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Done | 3 | SB-008, SB-009 |
 | SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Done | 3 | SB-008, SB-010 |
-| SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Backlog | 3 | SB-011 |
+| SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Done | 3 | SB-011 |
 | SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Backlog | 3 | SB-011, SB-012, SB-014 |
 | SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Backlog | 2 | SB-009, SB-004 |
 | SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Backlog | 2 | SB-011 |
@@ -306,7 +306,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-012 — Implement raw immutability guard
 
-- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-011
 - **Scope:** Enforce that any write/delete targeting `vault/00_Raw/` is rejected after initial creation.
   All raw mutations go through a single guarded path; attempts to overwrite/delete throw a clear error.
@@ -319,6 +319,11 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `packages/note-vault/src/*`; tests.
 - **Out of Scope:** Filesystem-level OS permissions; guarding non-raw folders.
 - **Notes:** Core safety invariant (ADR-004). Pairs with SB-017 checks.
+- **Implementation note (In Review):** Added `raw-immutability.ts` (`guardRawImmutable`, `isRawPath`,
+  `updateRawNote`, `deleteRawNote`) + `RawImmutabilityError` (`overwrite_rejected`/`delete_rejected`),
+  and extracted shared `raw-paths.ts` (single-sources the raw filename convention; the SB-011 writer now
+  uses it). Overwrite at create time is enforced by the writer's exclusive-create (`already_exists`);
+  `update`/`delete` via the API always reject and never touch the file. 5 new tests (13 total) green.
 
 ## SB-013 — Implement minimal CLI capture command
 
