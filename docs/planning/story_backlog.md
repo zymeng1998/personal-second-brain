@@ -45,7 +45,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-003 | Story | Create workspace tree exactly as documented | EPIC-CORE-001 | P0 | Ready | 2 | SB-002 |
 | SB-004 | Story | Create append-only event files (empty) | EPIC-CORE-001 | P0 | Ready | 1 | SB-003 |
 | SB-005 | Story | Create workspace README & safety README files | EPIC-CORE-001 | P0 | Ready | 1 | SB-003 |
-| SB-006 | Story | Add dry-run support for the initializer | EPIC-CORE-001 | P1 | Ready | 2 | SB-001 |
+| SB-006 | Story | Add dry-run support for the initializer | EPIC-CORE-001 | P1 | **Done** | 2 | SB-001 |
 | SB-007 | Story | Add validation commands for workspace init | EPIC-CORE-001 | P0 | Backlog | 2 | SB-003, SB-004, SB-005 |
 | SB-008 | Story | Define frontmatter schema v1 | EPIC-CORE-002 | P0 | Backlog | 3 | — (Phase 1A done) |
 | SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Backlog | 3 | — |
@@ -199,7 +199,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-006 — Add dry-run support for the initializer
 
-- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P1 · **Points:** 2 · **Status:** Ready
+- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-001
 - **Scope:** `--dry-run` prints exactly what would be created (dirs + files) without touching the
   filesystem. Shared with the real path so the plan can't drift from behavior.

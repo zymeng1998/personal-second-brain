@@ -19,12 +19,13 @@
  * It only reads (existence/stat/dir listing) to validate the configured workspace.
  */
 
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   WORKSPACE_ENV_VAR,
   WorkspaceConfigError,
   resolveWorkspaceConfig,
+  type WorkspaceConfig,
   type WorkspaceResolution,
 } from "./lib/workspace_env.ts";
 
@@ -39,51 +40,81 @@ interface CliOptions {
   dryRun: boolean;
 }
 
-/** A single ordered initialization step. Still logging stubs until SB-003+. */
-interface InitStep {
-  /** Stable id, mirrors the backlog story that will implement it. */
-  id: string;
-  /** Human-readable one-line description of what the step will do. */
-  description: string;
-}
-
 type LogLevel = "info" | "warn" | "error" | "step";
 
 /**
  * Structured logger. All diagnostics go to stderr so that machine-readable output
- * (e.g. usage text, or a future dry-run plan) can own stdout without interleaving.
+ * (e.g. usage text) can own stdout without interleaving.
  */
 function log(level: LogLevel, message: string): void {
   process.stderr.write(`[${PROGRAM}] ${level.toUpperCase()}: ${message}\n`);
 }
 
+/** A directory the initializer creates (path relative to the workspace root). */
+interface PlannedDir {
+  readonly rel: string;
+  readonly note?: string;
+}
+
+/** A file the initializer creates (path relative to the workspace root). */
+interface PlannedFile {
+  readonly rel: string;
+  readonly note: string;
+  /** Backlog story that implements creation of this file. */
+  readonly story: string;
+}
+
+/** The full, ordered plan of what a complete initializer run creates. */
+interface WorkspacePlan {
+  readonly directories: ReadonlyArray<PlannedDir>;
+  readonly files: ReadonlyArray<PlannedFile>;
+}
+
 /**
- * The fixed, ordered plan of CREATION steps the initializer will execute (after
- * config resolution, which already ran by this point). Declared in one place so
- * the eventual `--dry-run` (SB-006) and the real run cannot drift apart.
+ * Canonical workspace plan — the SINGLE SOURCE OF TRUTH mirroring
+ * docs/planning/repo_structure.md. Both `--dry-run` (SB-006) and the real
+ * creation path (SB-003 dirs, SB-004 event files, SB-005 READMEs) consume this
+ * exact data, so the preview can never drift from actual behavior. Paths are
+ * workspace-relative; absolute paths are derived by joining the resolved root.
  */
-const INIT_STEPS: ReadonlyArray<InitStep> = [
-  {
-    id: "SB-003",
-    description:
-      "Create the workspace directory tree exactly per docs/planning/repo_structure.md (idempotent).",
-  },
-  {
-    id: "SB-004",
-    description:
-      "Create empty append-only event files (capture/memory/projection .jsonl) if absent; never truncate.",
-  },
-  {
-    id: "SB-005",
-    description:
-      "Write workspace README.md and secure_refs/README.md (safety & authority notes).",
-  },
-  {
-    id: "SB-007",
-    description:
-      "Verify the workspace matches repo_structure.md (read-only check).",
-  },
-];
+const WORKSPACE_PLAN: WorkspacePlan = {
+  directories: [
+    { rel: "vault" },
+    { rel: "vault/00_Raw", note: "L0 immutable source — AI never overwrites/deletes" },
+    { rel: "vault/00_Inbox", note: "processing queue" },
+    { rel: "vault/10_Projects" },
+    { rel: "vault/20_Areas" },
+    { rel: "vault/30_Resources" },
+    { rel: "vault/40_Archives" },
+    { rel: "vault/50_Entities" },
+    { rel: "vault/60_Outputs", note: "L5 generated outputs (must cite sources)" },
+    { rel: "vault/70_Daily" },
+    { rel: "vault/80_Wiki" },
+    { rel: "vault/90_System", note: "templates, config, schema copies" },
+    { rel: "events", note: "source of truth (append-only JSONL); not disposable" },
+    { rel: "db" },
+    { rel: "db/backups" },
+    { rel: "indexes", note: "L4 — disposable / rebuildable" },
+    { rel: "indexes/full_text" },
+    { rel: "indexes/vector" },
+    { rel: "indexes/graph" },
+    { rel: "indexes/temporal" },
+    { rel: "attachments" },
+    { rel: "attachments/non_sensitive", note: "sensitive docs never stored here" },
+    { rel: "secure_refs", note: "metadata + pointers to external secure storage" },
+    { rel: "logs", note: "technical/debug logs only — disposable" },
+    { rel: "logs/capture_logs" },
+    { rel: "logs/extraction_logs" },
+    { rel: "logs/indexing_logs" },
+  ],
+  files: [
+    { rel: "events/capture_events.jsonl", note: "append-only capture events", story: "SB-004" },
+    { rel: "events/memory_events.jsonl", note: "append-only memory events", story: "SB-004" },
+    { rel: "events/projection_events.jsonl", note: "append-only projection events", story: "SB-004" },
+    { rel: "README.md", note: "workspace authority & safety notes", story: "SB-005" },
+    { rel: "secure_refs/README.md", note: "secure_refs pointer-pattern notes", story: "SB-005" },
+  ],
+};
 
 const USAGE = `${PROGRAM} — initialize the Personal Second Brain workspace.
 
@@ -92,7 +123,8 @@ USAGE:
   pnpm init:workspace -- [options]
 
 OPTIONS:
-  --dry-run    Validate config + print the ordered plan; make no changes. Exits 0.
+  --dry-run    Validate config + list every directory and file the real run would
+               create, in order; make no filesystem changes. Exits 0.
   -h, --help   Show this help and exit 0.
 
 ENVIRONMENT:
@@ -133,11 +165,33 @@ function parseArgs(argv: ReadonlyArray<string>): CliOptions {
   return options;
 }
 
-/** Print the ordered initialization plan (steps only log intent in SB-001). */
-function printPlan(): void {
-  log("info", `Planned initialization steps (${INIT_STEPS.length}):`);
-  INIT_STEPS.forEach((step, index) => {
-    log("step", `${index + 1}. [${step.id}] ${step.description}`);
+/** Absolute path for a plan entry, joined onto the resolved workspace root. */
+function planPath(config: WorkspaceConfig, rel: string): string {
+  return join(config.workspace, rel);
+}
+
+/**
+ * Render the full, ordered workspace plan (directories then files) as absolute
+ * paths. Used by both `--dry-run` and the real run so the preview matches behavior.
+ * Rendering itself performs no filesystem access.
+ */
+function renderPlan(config: WorkspaceConfig): void {
+  const { directories, files } = WORKSPACE_PLAN;
+
+  log("info", `Plan — workspace root: ${config.workspace}`);
+
+  log("info", `Directories to create (${directories.length}):`);
+  directories.forEach((dir, index) => {
+    const suffix = dir.note ? `  — ${dir.note}` : "";
+    log("step", `${index + 1}. ${planPath(config, dir.rel)}${suffix}`);
+  });
+
+  log("info", `Files to create (${files.length}):`);
+  files.forEach((file, index) => {
+    log(
+      "step",
+      `${index + 1}. ${planPath(config, file.rel)}  — ${file.note} (${file.story})`,
+    );
   });
 }
 
@@ -192,13 +246,12 @@ function main(argv: ReadonlyArray<string>): number {
     log("warn", warning);
   }
 
-  printPlan();
+  renderPlan(config);
 
   if (options.dryRun) {
     log(
       "info",
-      "Dry run: configuration validated; no filesystem changes made. " +
-        "Detailed per-file dry-run output arrives in SB-006.",
+      "Dry run: configuration validated; no filesystem changes made.",
     );
     return 0;
   }

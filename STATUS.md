@@ -12,42 +12,31 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Stop point — SB-002 (current)
-- **Current story:** SB-002 — environment loading & path-safety checks, Phase 1A, EPIC-CORE-001.
-- **Status:** `Done` (approved + committed + pushed).
-- **Files changed:** `scripts/init_workspace.ts` (wires env/path resolution into `main()`),
-  `scripts/lib/workspace_env.ts` (new — env loader + path-safety helper),
-  `docs/planning/story_backlog.md` (status), `docs/planning/phase_1_story_map.md` (next unit), `STATUS.md`.
-- **Atomicity:** SB-002 is 3 pts — within the ≤5 atomic limit; kept as one story (no split needed).
-- **Helper location note:** centralized logic placed in `scripts/lib/workspace_env.ts` instead of the
-  story's *optional* `packages/note-vault/src/paths.ts`, to avoid wiring an empty package (note-vault has
-  only a README). Flag for review.
+## Stop point — SB-006 (current)
+- **Current story:** SB-006 — dry-run support for the initializer, Phase 1A, EPIC-CORE-001.
+- **Status:** `Done` (committed + pushed).
+- **Files changed:** `scripts/init_workspace.ts` (canonical `WORKSPACE_PLAN` + `renderPlan()`),
+  `docs/planning/story_backlog.md`, `docs/planning/phase_1_story_map.md`, `STATUS.md`.
+- **Atomicity:** SB-006 is 2 pts — atomic; single file of behavior (`scripts/init_workspace.ts`).
+- **Design:** introduced `WORKSPACE_PLAN` as the single source of truth (27 dirs + 5 files, mirroring
+  `repo_structure.md`); `--dry-run` and the future real run (SB-003 dirs / SB-004 files / SB-005 READMEs)
+  consume the same plan so preview can't drift from behavior.
 - **Validation run (all green):**
-  - `--help` (no env) → exit 0.
-  - empty `SECOND_BRAIN_WORKSPACE=` → actionable error, exit 1.
-  - relative path → refused, exit 1.
-  - path inside repo (`$PWD`) → refused, exit 1.
-  - unset (no `.env`) → "not set" error, exit 1.
-  - valid outside path, no flags → validates + plan, exit 1; `--dry-run` → exit 0.
-  - spaces + Unicode path → handled correctly.
-  - existing non-empty workspace → warning, still validates (non-destructive).
-  - parent is a file / target is a file → refused.
-  - `.env` fallback (var absent from process.env) → reads from `.env`.
-  - `tsc --noEmit --strict` (nodenext) on both files → exit 0. No filesystem writes by the script.
-- **Next recommended action:** **SB-006 — dry-run support** (P1, 2 pts, `Ready`, deps SB-001) — start only
-  on human approval.
+  - `--dry-run` lists 27 directories + 5 files in order; exit 0.
+  - `find` after dry-run → zero filesystem changes.
+  - `tsc --noEmit --strict` (nodenext) → exit 0.
+- **Next recommended action:** **SB-003 — create workspace tree** (P0, 2 pts, `Ready`, deps SB-002) —
+  proceeding automatically per user instruction.
 
 ## Just completed
 - Phase 0 scaffold (committed `3990af3`); JIRA-style backlog workflow (committed `0cb6b00`).
-- **SB-001 → `Done`** (committed `2d99fe7`): initializer entry point + skeleton; Atomic Story Rule
-  formalized across backlog_workflow.md, CLAUDE.md, AGENTS.md, STATUS.md.
-- **SB-002 → `Done`:** `SECOND_BRAIN_WORKSPACE` loaded from env or local `.env`; path safety enforced
-  (absolute, outside repo, parent creatable, non-empty warning, spaces/Unicode); no filesystem writes.
+- **SB-001 → `Done`** (`2d99fe7`): initializer entry point + skeleton; Atomic Story Rule formalized.
+- **SB-002 → `Done`** (`1c38186`): env loading + path safety; no filesystem writes.
+- **SB-006 → `Done`:** canonical `WORKSPACE_PLAN` + `--dry-run` listing dirs/files; zero writes.
 
 ## Next concrete action
-- On human approval: mark SB-002 `Done`, commit atomically, then continue Phase 1A in order
-  SB-006 → SB-003 → SB-004 → SB-005 → SB-007, committing each story atomically after review; observe the
-  Phase 1A stop point before Phase 1B.
+- Implement **SB-003** (create the directory tree, idempotent) consuming `WORKSPACE_PLAN`, commit
+  atomically; then continue Phase 1A SB-004 → SB-005 → SB-007; observe the Phase 1A stop point before 1B.
 
 ## Open conflict to resolve
 - Minimal distillation is in `mvp_scope.md` but not in Phase 1A–1G. See Phase 1H note in
