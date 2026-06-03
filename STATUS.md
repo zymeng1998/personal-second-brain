@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1B — Schema Finalization (IN PROGRESS — SB-008 Done; next SB-009)
+**Phase:** Phase 1B — Schema Finalization (IN PROGRESS — SB-008, SB-009 Done; next SB-010)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -12,10 +12,18 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Phase 1B progress — SB-008 Done (EPIC-CORE-002)
-- **Current story:** SB-008 — frontmatter schema v1, Phase 1B. **Status:** `Done` (atomic commit).
-- **Next story:** SB-009 — event schema v1 (resolves open question #2), then SB-010 — capture interface v0.
-  Phase 1B human-review stop point is **after SB-010**.
+## Phase 1B progress — SB-008, SB-009 Done (EPIC-CORE-002)
+- **Done:** SB-008 (frontmatter v1, `fb00c5d`), SB-009 (event v1) — each an atomic commit.
+- **Next story:** SB-010 — capture interface v0 (TS contracts in `packages/interfaces` + finalize
+  `capture.schema.json`). Phase 1B human-review stop point is **after SB-010**.
+- **SB-009 (event v1):** `event.schema.json` v1. Envelope required `event_id(ULID),stream,kind,
+  occurred_at,actor`; per-stream kinds via allOf (capture→`captured`; memory→note/fact/entity/
+  distillation kinds, subject_id required; projection→`indexed/projection_rebuilt/projection_reset`).
+  `actor` = `human|cli|skill:<name>|sidecar:<name>`. APPEND-ONLY documented. Files:
+  `schemas/json/event.schema.json`, `examples/captures/events.sample.jsonl`, `.gitignore`
+  (scoped `!examples/**/*.jsonl` exception so synthetic fixtures commit while the `*.jsonl` privacy guard
+  holds for real data), `open_questions.md` (#2), backlog/STATUS. Validation: ajv over 9 event lines →
+  9/9 valid; 5/5 negative cases rejected. OQ #2 resolved.
 - **Decision locked (OQ #1, #3):** **ULID** is the canonical immutable `id` for all notes/events/etc.
   (pattern `^[0-7][0-9A-HJKMNP-TV-Z]{25}$`); filename `<ULID>--<slug>.md`; slug may change, id never does.
   ULID is not the retrieval mechanism (metadata/tags/links/entities + indexes are). Per-type layer pins:

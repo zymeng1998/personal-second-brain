@@ -17,6 +17,8 @@ workspace/
 *.sqlite
 *.duckdb
 *.jsonl
+# Exception: synthetic, non-sensitive schema fixtures under examples/ (never real data).
+!examples/**/*.jsonl
 
 # Secrets / environment
 .env

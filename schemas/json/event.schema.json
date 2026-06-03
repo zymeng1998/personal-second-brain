@@ -1,29 +1,103 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://second-brain.local/schemas/json/event.schema.json",
-  "title": "Event Envelope (DRAFT — Phase 0 skeleton)",
-  "$comment": "Append-only JSONL record. Source of truth for audit + replay. Never rewritten. Finalize in Phase 1.",
+  "title": "Event Envelope v1",
+  "version": "1.0.0",
+  "description": "One append-only JSONL record. The event log is the audit + replay source of truth: projections (L3) and indexes (L4) are rebuilt from L0-L2 + events. APPEND-ONLY — events are NEVER rewritten or deleted; corrections are new events (e.g. fact_superseded). Forward-compatible: unknown fields are preserved on replay. New v1 kinds are additive and bump the schema minor version.",
   "type": "object",
   "required": ["event_id", "stream", "kind", "occurred_at", "actor"],
   "additionalProperties": true,
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+      "description": "Canonical ULID: 26-char Crockford base32, time-sortable, immutable."
+    }
+  },
   "properties": {
-    "event_id": { "type": "string", "description": "Unique, sortable id (e.g. ULID)." },
+    "event_id": {
+      "$ref": "#/$defs/ulid",
+      "description": "Unique, time-sortable event id. ULID."
+    },
     "stream": {
       "type": "string",
       "enum": ["capture", "memory", "projection"],
-      "description": "Which JSONL stream this belongs to."
+      "description": "Which append-only JSONL stream this record belongs to (capture_events / memory_events / projection_events)."
     },
     "kind": {
       "type": "string",
-      "description": "Event kind, e.g. captured, note_created, note_updated, fact_added, fact_superseded, indexed."
+      "description": "Event kind. Allowed values are constrained per stream (see allOf)."
     },
-    "occurred_at": { "type": "string", "format": "date-time" },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event logically happened (ISO-8601, UTC recommended)."
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event was appended to the log. May differ from occurred_at for imports/backfills."
+    },
     "actor": {
       "type": "string",
-      "description": "Who caused it: human | cli | skill:<name> | sidecar:<name>. Never silent."
+      "pattern": "^(human|cli|skill:[a-z0-9][a-z0-9-]*|sidecar:[a-z0-9][a-z0-9-]*)$",
+      "description": "Who caused the event: 'human', 'cli', 'skill:<name>', or 'sidecar:<name>'. Never silent/anonymous."
     },
-    "subject_id": { "type": "string", "description": "Note/fact/entity id this event concerns." },
-    "source_ref": { "type": "string", "description": "Provenance pointer when applicable." },
-    "payload": { "type": "object", "description": "Kind-specific data. additionalProperties allowed.", "additionalProperties": true }
-  }
+    "subject_id": {
+      "$ref": "#/$defs/ulid",
+      "description": "Id of the note/fact/entity this event concerns. Required for capture and memory events; optional for vault-wide projection events."
+    },
+    "source_ref": {
+      "$ref": "#/$defs/ulid",
+      "description": "Provenance pointer (e.g. the raw note id a fact was extracted from) when applicable."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Optional semver of the event envelope this record was written against (e.g. '1.0.0')."
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Kind-specific data. Domain-neutral. Free-form; readers must tolerate unknown keys."
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "capture stream — raw material entered the system.",
+      "if": { "properties": { "stream": { "const": "capture" } }, "required": ["stream"] },
+      "then": {
+        "properties": { "kind": { "enum": ["captured"] } },
+        "required": ["subject_id"]
+      }
+    },
+    {
+      "$comment": "memory stream — derived notes/facts/entities changed (provenance-bearing).",
+      "if": { "properties": { "stream": { "const": "memory" } }, "required": ["stream"] },
+      "then": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "note_created",
+              "note_updated",
+              "fact_added",
+              "fact_superseded",
+              "entity_merged",
+              "distillation_accepted"
+            ]
+          }
+        },
+        "required": ["subject_id"]
+      }
+    },
+    {
+      "$comment": "projection stream — rebuildable L3/L4 derived state changed; may be vault-wide.",
+      "if": { "properties": { "stream": { "const": "projection" } }, "required": ["stream"] },
+      "then": {
+        "properties": {
+          "kind": { "enum": ["indexed", "projection_rebuilt", "projection_reset"] }
+        }
+      }
+    }
+  ]
 }

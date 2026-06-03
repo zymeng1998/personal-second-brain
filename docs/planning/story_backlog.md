@@ -48,7 +48,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-006 | Story | Add dry-run support for the initializer | EPIC-CORE-001 | P1 | **Done** | 2 | SB-001 |
 | SB-007 | Story | Add validation commands for workspace init | EPIC-CORE-001 | P0 | **Done** | 2 | SB-003, SB-004, SB-005 |
 | SB-008 | Story | Define frontmatter schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — (Phase 1A done) |
-| SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Backlog | 3 | — |
+| SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — |
 | SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Backlog | 3 | SB-008, SB-009 |
 | SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Backlog | 3 | SB-008, SB-010 |
 | SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Backlog | 3 | SB-011 |
@@ -248,7 +248,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-009 — Define event schema v1
 
-- **Type:** Story · **Epic:** EPIC-CORE-002 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-002 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** Phase 1A `Done`
 - **Scope:** Finalize `schemas/json/event.schema.json` to v1: envelope fields, per-stream kinds
   (capture/memory/projection), actor convention, provenance, timestamps. Resolve open question #2.
