@@ -20,7 +20,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 |---|---|---|---|---|---|
 | EPIC-CORE-001 | Workspace & Local-First Foundation | 1A | P0 | In Progress | Create the external workspace tree safely; no real data. |
 | EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Review | Finalize frontmatter v1, event v1, capture interface v0. (All 3 stories Done; awaiting 1B human review.) |
-| EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Backlog | Raw note write contract + immutability guard (L0). |
+| EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | In Progress | Raw note write contract + immutability guard (L0). |
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Backlog | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Backlog | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Backlog | Frontmatter validation + immutability checks. |
@@ -50,7 +50,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-008 | Story | Define frontmatter schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — (Phase 1A done) |
 | SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — |
 | SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Done | 3 | SB-008, SB-009 |
-| SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Backlog | 3 | SB-008, SB-010 |
+| SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Done | 3 | SB-008, SB-010 |
 | SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Backlog | 3 | SB-011 |
 | SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Backlog | 3 | SB-011, SB-012, SB-014 |
 | SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Backlog | 2 | SB-009, SB-004 |
@@ -280,7 +280,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-011 — Implement raw note write contract
 
-- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-008, SB-010
 - **Scope:** In `packages/note-vault`, implement writing an L0 raw note to `vault/00_Raw/<id>.md` with
   valid frontmatter and verbatim content. Create the matching L1 stub note in `00_Inbox/` referencing
@@ -294,6 +294,15 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `packages/note-vault/src/*`; tests.
 - **Out of Scope:** Immutability enforcement (SB-012); event emission (SB-014); CLI (SB-013).
 - **Notes:** No domain fields.
+- **Implementation note (scope split, In Review):** Per explicit human instruction, SB-011 was
+  delivered as the **low-level raw write primitive only** (`writeRawNote()` → `vault/00_Raw/<id>.md`
+  or `<id>--<slug>.md`, exclusive-create, verbatim body, structured errors, 8 passing tests). The
+  **`00_Inbox/` L1 stub** part of the original AC is **deferred** to capture orchestration (recommend
+  tracking under SB-013) so this story stays atomic. Raw frontmatter uses schema-exact required fields
+  (`id`/`type:raw`/`layer:0`/`created`, no `updated`); capture source kind + external `ref` are carried
+  as additive provenance metadata (`source: { kind, ref }`) permitted by the schema's
+  `additionalProperties: true`. A raw (L0) note has **no `source_ref`** (it is the origin), so that part
+  of the illustrative validation does not apply to the raw note itself.
 
 ## SB-012 — Implement raw immutability guard
 

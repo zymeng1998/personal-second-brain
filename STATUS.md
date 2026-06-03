@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1B — Schema Finalization (COMPLETE — SB-008/009/010 Done; at mandatory stop point)
+**Phase:** Phase 1C — Vault Write Path (IN PROGRESS — SB-011 `Done`; next SB-012 immutability guard)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -12,11 +12,30 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Stop point — Phase 1B COMPLETE (EPIC-CORE-002, all 3 stories Done)
-- **Done (atomic commits):** SB-008 (frontmatter v1, `fb00c5d`), SB-009 (event v1, `0b9d7c8`),
-  SB-010 (capture interface v0, this commit). **Phase 1B complete — mandatory human review point.**
-- **Next phase:** Phase 1C — Vault Write Path (SB-011 raw write contract, then SB-012 immutability guard).
-  Do not start until the 1B schema decisions are reviewed.
+## Stop point — SB-011 `Done` (Phase 1C, EPIC-CORE-003) — committed
+- **Current story:** SB-011 — raw note write contract. **Status:** `Done` (atomic commit).
+  **Next story:** SB-012 — raw immutability guard (start only on human approval).
+- **Scope delivered (narrowed by human instruction):** the **low-level raw write primitive only** —
+  `writeRawNote()` in `@sb/note-vault`. Creates an immutable L0 raw note at
+  `<workspace>/vault/00_Raw/<ULID>.md` (or `<ULID>--<slug>.md`); frontmatter `id/type:raw/layer:0/created`
+  (+ additive `source:{kind,ref}`/`title`/`tags`), schema-exact (no `updated`); body byte-faithful;
+  exclusive-create (`flag: wx`) so L0 is never overwritten; structured `RawNoteWriteError` codes.
+- **Deferred (NOT done in SB-011):** the `00_Inbox/` L1 stub from the original card AC → moved to capture
+  orchestration (recommend SB-013). No event emission (SB-014), no broader immutability guard (SB-012),
+  no CLI (SB-013). A raw note has no `source_ref` (it is the origin).
+- **Files changed (SB-011):** `packages/note-vault/{package.json,tsconfig.json,README.md}`,
+  `packages/note-vault/src/{index.ts,raw-note-writer.ts,errors.ts}`,
+  `packages/note-vault/test/raw-note-writer.test.ts`, `pnpm-lock.yaml` (new `@sb/note-vault` importer),
+  `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `pnpm install` → ok; `pnpm --filter @sb/note-vault test` → 8/8 pass
+  (creates note under `00_Raw`, ULID/slug filename, `type:raw`+`layer:0`, verbatim body, no-overwrite,
+  invalid-ULID rejected, relative-path rejected, unsafe-slug + unknown-source rejected);
+  `pnpm --filter @sb/note-vault build` (`tsc --noEmit`) → exit 0; `@sb/interfaces` typecheck → exit 0;
+  domain-leakage grep → only generic "client" + anti-leakage rules + the negative test asserting
+  `source:"broker"` is rejected (no real leakage).
+- **Next recommended action:** human reviews `writeRawNote()` + tests; on approval, commit SB-011
+  atomically (`feat: raw note write contract (SB-011)`), then proceed to **SB-012 — raw immutability guard**.
+  (`@sb/interfaces` build script substitution: it exposes `typecheck`, not `build` — ran `tsc --noEmit`.)
 - **SB-010 (capture interface v0):** scaffolded `@sb/interfaces` (package.json + tsconfig + `src/*`):
   `ids.ts` (branded `Ulid`/`SecureRef`), `note.ts` (per-type `NoteFrontmatter` discriminated union +
   `Note`), `event.ts` (per-stream `Event` union + `Actor`), `capture.ts` (`CaptureRequest`/`CaptureResult`),

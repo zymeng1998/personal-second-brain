@@ -117,7 +117,9 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 (each an atomic commit per the Atomic Story Rule): **SB-008** frontmatter v1 (`fb00c5d`),
 **SB-009** event v1 (`0b9d7c8`), **SB-010** capture interface v0. Open questions #1, #2, #3 resolved.
 
-→ **Mandatory Phase 1B stop point: human review now.** Review the schema decisions (ULID id scheme;
-per-type frontmatter rules; event envelope + per-stream kinds; capture request v1; `@sb/interfaces` v0
-contracts) before starting **Phase 1C — Vault Write Path** (next story **SB-011 — raw note write
-contract**; depends on SB-008, SB-010 `Done`).
+**Phase 1B passed human review.** Now in **Phase 1C — Vault Write Path**: **SB-011 — raw note write
+contract** is `Done` (atomic commit) — raw write primitive `writeRawNote()` in `@sb/note-vault`;
+8 tests green; `00_Inbox/` stub deferred to capture orchestration to keep the story atomic.
+
+→ **Next story: SB-012 — raw immutability guard** (depends on SB-011 `Done`; start only on human
+approval), then Phase 1D (SB-014 event append) and Phase 1E (SB-013 CLI capture, SB-015 list/get).
