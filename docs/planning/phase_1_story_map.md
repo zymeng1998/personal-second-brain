@@ -113,12 +113,13 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 
 ## Next implementation unit
 
-**Phase 1A** is the next implementation unit. The exact first story to implement next is:
+**Phase 1A** is in progress. **SB-001 (initializer entry + skeleton) is `Done`** (one atomic commit per the
+Atomic Story Rule). The next story to implement is:
 
-> **SB-001 — Implement workspace initializer (entry + skeleton)** · P0 · 2 pts · `Ready` · no dependencies.
+> **SB-002 — Add environment loading & path-safety checks** · P0 · 3 pts · `Ready` · depends on SB-001 (`Done`).
 
-Do **not** implement it in this planning task. When approved to begin Phase 1, start with SB-001, then
-proceed SB-002 → SB-006 → SB-003 → SB-004 → SB-005 → SB-007, observing the 1A stop point before Phase 1B.
+Start SB-002 only on human approval. Remaining 1A order: SB-002 → SB-006 → SB-003 → SB-004 → SB-005 →
+SB-007, observing the 1A stop point before Phase 1B. Each story is committed atomically after review.
 
 *(Suggested within-1A order: SB-001 skeleton, SB-002 env/path-safety, SB-006 dry-run, then SB-003 tree,
 SB-004 event files, SB-005 READMEs, SB-007 verify — so the safe dry-run path exists before any real writes.)*

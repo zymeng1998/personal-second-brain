@@ -36,6 +36,13 @@ This project is managed through a JIRA-style backlog. See
 - Implement **only** what is in the story's Scope; touch **only** its listed files; new work → new `Backlog` story.
 - Statuses: `Backlog → Ready → In Progress → In Review → Done` (+ `Blocked`, `Deferred`). **Stop for human
   review** at `In Review` and at each sub-phase stop point. Run the story's Validation before `Done`.
+- **Atomic Story Rule (MANDATORY):** each story is implemented, reviewed, validated, and committed as one
+  atomic unit. **One atomic commit per reviewed story** (only files directly related to it); **do not start
+  the next story until the current one is reviewed and committed.** No story > 5 points enters
+  implementation. At each stop point, update `STATUS.md` (current story ID, status, files changed,
+  validation run, next action) so an interrupted session resumes from `git log` + `STATUS.md` +
+  `story_backlog.md`. Full text in
+  [`docs/planning/backlog_workflow.md`](docs/planning/backlog_workflow.md).
 - `EPIC-DOMAIN-001` (broker) stays `Deferred`; no domain concepts in the core.
 
 ## Agent workflow layer
@@ -46,4 +53,7 @@ workflows and the `interfaces` contracts.
 
 ## Current phase
 
-Phase 0 (scaffold). No application logic. See [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md).
+Phase 1A — Workspace Initialization (in progress). SB-001 (initializer skeleton) is `Done`; next is
+SB-002 (env loading & path-safety). See
+[`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md) and
+[`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md).

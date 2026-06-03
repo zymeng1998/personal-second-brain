@@ -47,7 +47,13 @@ This project is managed through a JIRA-style backlog. Full definitions:
   `In Progress` when you start and to `In Review` when done; **stop for human review** at that point.
 - **Mandatory review checkpoints:** stop for human review at every story's `In Review` and at each
   **sub-phase stop point** in [`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md).
-  Commit at sub-phase boundaries with handoff context.
+- **Atomic Story Rule (MANDATORY):** every story is an atomic unit — implement, review, validate, and
+  commit it independently. **One atomic commit per reviewed story** (only files directly related to that
+  story); **do not start the next story until the current one is reviewed and committed.** No story > 5
+  points enters implementation (split first). At every stop point, update `STATUS.md` with: current story
+  ID, status, files changed, validation run, and next recommended action — so an interrupted session can
+  resume from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
+  [`docs/planning/backlog_workflow.md`](docs/planning/backlog_workflow.md) (Atomic Story Rule).
 - **Priorities:** P0 (required before MVP) → P1 → P2 → P3.
 - **Validation before Done:** run the story's Validation commands; redirect verbose output to a file and
   surface only the summary. A story is not `Done` until AC + DoD are met and validation is green.
@@ -66,7 +72,9 @@ When picking up work: confirm the story is `Ready` + deps `Done` → re-read its
 
 ## Current phase
 
-**Backlog planning, before Phase 1.** Phase 0 scaffold is committed (`3990af3`). No application logic yet;
-all scripts/packages are stubs/empty. The next implementation unit is **Phase 1A**, starting with story
-**SB-001** — but only begin once a human approves starting Phase 1. Do not implement application logic, DB
-code, retrieval, AI extraction, connectors, or domain workflows ahead of the backlog/story map.
+**Phase 1A — Workspace Initialization (in progress).** Phase 0 scaffold committed (`3990af3`); JIRA
+workflow committed (`0cb6b00`). **SB-001 (initializer entry + skeleton) is `Done`** and committed —
+`scripts/init_workspace.ts` is now a safe skeleton (arg parsing, logging, ordered step descriptions; no
+filesystem writes). The next story is **SB-002 — environment loading & path-safety checks** (start only on
+human approval). Do not implement DB code, retrieval, AI extraction, connectors, or domain workflows ahead
+of the backlog/story map.

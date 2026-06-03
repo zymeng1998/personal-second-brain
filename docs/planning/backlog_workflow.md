@@ -79,6 +79,32 @@ Side states: `Blocked` (from In Progress), `Deferred` (from Backlog/Ready).
 5. **No silent scope growth:** anything outside a story's Scope goes to its `Out of Scope` list and, if
    worth doing, becomes a new backlog story.
 
+## Atomic Story Rule (MANDATORY)
+
+Every story is an **atomic unit of work**. Agent sessions may be interrupted by context limits, time
+windows, usage windows, or unexpected cutoffs. If each story is atomic and committed after review, we can
+resume cleanly from the last completed story without wasting context, tokens, or manual reconstruction.
+
+```text
+Atomic Story Rule:
+- A story must be small enough to implement, review, validate, and commit independently.
+- No story larger than 5 points may enter implementation; split it first.
+- Do not start the next story until the current story is reviewed and committed.
+- Each completed story should produce one atomic commit unless there is a strong reason not to.
+- The commit should include only files directly related to that story.
+- At every stop point, update STATUS.md with:
+  - current story ID
+  - status
+  - files changed
+  - validation run
+  - next recommended action
+- If an agent session is interrupted, the next session should be able to resume from git log + STATUS.md + story_backlog.md.
+```
+
+This supersedes any earlier "commit only at sub-phase boundaries" guidance: **the default is one atomic
+commit per reviewed story.** Sub-phase stop points remain mandatory review checkpoints, but commits are
+per-story so progress is always recoverable from `git log`.
+
 ## How Claude Code picks up work
 
 1. Open [`phase_1_story_map.md`](phase_1_story_map.md); identify the current sub-phase and the next
@@ -99,7 +125,8 @@ Side states: `Blocked` (from In Progress), `Deferred` (from Backlog/Ready).
   STATUS/docs updated.
 - Approval moves the story to `Done` and unblocks dependents. Rejection returns it to `In Progress`
   with notes.
-- Commits happen at sub-phase boundaries (and may be per-story) with handoff context in the message.
+- Commits are **per reviewed story** (one atomic commit each — see the Atomic Story Rule above), with
+  handoff context in the message. Sub-phase stop points remain mandatory review checkpoints.
 
 ## How to avoid scope creep
 

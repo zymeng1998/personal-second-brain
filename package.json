@@ -15,6 +15,7 @@
     "query:memory": "tsx scripts/query_memory.ts"
   },
   "devDependencies": {
+    "@types/node": "^25.9.1",
     "tsx": "^4.0.0",
     "typescript": "^5.4.0"
   },
