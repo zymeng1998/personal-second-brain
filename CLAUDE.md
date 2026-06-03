@@ -6,9 +6,11 @@ Project-specific guidance for Claude Code. See [`AGENTS.md`](AGENTS.md) for the 
 ## Session start ritual
 
 1. Read [`STATUS.md`](STATUS.md) (handoff from the previous session).
-2. Skim [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md) and
-   [`docs/planning/mvp_scope.md`](docs/planning/mvp_scope.md) for current phase + scope.
-3. State the next concrete task in one sentence before acting.
+2. Open the backlog: [`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md) for the
+   current sub-phase + next story, and [`docs/planning/story_backlog.md`](docs/planning/story_backlog.md)
+   for that story's card. Cross-check [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md)
+   and [`docs/planning/mvp_scope.md`](docs/planning/mvp_scope.md) for phase + scope.
+3. State the next concrete task (by story ID) in one sentence before acting.
 
 ## Non-negotiable invariants
 
@@ -28,6 +30,33 @@ Project-specific guidance for Claude Code. See [`AGENTS.md`](AGENTS.md) for the 
 - TS↔Python contract: **stdio JSON/JSONL** (Phase 0/1). No HTTP/MCP yet.
 - Claude-Code skills = agent workflow layer, never the backend.
 
+## Backlog workflow (MANDATORY — JIRA-style)
+
+This project is managed through a JIRA-style backlog. Full definitions:
+[`docs/planning/backlog_workflow.md`](docs/planning/backlog_workflow.md). Enforced rules:
+
+- **Work is organized as Epic → Story → Task.** The **Story** is the unit of implementation; every story
+  has Acceptance Criteria, Definition of Done, Validation commands, Files Expected to Change, Out of Scope,
+  and Dependencies in [`docs/planning/story_backlog.md`](docs/planning/story_backlog.md).
+- **Ready rule:** **no implementation starts unless the story is `Ready` and has acceptance criteria.**
+  If it isn't `Ready` (or deps aren't `Done`), refine first — do not start coding.
+- **Split rule:** any story **> 5 story points must be split** before implementation. An `8` is never started.
+- **One story at a time** on the critical path. Implement **only** what is in the story's Scope; touch
+  **only** its listed files. Anything else → add a new `Backlog` story (never silent scope growth).
+- **Statuses:** `Backlog → Ready → In Progress → In Review → Done` (+ `Blocked`, `Deferred`). Move a story to
+  `In Progress` when you start and to `In Review` when done; **stop for human review** at that point.
+- **Mandatory review checkpoints:** stop for human review at every story's `In Review` and at each
+  **sub-phase stop point** in [`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md).
+  Commit at sub-phase boundaries with handoff context.
+- **Priorities:** P0 (required before MVP) → P1 → P2 → P3.
+- **Validation before Done:** run the story's Validation commands; redirect verbose output to a file and
+  surface only the summary. A story is not `Done` until AC + DoD are met and validation is green.
+- **Domain independence still applies:** no story may add domain/broker concepts to the core; `EPIC-DOMAIN-001`
+  (broker) stays `Deferred` until the core is stable.
+
+When picking up work: confirm the story is `Ready` + deps `Done` → re-read its card → implement in-scope only
+→ validate → set `In Review` → stop for review. Update `STATUS.md` with the story ID at milestones and before stopping.
+
 ## Working norms (from user global rules)
 
 - Redirect verbose command output to files; surface only summaries.
@@ -37,5 +66,7 @@ Project-specific guidance for Claude Code. See [`AGENTS.md`](AGENTS.md) for the 
 
 ## Current phase
 
-Phase 0 — scaffold only. Do not implement application logic, DB code, retrieval, AI extraction,
-connectors, or domain workflows until the roadmap says so.
+**Backlog planning, before Phase 1.** Phase 0 scaffold is committed (`3990af3`). No application logic yet;
+all scripts/packages are stubs/empty. The next implementation unit is **Phase 1A**, starting with story
+**SB-001** — but only begin once a human approves starting Phase 1. Do not implement application logic, DB
+code, retrieval, AI extraction, connectors, or domain workflows ahead of the backlog/story map.

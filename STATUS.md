@@ -1,20 +1,27 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** 0 — scaffold & planning
+**Phase:** Backlog planning (before Phase 1 implementation)
 **Last updated:** 2026-06-03
 
 ## Just completed
-- Open-source evaluation of 8 primary candidates + mem0/ReMe (see `docs/research/`).
-- Architecture, methodology, and decision docs (ADRs 001–007).
-- Phase 0 scaffold: repo tree, READMEs, schema skeletons, configs, stub scripts.
-- Applied 7 user amendments (event log first-class, `00_Raw/`, no sidecar code, stdio JSON contract,
-  broker docs-only, license safety rule, MVP scope unchanged).
+- Phase 0 scaffold (committed `3990af3`): repo tree, READMEs, schema skeletons, configs, stub scripts,
+  evaluation + architecture + decision docs (ADRs 001–007).
+- **Adopted a JIRA-style backlog workflow** before Phase 1. Created
+  `docs/planning/backlog_workflow.md`, `story_backlog.md`, `phase_1_story_map.md`.
+
+## Now entering
+- **Backlog planning, before Phase 1 implementation.** No application logic written yet; `init_workspace.ts`
+  and all other scripts/packages remain stubs/empty.
 
 ## Next concrete action
-- Human review of the scaffold and docs.
-- On approval: begin **Phase 1 (MVP)** — CLI capture → L0 raw + append-only event log; vault
-  read/write with raw-immutability guard; frontmatter validation; `interfaces` v0.
+- Human review of the backlog + Phase 1 story map.
+- On approval to begin Phase 1: implement **SB-001 — workspace initializer (entry + skeleton)** (Phase 1A,
+  P0, 2 pts, Ready). Then proceed through Phase 1A stories, stopping at the 1A review checkpoint.
+
+## Open conflict to resolve
+- Minimal distillation is in `mvp_scope.md` but not in Phase 1A–1G. See Phase 1H note in
+  `phase_1_story_map.md` (add Phase 1H vs. defer to Phase 2).
 
 ## Key constraints
 - Domain-independent core; broker only under `domain-apps/`, via `interfaces` only.

@@ -23,6 +23,21 @@ A local-first, open-format, **domain-independent** personal second brain core. S
 8. **License safety:** do not copy source code from AGPL / GPL / unspecified / unclear-license
    repositories. Reference architecture and ideas only unless license compatibility is verified.
 
+## Backlog workflow (MANDATORY — JIRA-style)
+
+This project is managed through a JIRA-style backlog. See
+[`docs/planning/backlog_workflow.md`](docs/planning/backlog_workflow.md),
+[`docs/planning/story_backlog.md`](docs/planning/story_backlog.md), and
+[`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md).
+
+- Work is Epic → Story → Task; the **Story** is the unit of implementation.
+- **No implementation unless the story is `Ready` with acceptance criteria** and its dependencies are `Done`.
+- **Any story > 5 points must be split** before starting.
+- Implement **only** what is in the story's Scope; touch **only** its listed files; new work → new `Backlog` story.
+- Statuses: `Backlog → Ready → In Progress → In Review → Done` (+ `Blocked`, `Deferred`). **Stop for human
+  review** at `In Review` and at each sub-phase stop point. Run the story's Validation before `Done`.
+- `EPIC-DOMAIN-001` (broker) stays `Deferred`; no domain concepts in the core.
+
 ## Agent workflow layer
 
 Claude-Code skills (and equivalents) are the **agent workflow layer** — capture intake, braindump
