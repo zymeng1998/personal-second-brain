@@ -6,9 +6,9 @@ To resolve before / during the noted phase. Tracked here so they don't block sca
 
 | # | Question | Options / lean |
 |---|---|---|
-| 1 | Frontmatter schema v1 fields per note type (raw/working/distilled/entity/project/concept/case/daily) | Draft in `schemas/markdown/`; finalize with first real notes |
-| 2 | Event schema v1 fields (`capture`/`memory`/`projection`) | Common envelope + per-type payload; ids + timestamps + actor + source_ref |
-| 3 | Note id scheme | ULID/timestamp-slug; must be stable + sortable + filename-safe |
+| 1 | Frontmatter schema v1 fields per note type (raw/working/distilled/entity/project/concept/case/daily) | **RESOLVED (SB-008):** `frontmatter.schema.json` v1. Common required `id,type,layer,created`; each type pins its layer + required fields (raw=L0 no `updated`; working=L1 needs `source_ref`; distilled/entity/concept/case=L2 need `title`; project=L1/L2; daily=L1; output=L5 needs `title`+non-empty `sources`). Validated by 9 example notes under `examples/notes/`. |
+| 2 | Event schema v1 fields (`capture`/`memory`/`projection`) | Common envelope + per-type payload; ids + timestamps + actor + source_ref (SB-009) |
+| 3 | Note id scheme | **RESOLVED (SB-008):** **ULID** is the canonical immutable `id` for all notes (and events/captures/facts/entities/tasks/outputs). Pattern `^[0-7][0-9A-HJKMNP-TV-Z]{25}$`. Filename convention `<ULID>--<optional-slug>.md`; slugs may change, the `id` never does. ULID is not the retrieval mechanism — retrieval uses metadata/title/tags/links/entities + FTS/vector/graph/temporal indexes. |
 | 4 | Workspace creation | `init_workspace.ts` creates the tree; confirm exact path + whether to seed templates |
 | 5 | Repo visibility | Private recommended (data sensitivity), even though core code is non-sensitive |
 

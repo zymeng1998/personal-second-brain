@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1A — Workspace Initialization (COMPLETE — at mandatory stop point)
+**Phase:** Phase 1B — Schema Finalization (IN PROGRESS — SB-008 Done; next SB-009)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -11,6 +11,22 @@
   stop point STATUS.md records: current story ID, status, files changed, validation run, next action — so an
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
+
+## Phase 1B progress — SB-008 Done (EPIC-CORE-002)
+- **Current story:** SB-008 — frontmatter schema v1, Phase 1B. **Status:** `Done` (atomic commit).
+- **Next story:** SB-009 — event schema v1 (resolves open question #2), then SB-010 — capture interface v0.
+  Phase 1B human-review stop point is **after SB-010**.
+- **Decision locked (OQ #1, #3):** **ULID** is the canonical immutable `id` for all notes/events/etc.
+  (pattern `^[0-7][0-9A-HJKMNP-TV-Z]{25}$`); filename `<ULID>--<slug>.md`; slug may change, id never does.
+  ULID is not the retrieval mechanism (metadata/tags/links/entities + indexes are). Per-type layer pins:
+  raw=L0 (no `updated`), working=L1 (needs `source_ref`), distilled/entity/concept/case=L2 (need `title`),
+  project=L1/L2, daily=L1, output=L5 (needs `title` + non-empty `sources`).
+- **Files changed (SB-008):** `schemas/markdown/frontmatter.schema.json` (v1, DRAFT removed),
+  `examples/notes/*` (9 example notes, one per type), `docs/planning/open_questions.md` (#1, #3 resolved),
+  `docs/planning/story_backlog.md` + `STATUS.md` (bookkeeping).
+- **Validation run (green):** ajv (2020-12) over all 9 `examples/notes/*.md` frontmatter → 9/9 valid;
+  5/5 negative cases rejected (raw+`updated`, working w/o `source_ref`, output w/o `sources`,
+  wrong layer, bad ULID). Validator was a throwaway `/tmp` project (ajv+yaml) — nothing committed.
 
 ## Stop point — Phase 1A COMPLETE (SB-007 done)
 - **Current story:** SB-007 — `--verify` workspace validation, Phase 1A, EPIC-CORE-001.

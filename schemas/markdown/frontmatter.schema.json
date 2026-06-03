@@ -1,43 +1,167 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://second-brain.local/schemas/markdown/frontmatter.schema.json",
-  "title": "Note Frontmatter (DRAFT — Phase 0 skeleton)",
-  "$comment": "Skeleton. Finalize fields per note type in Phase 1. Domain-neutral only.",
+  "title": "Note Frontmatter v1",
+  "version": "1.0.0",
+  "description": "YAML frontmatter for every note in the vault. Domain-neutral. The 'id' (ULID) is the durable source-of-truth key for links, chunks, and provenance; filenames may carry an optional human slug but the id never changes. Unknown properties are preserved (Obsidian-compatible, forward-compatible).",
   "type": "object",
   "required": ["id", "type", "layer", "created"],
   "additionalProperties": true,
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+      "description": "Canonical ULID: 26-char Crockford base32, time-sortable, filename-safe, immutable once assigned."
+    },
+    "ulidList": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ulid" }
+    }
+  },
   "properties": {
     "id": {
-      "type": "string",
-      "description": "Stable, sortable, filename-safe id (e.g. ULID). Durable key for links/chunks."
+      "$ref": "#/$defs/ulid",
+      "description": "Stable, sortable, filename-safe note id. Durable key for links/chunks/provenance. Never changes."
     },
     "type": {
       "type": "string",
       "enum": ["raw", "working", "distilled", "entity", "project", "concept", "case", "daily", "output"],
-      "description": "Note type. Domain-neutral."
+      "description": "Note type. Domain-neutral. Determines its memory layer and required fields."
     },
     "layer": {
       "type": "integer",
       "minimum": 0,
       "maximum": 5,
-      "description": "Memory layer L0-L5. raw=0 is immutable."
+      "description": "Memory layer L0-L5. L0 (raw) is immutable; L4 indexes are not notes. Each type pins its layer (see allOf)."
     },
-    "title": { "type": "string" },
-    "tags": { "type": "array", "items": { "type": "string" } },
-    "created": { "type": "string", "format": "date-time" },
-    "updated": { "type": "string", "format": "date-time" },
-    "source_ref": {
+    "title": {
       "type": "string",
-      "description": "Provenance: id of the raw capture / source this note derives from."
+      "minLength": 1,
+      "description": "Human-readable title. Required for curated/derived note types (see allOf)."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "description": "Free-form tags. Feeds retrieval/organization; not a substitute for the id."
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "description": "Alternate names/titles (Obsidian-compatible). Useful for entity notes."
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 creation timestamp (UTC recommended)."
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 last-edit timestamp. Absent or equal to 'created' for never-edited notes. Must not be set on raw (L0) notes."
+    },
+    "source_ref": {
+      "$ref": "#/$defs/ulid",
+      "description": "Provenance: id of the single raw capture / source this note directly derives from. Required for working (L1) notes."
+    },
+    "sources": {
+      "$ref": "#/$defs/ulidList",
+      "description": "Provenance: ids of all L0-L3 sources an output cites. Required (non-empty) for output (L5) notes."
     },
     "links": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Outgoing [[wikilink]] targets (also seeds the graph index)."
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "description": "Outgoing [[wikilink]] targets (note ids or titles). Seeds the graph index."
+    },
+    "entities": {
+      "$ref": "#/$defs/ulidList",
+      "description": "Ids of entity notes referenced by this note. Seeds the entity/graph index."
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional lifecycle marker (e.g. active/archived). Domain-neutral; no workflow is enforced here."
     },
     "secure_ref": {
       "type": "string",
-      "description": "Optional pointer to external secure storage (secref_...). Never inline sensitive content."
+      "pattern": "^secref_[A-Za-z0-9_-]+$",
+      "description": "Pointer to external secure storage. Never inline sensitive content in the note."
     }
-  }
+  },
+  "allOf": [
+    {
+      "$comment": "raw (L0) — immutable source material; no 'updated' allowed.",
+      "if": { "properties": { "type": { "const": "raw" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "const": 0 } },
+        "not": { "required": ["updated"] }
+      }
+    },
+    {
+      "$comment": "working (L1) — must reference its L0 source.",
+      "if": { "properties": { "type": { "const": "working" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "const": 1 } },
+        "required": ["source_ref"]
+      }
+    },
+    {
+      "$comment": "daily (L1) — daily log/journal note.",
+      "if": { "properties": { "type": { "const": "daily" } }, "required": ["type"] },
+      "then": { "properties": { "layer": { "const": 1 } } }
+    },
+    {
+      "$comment": "distilled (L2) — curated evergreen note.",
+      "if": { "properties": { "type": { "const": "distilled" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "const": 2 } },
+        "required": ["title"]
+      }
+    },
+    {
+      "$comment": "entity (L2) — person/org/place/thing note.",
+      "if": { "properties": { "type": { "const": "entity" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "const": 2 } },
+        "required": ["title"]
+      }
+    },
+    {
+      "$comment": "concept (L2) — wiki/concept note.",
+      "if": { "properties": { "type": { "const": "concept" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "const": 2 } },
+        "required": ["title"]
+      }
+    },
+    {
+      "$comment": "case (L2) — case/situation note.",
+      "if": { "properties": { "type": { "const": "case" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "const": 2 } },
+        "required": ["title"]
+      }
+    },
+    {
+      "$comment": "project (L1 or L2) — organizing PARA note.",
+      "if": { "properties": { "type": { "const": "project" } }, "required": ["type"] },
+      "then": {
+        "properties": { "layer": { "enum": [1, 2] } },
+        "required": ["title"]
+      }
+    },
+    {
+      "$comment": "output (L5) — generated output; must cite its sources.",
+      "if": { "properties": { "type": { "const": "output" } }, "required": ["type"] },
+      "then": {
+        "properties": {
+          "layer": { "const": 5 },
+          "sources": { "minItems": 1 }
+        },
+        "required": ["title", "sources"]
+      }
+    }
+  ]
 }
