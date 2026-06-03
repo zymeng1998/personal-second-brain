@@ -2,22 +2,24 @@
  * init_workspace.ts — Workspace initializer (entry point + env/path safety).
  *
  * Stories: SB-001 (entry + skeleton), SB-002 (env loading & path-safety checks),
- * SB-006 (dry-run plan), SB-003 (create the directory tree) — Phase 1A, EPIC-CORE-001.
+ * SB-006 (dry-run plan), SB-003 (create the directory tree), SB-004 (create empty
+ * append-only event files) — Phase 1A, EPIC-CORE-001.
  *
  * Entry point: argument parsing (`--dry-run`, `--help`), structured logging, and a
  * top-level `main()` that resolves + validates the external workspace configuration,
- * renders the canonical plan, and (real run) creates the directory tree idempotently.
+ * renders the canonical plan, and (real run) creates the directory tree and the empty
+ * append-only event files — all idempotently.
  *
  * Remaining Phase 1A stories:
- *   - SB-004: create empty, append-only event files
  *   - SB-005: write the workspace README & secure_refs README
  *   - SB-007: `--verify` workspace check
  *
- * Safety: `--dry-run` never writes. A real run creates ONLY directories (SB-003);
- * it never writes data files, and never touches existing files (idempotent).
+ * Safety: `--dry-run` never writes. A real run creates directories and empty event
+ * files; it never overwrites or truncates an existing file (append-only invariant),
+ * so re-running is a safe no-op.
  */
 
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -55,10 +57,14 @@ interface PlannedDir {
   readonly note?: string;
 }
 
+/** Category of a planned file (drives how/when it is created). */
+type PlannedFileKind = "event-log" | "readme";
+
 /** A file the initializer creates (path relative to the workspace root). */
 interface PlannedFile {
   readonly rel: string;
   readonly note: string;
+  readonly kind: PlannedFileKind;
   /** Backlog story that implements creation of this file. */
   readonly story: string;
 }
@@ -107,11 +113,11 @@ const WORKSPACE_PLAN: WorkspacePlan = {
     { rel: "logs/indexing_logs" },
   ],
   files: [
-    { rel: "events/capture_events.jsonl", note: "append-only capture events", story: "SB-004" },
-    { rel: "events/memory_events.jsonl", note: "append-only memory events", story: "SB-004" },
-    { rel: "events/projection_events.jsonl", note: "append-only projection events", story: "SB-004" },
-    { rel: "README.md", note: "workspace authority & safety notes", story: "SB-005" },
-    { rel: "secure_refs/README.md", note: "secure_refs pointer-pattern notes", story: "SB-005" },
+    { rel: "events/capture_events.jsonl", note: "append-only capture events", kind: "event-log", story: "SB-004" },
+    { rel: "events/memory_events.jsonl", note: "append-only memory events", kind: "event-log", story: "SB-004" },
+    { rel: "events/projection_events.jsonl", note: "append-only projection events", kind: "event-log", story: "SB-004" },
+    { rel: "README.md", note: "workspace authority & safety notes", kind: "readme", story: "SB-005" },
+    { rel: "secure_refs/README.md", note: "secure_refs pointer-pattern notes", kind: "readme", story: "SB-005" },
   ],
 };
 
@@ -136,11 +142,11 @@ BEHAVIOR:
   - Otherwise:      resolves + validates ${WORKSPACE_ENV_VAR} and path safety first.
                       * invalid/missing config → actionable error, exits non-zero.
                       * --dry-run (valid)       → lists the plan, makes no changes, exits 0.
-                      * no flags  (valid)       → creates the directory tree (idempotent),
-                                                  exits 0. (Event files & READMEs: SB-004/005.)
+                      * no flags  (valid)       → creates the directory tree + empty event
+                                                  files (idempotent), exits 0. (READMEs: SB-005.)
 
-The real data workspace lives OUTSIDE this repository. A real run creates ONLY
-directories; it writes no data files and never overwrites existing files.`;
+The real data workspace lives OUTSIDE this repository. A real run creates directories
+and empty append-only event files; it never overwrites or truncates an existing file.`;
 
 /** Parse argv into options. Unknown flags are a hard error (fail fast). */
 function parseArgs(argv: ReadonlyArray<string>): CliOptions {
@@ -232,6 +238,42 @@ function createDirectories(config: WorkspaceConfig): CreateDirsResult {
   return { created, existed };
 }
 
+/** Outcome of file creation: which were newly made vs already present. */
+interface CreateFilesResult {
+  readonly created: ReadonlyArray<string>;
+  readonly existed: ReadonlyArray<string>;
+}
+
+/**
+ * Create the empty append-only event-log files (SB-004): the three
+ * `events/*.jsonl` streams. CRITICAL append-only invariant: an existing event
+ * file is NEVER truncated or modified — it is left exactly as-is. New files are
+ * created empty using the exclusive `wx` flag (create-only; fails rather than
+ * truncates if the file races into existence). The parent directory is ensured
+ * defensively, though SB-003 already creates `events/`.
+ */
+function createEventFiles(config: WorkspaceConfig): CreateFilesResult {
+  const created: string[] = [];
+  const existed: string[] = [];
+
+  const eventFiles = WORKSPACE_PLAN.files.filter(
+    (file) => file.kind === "event-log",
+  );
+
+  for (const file of eventFiles) {
+    const target = planPath(config, file.rel);
+    if (existsSync(target)) {
+      existed.push(target); // preserve existing content untouched
+      continue;
+    }
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, "", { flag: "wx" });
+    created.push(target);
+  }
+
+  return { created, existed };
+}
+
 /**
  * Entry point. Returns the intended process exit code instead of calling
  * process.exit directly, so it is testable and has a single exit site.
@@ -285,30 +327,37 @@ function main(argv: ReadonlyArray<string>): number {
     return 0;
   }
 
-  let result: CreateDirsResult;
+  let dirs: CreateDirsResult;
+  let events: CreateFilesResult;
   try {
-    result = createDirectories(config);
+    dirs = createDirectories(config);
+    events = createEventFiles(config);
   } catch (error: unknown) {
     log(
       "error",
-      `Failed to create the workspace tree: ${
+      `Failed to initialize the workspace: ${
         error instanceof Error ? error.message : "unknown error"
       }`,
     );
     return 1;
   }
 
-  for (const dir of result.created) {
-    log("step", `created  ${dir}`);
+  for (const dir of dirs.created) {
+    log("step", `created dir   ${dir}`);
+  }
+  for (const file of events.created) {
+    log("step", `created file  ${file}`);
   }
   log(
     "info",
-    `Directory tree ready: ${result.created.length} created, ${result.existed.length} already existed.`,
+    `Directory tree ready: ${dirs.created.length} created, ${dirs.existed.length} already existed.`,
   );
   log(
     "info",
-    "Event files (SB-004) and workspace READMEs (SB-005) are not created yet.",
+    `Event files ready: ${events.created.length} created, ${events.existed.length} already existed ` +
+      "(existing files left untouched — append-only).",
   );
+  log("info", "Workspace READMEs (SB-005) are not created yet.");
   return 0;
 }
 

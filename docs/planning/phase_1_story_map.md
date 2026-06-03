@@ -113,13 +113,13 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 
 ## Next implementation unit
 
-**Phase 1A** is in progress. **SB-001, SB-002, SB-006, SB-003 are `Done`** (each an atomic commit per the
-Atomic Story Rule). The next story to implement is:
+**Phase 1A** is in progress. **SB-001, SB-002, SB-006, SB-003, SB-004 are `Done`** (each an atomic commit
+per the Atomic Story Rule). The next story to implement is:
 
-> **SB-004 — Create append-only event files (empty)** · P0 · 1 pt · `Ready` · depends on SB-003 (`Done`).
+> **SB-005 — Create workspace README & safety README files** · P0 · 1 pt · `Ready` · depends on SB-003 (`Done`).
 
-Remaining 1A order: SB-004 → SB-005 → SB-007, observing the 1A stop point before Phase 1B. Each story is
-committed atomically after review.
+Remaining 1A order: SB-005 → SB-007, observing the 1A stop point before Phase 1B. Each story is committed
+atomically after review.
 
 *(Suggested within-1A order: SB-001 skeleton, SB-002 env/path-safety, SB-006 dry-run, then SB-003 tree,
 SB-004 event files, SB-005 READMEs, SB-007 verify — so the safe dry-run path exists before any real writes.)*

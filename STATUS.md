@@ -12,34 +12,34 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Stop point — SB-003 (current)
-- **Current story:** SB-003 — create workspace tree exactly as documented, Phase 1A, EPIC-CORE-001.
+## Stop point — SB-004 (current)
+- **Current story:** SB-004 — create append-only event files (empty), Phase 1A, EPIC-CORE-001.
 - **Status:** `Done` (committed + pushed).
-- **Files changed:** `scripts/init_workspace.ts` (`createDirectories()` + real-run wiring),
+- **Files changed:** `scripts/init_workspace.ts` (`PlannedFile.kind`, `createEventFiles()`, real-run wiring),
   `docs/planning/story_backlog.md`, `docs/planning/phase_1_story_map.md`, `STATUS.md`.
-- **Atomicity:** SB-003 is 2 pts — atomic; single behavior file (`scripts/init_workspace.ts`).
-- **Behavior:** real run (no flags) now creates the directory tree idempotently from `WORKSPACE_PLAN`
-  (27 dirs + workspace root = 28); directories ONLY (event files SB-004, READMEs SB-005). `--dry-run`
-  still writes nothing.
+- **Atomicity:** SB-004 is 1 pt — atomic; single behavior file (`scripts/init_workspace.ts`).
+- **Behavior:** real run now also creates the 3 empty `events/*.jsonl` files when absent, using exclusive
+  `wx` create (never truncates). Existing event files are left byte-for-byte untouched (append-only).
 - **Validation run (all green):**
-  - first run → 28 created, exit 0; `find -type d` matches `repo_structure.md` exactly (27 dirs).
-  - 0 files created.
-  - re-run → 0 created / 28 existed, snapshot byte-identical (idempotent), exit 0.
+  - first run → 3 event files created, all 0 bytes, exit 0.
+  - APPEND-ONLY: manually appended line survives re-run (md5 identical before/after).
+  - full tree+content idempotent across re-runs (hash identical).
   - `--dry-run` on a fresh path → creates nothing, exit 0.
   - `tsc --noEmit --strict` (nodenext) → exit 0.
-- **Next recommended action:** **SB-004 — create append-only event files (empty)** (P0, 1 pt, `Ready`,
-  deps SB-003) — start only on user approval (automatic run authorized through SB-003 only).
+- **Next recommended action:** **SB-005 — workspace README & secure_refs README** (P0, 1 pt, `Ready`,
+  deps SB-003) — start only on user approval.
 
 ## Just completed
 - Phase 0 scaffold (`3990af3`); JIRA-style backlog workflow (`0cb6b00`).
 - **SB-001 → `Done`** (`2d99fe7`): initializer entry point + skeleton; Atomic Story Rule formalized.
 - **SB-002 → `Done`** (`1c38186`): env loading + path safety; no filesystem writes.
 - **SB-006 → `Done`** (`ccce72a`): canonical `WORKSPACE_PLAN` + `--dry-run` listing dirs/files; zero writes.
-- **SB-003 → `Done`:** idempotent directory-tree creation (dirs only); tree matches `repo_structure.md`.
+- **SB-003 → `Done`** (`eef5fd6`): idempotent directory-tree creation; tree matches `repo_structure.md`.
+- **SB-004 → `Done`:** empty append-only event files; existing files never truncated.
 
 ## Next concrete action
-- On user approval: implement **SB-004** (create empty append-only event files; never truncate existing),
-  commit atomically; then SB-005 → SB-007; observe the Phase 1A stop point before Phase 1B.
+- On user approval: implement **SB-005** (write workspace README.md + secure_refs/README.md into the
+  workspace, not the repo), commit atomically; then SB-007; observe the Phase 1A stop point before 1B.
 
 ## Open conflict to resolve
 - Minimal distillation is in `mvp_scope.md` but not in Phase 1A–1G. See Phase 1H note in
