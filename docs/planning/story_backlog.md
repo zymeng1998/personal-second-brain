@@ -41,7 +41,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-001 | Story | Implement workspace initializer (entry + skeleton) | EPIC-CORE-001 | P0 | **Done** | 2 | — |
-| SB-002 | Story | Add environment loading & path-safety checks | EPIC-CORE-001 | P0 | Ready | 3 | SB-001 |
+| SB-002 | Story | Add environment loading & path-safety checks | EPIC-CORE-001 | P0 | **Done** | 3 | SB-001 |
 | SB-003 | Story | Create workspace tree exactly as documented | EPIC-CORE-001 | P0 | Ready | 2 | SB-002 |
 | SB-004 | Story | Create append-only event files (empty) | EPIC-CORE-001 | P0 | Ready | 1 | SB-003 |
 | SB-005 | Story | Create workspace README & safety README files | EPIC-CORE-001 | P0 | Ready | 1 | SB-003 |
@@ -118,7 +118,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-002 — Add environment loading & path-safety checks
 
-- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P0 · **Points:** 3 · **Status:** Ready
+- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-001
 - **Scope:** Load `SECOND_BRAIN_WORKSPACE` (and derived paths) from `.env`/env. Add defensive checks:
   path must be **absolute**; must **not** be inside the git repo / `personal-second-brain/`; parent must
