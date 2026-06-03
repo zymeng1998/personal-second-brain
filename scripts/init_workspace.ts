@@ -1,24 +1,23 @@
 /**
  * init_workspace.ts — Workspace initializer (entry point + env/path safety).
  *
- * Stories: SB-001 (entry + skeleton), SB-002 (env loading & path-safety checks)
- * — Phase 1A, EPIC-CORE-001.
+ * Stories: SB-001 (entry + skeleton), SB-002 (env loading & path-safety checks),
+ * SB-006 (dry-run plan), SB-003 (create the directory tree) — Phase 1A, EPIC-CORE-001.
  *
- * Entry point: argument parsing (`--dry-run`, `--help`), structured logging, and
- * a top-level `main()` that (SB-002) resolves + validates the external workspace
- * configuration before wiring the (not-yet-built) creation steps in a fixed order.
+ * Entry point: argument parsing (`--dry-run`, `--help`), structured logging, and a
+ * top-level `main()` that resolves + validates the external workspace configuration,
+ * renders the canonical plan, and (real run) creates the directory tree idempotently.
  *
- * Real behavior arrives in later Phase 1A stories:
- *   - SB-003: create the workspace directory tree (see docs/planning/repo_structure.md)
+ * Remaining Phase 1A stories:
  *   - SB-004: create empty, append-only event files
  *   - SB-005: write the workspace README & secure_refs README
- *   - SB-006: full `--dry-run` plan/output parity with the real run
  *   - SB-007: `--verify` workspace check
  *
- * Guarantee through SB-002: running this script never WRITES to the filesystem.
- * It only reads (existence/stat/dir listing) to validate the configured workspace.
+ * Safety: `--dry-run` never writes. A real run creates ONLY directories (SB-003);
+ * it never writes data files, and never touches existing files (idempotent).
  */
 
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -136,13 +135,12 @@ BEHAVIOR:
   - With --help:    prints this usage and exits 0 (no env required).
   - Otherwise:      resolves + validates ${WORKSPACE_ENV_VAR} and path safety first.
                       * invalid/missing config → actionable error, exits non-zero.
-                      * --dry-run (valid)       → prints the plan, exits 0.
-                      * no flags  (valid)       → prints the plan, reports nothing is
-                                                  created yet (creation lands in SB-003),
-                                                  exits non-zero.
+                      * --dry-run (valid)       → lists the plan, makes no changes, exits 0.
+                      * no flags  (valid)       → creates the directory tree (idempotent),
+                                                  exits 0. (Event files & READMEs: SB-004/005.)
 
-The real data workspace lives OUTSIDE this repository. This script performs NO
-filesystem writes (through SB-002); it only reads to validate the workspace path.`;
+The real data workspace lives OUTSIDE this repository. A real run creates ONLY
+directories; it writes no data files and never overwrites existing files.`;
 
 /** Parse argv into options. Unknown flags are a hard error (fail fast). */
 function parseArgs(argv: ReadonlyArray<string>): CliOptions {
@@ -200,6 +198,40 @@ function printUsage(): void {
   process.stdout.write(`${USAGE}\n`);
 }
 
+/** Outcome of directory creation: which were newly made vs already present. */
+interface CreateDirsResult {
+  readonly created: ReadonlyArray<string>;
+  readonly existed: ReadonlyArray<string>;
+}
+
+/**
+ * Create the workspace root and every planned directory (SB-003). Idempotent:
+ * existing directories are left untouched, so re-running is a safe no-op. Creates
+ * directories ONLY — never data files (event files: SB-004; READMEs: SB-005).
+ * Parent-before-child ordering in WORKSPACE_PLAN keeps the created/existed tally
+ * accurate; `recursive: true` is belt-and-suspenders.
+ */
+function createDirectories(config: WorkspaceConfig): CreateDirsResult {
+  const created: string[] = [];
+  const existed: string[] = [];
+
+  const targets = [
+    config.workspace,
+    ...WORKSPACE_PLAN.directories.map((dir) => planPath(config, dir.rel)),
+  ];
+
+  for (const target of targets) {
+    if (existsSync(target)) {
+      existed.push(target);
+      continue;
+    }
+    mkdirSync(target, { recursive: true });
+    created.push(target);
+  }
+
+  return { created, existed };
+}
+
 /**
  * Entry point. Returns the intended process exit code instead of calling
  * process.exit directly, so it is testable and has a single exit site.
@@ -249,19 +281,35 @@ function main(argv: ReadonlyArray<string>): number {
   renderPlan(config);
 
   if (options.dryRun) {
-    log(
-      "info",
-      "Dry run: configuration validated; no filesystem changes made.",
-    );
+    log("info", "Dry run: configuration validated; no filesystem changes made.");
     return 0;
   }
 
+  let result: CreateDirsResult;
+  try {
+    result = createDirectories(config);
+  } catch (error: unknown) {
+    log(
+      "error",
+      `Failed to create the workspace tree: ${
+        error instanceof Error ? error.message : "unknown error"
+      }`,
+    );
+    return 1;
+  }
+
+  for (const dir of result.created) {
+    log("step", `created  ${dir}`);
+  }
   log(
-    "warn",
-    "Validation only: workspace not yet created (directory creation lands in SB-003).",
+    "info",
+    `Directory tree ready: ${result.created.length} created, ${result.existed.length} already existed.`,
   );
-  log("info", "Re-run with --dry-run to preview the plan, or --help for usage.");
-  return 1;
+  log(
+    "info",
+    "Event files (SB-004) and workspace READMEs (SB-005) are not created yet.",
+  );
+  return 0;
 }
 
 const exitCode = main(process.argv.slice(2));
