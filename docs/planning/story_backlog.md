@@ -44,7 +44,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-002 | Story | Add environment loading & path-safety checks | EPIC-CORE-001 | P0 | **Done** | 3 | SB-001 |
 | SB-003 | Story | Create workspace tree exactly as documented | EPIC-CORE-001 | P0 | **Done** | 2 | SB-002 |
 | SB-004 | Story | Create append-only event files (empty) | EPIC-CORE-001 | P0 | **Done** | 1 | SB-003 |
-| SB-005 | Story | Create workspace README & safety README files | EPIC-CORE-001 | P0 | Ready | 1 | SB-003 |
+| SB-005 | Story | Create workspace README & safety README files | EPIC-CORE-001 | P0 | **Done** | 1 | SB-003 |
 | SB-006 | Story | Add dry-run support for the initializer | EPIC-CORE-001 | P1 | **Done** | 2 | SB-001 |
 | SB-007 | Story | Add validation commands for workspace init | EPIC-CORE-001 | P0 | Backlog | 2 | SB-003, SB-004, SB-005 |
 | SB-008 | Story | Define frontmatter schema v1 | EPIC-CORE-002 | P0 | Backlog | 3 | — (Phase 1A done) |
@@ -181,7 +181,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-005 — Create workspace README & safety README files
 
-- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P0 · **Points:** 1 · **Status:** Ready
+- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P0 · **Points:** 1 · **Status:** Done
 - **Dependencies:** SB-003
 - **Scope:** Write a top-level `workspace/README.md` (what lives here, what is authoritative vs
   rebuildable, "never commit this") and `secure_refs/README.md` (metadata-only pointer pattern; no

@@ -3,15 +3,14 @@
  *
  * Stories: SB-001 (entry + skeleton), SB-002 (env loading & path-safety checks),
  * SB-006 (dry-run plan), SB-003 (create the directory tree), SB-004 (create empty
- * append-only event files) — Phase 1A, EPIC-CORE-001.
+ * append-only event files), SB-005 (write workspace READMEs) — Phase 1A, EPIC-CORE-001.
  *
  * Entry point: argument parsing (`--dry-run`, `--help`), structured logging, and a
  * top-level `main()` that resolves + validates the external workspace configuration,
- * renders the canonical plan, and (real run) creates the directory tree and the empty
- * append-only event files — all idempotently.
+ * renders the canonical plan, and (real run) creates the directory tree, the empty
+ * append-only event files, and the workspace READMEs — all idempotently.
  *
  * Remaining Phase 1A stories:
- *   - SB-005: write the workspace README & secure_refs README
  *   - SB-007: `--verify` workspace check
  *
  * Safety: `--dry-run` never writes. A real run creates directories and empty event
@@ -29,6 +28,7 @@ import {
   type WorkspaceConfig,
   type WorkspaceResolution,
 } from "./lib/workspace_env.ts";
+import { readmeContentFor } from "./lib/workspace_readmes.ts";
 
 const PROGRAM = "init_workspace";
 
@@ -142,8 +142,8 @@ BEHAVIOR:
   - Otherwise:      resolves + validates ${WORKSPACE_ENV_VAR} and path safety first.
                       * invalid/missing config → actionable error, exits non-zero.
                       * --dry-run (valid)       → lists the plan, makes no changes, exits 0.
-                      * no flags  (valid)       → creates the directory tree + empty event
-                                                  files (idempotent), exits 0. (READMEs: SB-005.)
+                      * no flags  (valid)       → creates the directory tree, empty event
+                                                  files, and workspace READMEs (idempotent), exits 0.
 
 The real data workspace lives OUTSIDE this repository. A real run creates directories
 and empty append-only event files; it never overwrites or truncates an existing file.`;
@@ -275,6 +275,38 @@ function createEventFiles(config: WorkspaceConfig): CreateFilesResult {
 }
 
 /**
+ * Write the workspace README files (SB-005): the top-level `README.md` and
+ * `secure_refs/README.md`. Non-destructive: an existing README is left untouched
+ * (the user may have customized it), so re-running is a safe no-op. Uses the
+ * exclusive `wx` flag so an existing file is never overwritten.
+ */
+function createReadmeFiles(config: WorkspaceConfig): CreateFilesResult {
+  const created: string[] = [];
+  const existed: string[] = [];
+
+  const readmeFiles = WORKSPACE_PLAN.files.filter(
+    (file) => file.kind === "readme",
+  );
+
+  for (const file of readmeFiles) {
+    const target = planPath(config, file.rel);
+    if (existsSync(target)) {
+      existed.push(target);
+      continue;
+    }
+    const content = readmeContentFor(file.rel);
+    if (content === undefined) {
+      throw new Error(`No README template defined for "${file.rel}".`);
+    }
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, content, { flag: "wx" });
+    created.push(target);
+  }
+
+  return { created, existed };
+}
+
+/**
  * Entry point. Returns the intended process exit code instead of calling
  * process.exit directly, so it is testable and has a single exit site.
  */
@@ -329,9 +361,11 @@ function main(argv: ReadonlyArray<string>): number {
 
   let dirs: CreateDirsResult;
   let events: CreateFilesResult;
+  let readmes: CreateFilesResult;
   try {
     dirs = createDirectories(config);
     events = createEventFiles(config);
+    readmes = createReadmeFiles(config);
   } catch (error: unknown) {
     log(
       "error",
@@ -343,10 +377,10 @@ function main(argv: ReadonlyArray<string>): number {
   }
 
   for (const dir of dirs.created) {
-    log("step", `created dir   ${dir}`);
+    log("step", `created dir    ${dir}`);
   }
-  for (const file of events.created) {
-    log("step", `created file  ${file}`);
+  for (const file of [...events.created, ...readmes.created]) {
+    log("step", `created file   ${file}`);
   }
   log(
     "info",
@@ -357,7 +391,11 @@ function main(argv: ReadonlyArray<string>): number {
     `Event files ready: ${events.created.length} created, ${events.existed.length} already existed ` +
       "(existing files left untouched — append-only).",
   );
-  log("info", "Workspace READMEs (SB-005) are not created yet.");
+  log(
+    "info",
+    `READMEs ready: ${readmes.created.length} created, ${readmes.existed.length} already existed.`,
+  );
+  log("info", "Workspace initialized.");
   return 0;
 }
 
