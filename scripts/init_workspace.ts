@@ -3,22 +3,21 @@
  *
  * Stories: SB-001 (entry + skeleton), SB-002 (env loading & path-safety checks),
  * SB-006 (dry-run plan), SB-003 (create the directory tree), SB-004 (create empty
- * append-only event files), SB-005 (write workspace READMEs) — Phase 1A, EPIC-CORE-001.
+ * append-only event files), SB-005 (write workspace READMEs), SB-007 (`--verify`
+ * read-only workspace check) — Phase 1A, EPIC-CORE-001.
  *
- * Entry point: argument parsing (`--dry-run`, `--help`), structured logging, and a
- * top-level `main()` that resolves + validates the external workspace configuration,
- * renders the canonical plan, and (real run) creates the directory tree, the empty
- * append-only event files, and the workspace READMEs — all idempotently.
- *
- * Remaining Phase 1A stories:
- *   - SB-007: `--verify` workspace check
+ * Entry point: argument parsing (`--dry-run`, `--verify`, `--help`), structured
+ * logging, and a top-level `main()` that resolves + validates the external workspace
+ * configuration, then either verifies it (`--verify`), previews the plan (`--dry-run`),
+ * or (real run) creates the directory tree, the empty append-only event files, and the
+ * workspace READMEs — all idempotently.
  *
  * Safety: `--dry-run` never writes. A real run creates directories and empty event
  * files; it never overwrites or truncates an existing file (append-only invariant),
  * so re-running is a safe no-op.
  */
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -39,6 +38,7 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 interface CliOptions {
   help: boolean;
   dryRun: boolean;
+  verify: boolean;
 }
 
 type LogLevel = "info" | "warn" | "error" | "step";
@@ -130,6 +130,9 @@ USAGE:
 OPTIONS:
   --dry-run    Validate config + list every directory and file the real run would
                create, in order; make no filesystem changes. Exits 0.
+  --verify     Read-only check that the workspace matches the canonical plan (all
+               directories + files present, no unexpected top-level entries). Exits
+               0 if OK, non-zero with details otherwise. Makes no changes.
   -h, --help   Show this help and exit 0.
 
 ENVIRONMENT:
@@ -141,6 +144,7 @@ BEHAVIOR:
   - With --help:    prints this usage and exits 0 (no env required).
   - Otherwise:      resolves + validates ${WORKSPACE_ENV_VAR} and path safety first.
                       * invalid/missing config → actionable error, exits non-zero.
+                      * --verify  (valid)       → checks the workspace, makes no changes.
                       * --dry-run (valid)       → lists the plan, makes no changes, exits 0.
                       * no flags  (valid)       → creates the directory tree, empty event
                                                   files, and workspace READMEs (idempotent), exits 0.
@@ -150,7 +154,7 @@ and empty append-only event files; it never overwrites or truncates an existing 
 
 /** Parse argv into options. Unknown flags are a hard error (fail fast). */
 function parseArgs(argv: ReadonlyArray<string>): CliOptions {
-  const options: CliOptions = { help: false, dryRun: false };
+  const options: CliOptions = { help: false, dryRun: false, verify: false };
   for (const arg of argv) {
     switch (arg) {
       case "-h":
@@ -159,6 +163,9 @@ function parseArgs(argv: ReadonlyArray<string>): CliOptions {
         break;
       case "--dry-run":
         options.dryRun = true;
+        break;
+      case "--verify":
+        options.verify = true;
         break;
       default:
         throw new Error(
@@ -306,6 +313,80 @@ function createReadmeFiles(config: WorkspaceConfig): CreateFilesResult {
   return { created, existed };
 }
 
+/** Result of a read-only workspace verification. */
+interface VerifyResult {
+  readonly ok: boolean;
+  readonly problems: ReadonlyArray<string>;
+  readonly dirCount: number;
+  readonly fileCount: number;
+}
+
+/** The expected set of top-level entry names, derived from the plan. */
+function expectedTopLevelNames(): ReadonlySet<string> {
+  const names = new Set<string>();
+  for (const dir of WORKSPACE_PLAN.directories) {
+    names.add(dir.rel.split("/")[0]);
+  }
+  for (const file of WORKSPACE_PLAN.files) {
+    names.add(file.rel.split("/")[0]);
+  }
+  return names;
+}
+
+/**
+ * Read-only verification (SB-007): assert the workspace matches the canonical plan —
+ * every planned directory and file is present (correct type), and there are no
+ * unexpected top-level entries. Dotfiles (e.g. macOS `.DS_Store`) are ignored.
+ * Performs NO writes.
+ */
+function verifyWorkspace(config: WorkspaceConfig): VerifyResult {
+  const problems: string[] = [];
+
+  if (!existsSync(config.workspace) || !statSync(config.workspace).isDirectory()) {
+    return {
+      ok: false,
+      problems: [`Workspace root missing or not a directory: ${config.workspace}`],
+      dirCount: 0,
+      fileCount: 0,
+    };
+  }
+
+  for (const dir of WORKSPACE_PLAN.directories) {
+    const target = planPath(config, dir.rel);
+    if (!existsSync(target)) {
+      problems.push(`Missing directory: ${target}`);
+    } else if (!statSync(target).isDirectory()) {
+      problems.push(`Expected a directory but found a file: ${target}`);
+    }
+  }
+
+  for (const file of WORKSPACE_PLAN.files) {
+    const target = planPath(config, file.rel);
+    if (!existsSync(target)) {
+      problems.push(`Missing file: ${target}`);
+    } else if (!statSync(target).isFile()) {
+      problems.push(`Expected a file but found a directory: ${target}`);
+    }
+  }
+
+  const expected = expectedTopLevelNames();
+  for (const entry of readdirSync(config.workspace)) {
+    if (entry.startsWith(".")) {
+      continue; // ignore dotfiles (e.g. macOS .DS_Store)
+    }
+    if (!expected.has(entry)) {
+      problems.push(`Unexpected top-level entry: ${join(config.workspace, entry)}`);
+    }
+  }
+
+  return {
+    ok: problems.length === 0,
+    problems,
+    dirCount: WORKSPACE_PLAN.directories.length,
+    fileCount: WORKSPACE_PLAN.files.length,
+  };
+}
+
 /**
  * Entry point. Returns the intended process exit code instead of calling
  * process.exit directly, so it is testable and has a single exit site.
@@ -350,6 +431,27 @@ function main(argv: ReadonlyArray<string>): number {
   );
   for (const warning of warnings) {
     log("warn", warning);
+  }
+
+  if (options.verify) {
+    const result = verifyWorkspace(config);
+    if (result.ok) {
+      log(
+        "info",
+        `Workspace OK: ${result.dirCount} directories and ${result.fileCount} files present; ` +
+          "no unexpected top-level entries.",
+      );
+      return 0;
+    }
+    for (const problem of result.problems) {
+      log("error", problem);
+    }
+    log(
+      "error",
+      `Workspace verification FAILED: ${result.problems.length} problem(s). ` +
+        "Re-run init (no flags) to create missing entries.",
+    );
+    return 1;
   }
 
   renderPlan(config);

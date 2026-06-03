@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1A — Workspace Initialization (in progress)
+**Phase:** Phase 1A — Workspace Initialization (COMPLETE — at mandatory stop point)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -12,38 +12,37 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Stop point — SB-005 (current)
-- **Current story:** SB-005 — workspace README & secure_refs README, Phase 1A, EPIC-CORE-001.
-- **Status:** `Done` (committed + pushed).
-- **Files changed:** `scripts/init_workspace.ts` (`createReadmeFiles()` + wiring),
-  `scripts/lib/workspace_readmes.ts` (new — README templates), `docs/planning/story_backlog.md`,
+## Stop point — Phase 1A COMPLETE (SB-007 done)
+- **Current story:** SB-007 — `--verify` workspace validation, Phase 1A, EPIC-CORE-001.
+- **Status:** `Done` (committed + pushed). **Phase 1A complete — mandatory human review point.**
+- **Files changed (SB-007):** `scripts/init_workspace.ts` (`--verify` flag + `verifyWorkspace()`),
+  `package.json` (`verify:workspace` alias), `docs/planning/story_backlog.md`,
   `docs/planning/phase_1_story_map.md`, `STATUS.md`.
-- **Atomicity:** SB-005 is 1 pt — atomic. Templates live in `scripts/lib/workspace_readmes.ts`
-  (story explicitly permits template strings under `scripts/`).
-- **Behavior:** real run now also writes `README.md` + `secure_refs/README.md` into the workspace
-  (never the repo), create-only (`wx`); existing READMEs left untouched. Real run now creates the full
-  plan (dirs + event files + READMEs).
+- **Atomicity:** SB-007 is 2 pts — atomic; behavior in `scripts/init_workspace.ts` + script alias.
+- **Behavior:** `--verify` is read-only; asserts all 27 dirs + 5 files present and no unexpected top-level
+  entries (dotfiles like `.DS_Store` ignored). Exit 0 if OK, 1 with a per-problem list otherwise.
 - **Validation run (all green):**
-  - both READMEs created; required statements present (never-commit, 00_Raw immutable, events=SoT,
-    db/indexes rebuildable, secure_refs pointers-only).
-  - non-destructive: a user edit to README survives re-run (md5 identical).
-  - `--dry-run` → no writes. `tsc --noEmit --strict` (nodenext) → exit 0.
-  - top-level layout = `README.md` + 7 dirs (vault, events, db, indexes, attachments, secure_refs, logs).
-- **Next recommended action:** **SB-007 — add `--verify` validation command** (P0, 2 pts; deps
-  SB-003/004/005 now `Done`) — final Phase 1A story, proceeding now per user instruction.
+  - verify before init → FAILED (root missing), exit 1.
+  - init then verify → "Workspace OK: 27 directories and 5 files present", exit 0 (also via
+    `pnpm run verify:workspace`).
+  - verify is read-only (snapshot unchanged).
+  - `.DS_Store` at top level → ignored, still OK.
+  - missing dir + stray top-level file → 2 problems reported, exit 1; re-init heals → OK again.
+  - `tsc --noEmit --strict` (nodenext) on all 3 script files → exit 0.
 
-## Just completed
-- Phase 0 scaffold (`3990af3`); JIRA-style backlog workflow (`0cb6b00`).
-- **SB-001 → `Done`** (`2d99fe7`): initializer entry point + skeleton; Atomic Story Rule formalized.
-- **SB-002 → `Done`** (`1c38186`): env loading + path safety; no filesystem writes.
-- **SB-006 → `Done`** (`ccce72a`): canonical `WORKSPACE_PLAN` + `--dry-run` listing dirs/files; zero writes.
-- **SB-003 → `Done`** (`eef5fd6`): idempotent directory-tree creation; tree matches `repo_structure.md`.
-- **SB-004 → `Done`** (`46beab1`): empty append-only event files; existing files never truncated.
-- **SB-005 → `Done`:** workspace READMEs written into the workspace; non-destructive.
+## Phase 1A summary (all `Done`, atomic commits, pushed)
+- **SB-001** (`2d99fe7`): initializer entry + skeleton; Atomic Story Rule formalized.
+- **SB-002** (`1c38186`): env loading + path safety.
+- **SB-006** (`ccce72a`): canonical `WORKSPACE_PLAN` + `--dry-run`.
+- **SB-003** (`eef5fd6`): idempotent directory-tree creation.
+- **SB-004** (`46beab1`): empty append-only event files.
+- **SB-005** (`74541fb`): workspace READMEs.
+- **SB-007** (this commit): `--verify` read-only check.
 
 ## Next concrete action
-- Implement **SB-007** (`--verify` read-only workspace check + `package.json` alias), commit atomically;
-  then **Phase 1A is complete → mandatory human stop point** before Phase 1B.
+- **STOP for human review of Phase 1A** (init against a throwaway `SECOND_BRAIN_WORKSPACE`, then
+  `--verify` green). On approval, begin **Phase 1B — Schema Finalization**, first story **SB-008**
+  (frontmatter schema v1). Do not start Phase 1B until approved.
 
 ## Open conflict to resolve
 - Minimal distillation is in `mvp_scope.md` but not in Phase 1A–1G. See Phase 1H note in

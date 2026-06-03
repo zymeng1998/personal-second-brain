@@ -46,7 +46,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-004 | Story | Create append-only event files (empty) | EPIC-CORE-001 | P0 | **Done** | 1 | SB-003 |
 | SB-005 | Story | Create workspace README & safety README files | EPIC-CORE-001 | P0 | **Done** | 1 | SB-003 |
 | SB-006 | Story | Add dry-run support for the initializer | EPIC-CORE-001 | P1 | **Done** | 2 | SB-001 |
-| SB-007 | Story | Add validation commands for workspace init | EPIC-CORE-001 | P0 | Backlog | 2 | SB-003, SB-004, SB-005 |
+| SB-007 | Story | Add validation commands for workspace init | EPIC-CORE-001 | P0 | **Done** | 2 | SB-003, SB-004, SB-005 |
 | SB-008 | Story | Define frontmatter schema v1 | EPIC-CORE-002 | P0 | Backlog | 3 | — (Phase 1A done) |
 | SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Backlog | 3 | — |
 | SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Backlog | 3 | SB-008, SB-009 |
@@ -215,8 +215,8 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-007 — Add validation commands for workspace init
 
-- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P0 · **Points:** 2 · **Status:** Backlog
-- **Dependencies:** SB-003, SB-004, SB-005
+- **Type:** Story · **Epic:** EPIC-CORE-001 · **Priority:** P0 · **Points:** 2 · **Status:** Done
+- **Dependencies:** SB-003, SB-004, SB-005 (all `Done`)
 - **Scope:** Provide a repeatable check (script target or documented command sequence) that asserts the
   workspace matches `repo_structure.md`: all dirs present, 3 event files present, READMEs present, and
   no unexpected extra top-level entries.

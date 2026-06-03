@@ -10,6 +10,7 @@
   },
   "scripts": {
     "init:workspace": "tsx scripts/init_workspace.ts",
+    "verify:workspace": "tsx scripts/init_workspace.ts --verify",
     "validate:notes": "tsx scripts/validate_notes.ts",
     "index:vault": "tsx scripts/index_vault.ts",
     "query:memory": "tsx scripts/query_memory.ts"
