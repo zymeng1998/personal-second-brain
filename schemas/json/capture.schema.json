@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://second-brain.local/schemas/json/capture.schema.json",
+  "title": "Capture Request (DRAFT — Phase 0 skeleton)",
+  "$comment": "Input to the `capture` operation. Produces an immutable L0 raw note + a capture event. Finalize in Phase 1.",
+  "type": "object",
+  "required": ["content", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "content": { "type": "string", "description": "Verbatim raw content to store immutably in vault/00_Raw/." },
+    "source": {
+      "type": "string",
+      "enum": ["paste", "email", "wechat", "ocr", "voice", "clip", "import"],
+      "description": "Adapter/source kind. MVP supports `paste` only."
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "ref": { "type": "string", "description": "Optional external reference (URL, message id). Not sensitive content." },
+    "captured_at": { "type": "string", "format": "date-time" }
+  }
+}

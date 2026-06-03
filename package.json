@@ -1,0 +1,22 @@
+{
+  "name": "personal-second-brain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local-first, open-format, domain-independent personal second brain core",
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "init:workspace": "tsx scripts/init_workspace.ts",
+    "validate:notes": "tsx scripts/validate_notes.ts",
+    "index:vault": "tsx scripts/index_vault.ts",
+    "query:memory": "tsx scripts/query_memory.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  },
+  "comment": "Phase 0 scaffold. Script targets are stubs; no application logic yet."
+}

@@ -1,0 +1,7 @@
+# pnpm workspace definition for the Second Brain Core.
+# Python sidecars under sidecars/ are intentionally NOT part of the pnpm workspace;
+# they use their own toolchain and communicate over a stdio JSON/JSONL contract.
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "domain-apps/*"

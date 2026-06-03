@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://second-brain.local/schemas/markdown/frontmatter.schema.json",
+  "title": "Note Frontmatter (DRAFT — Phase 0 skeleton)",
+  "$comment": "Skeleton. Finalize fields per note type in Phase 1. Domain-neutral only.",
+  "type": "object",
+  "required": ["id", "type", "layer", "created"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, sortable, filename-safe id (e.g. ULID). Durable key for links/chunks."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["raw", "working", "distilled", "entity", "project", "concept", "case", "daily", "output"],
+      "description": "Note type. Domain-neutral."
+    },
+    "layer": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Memory layer L0-L5. raw=0 is immutable."
+    },
+    "title": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "created": { "type": "string", "format": "date-time" },
+    "updated": { "type": "string", "format": "date-time" },
+    "source_ref": {
+      "type": "string",
+      "description": "Provenance: id of the raw capture / source this note derives from."
+    },
+    "links": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Outgoing [[wikilink]] targets (also seeds the graph index)."
+    },
+    "secure_ref": {
+      "type": "string",
+      "description": "Optional pointer to external secure storage (secref_...). Never inline sensitive content."
+    }
+  }
+}
