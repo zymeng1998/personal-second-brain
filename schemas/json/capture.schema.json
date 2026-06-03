@@ -1,20 +1,43 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://second-brain.local/schemas/json/capture.schema.json",
-  "title": "Capture Request (DRAFT — Phase 0 skeleton)",
-  "$comment": "Input to the `capture` operation. Produces an immutable L0 raw note + a capture event. Finalize in Phase 1.",
+  "title": "Capture Request v1",
+  "version": "1.0.0",
+  "description": "Input to the `capture` operation. Produces one immutable L0 raw note in vault/00_Raw/ plus a capture event. Domain-neutral. The system assigns the note id (ULID); callers never supply it.",
   "type": "object",
   "required": ["content", "source"],
   "additionalProperties": false,
   "properties": {
-    "content": { "type": "string", "description": "Verbatim raw content to store immutably in vault/00_Raw/." },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Verbatim raw content to store byte-faithfully in vault/00_Raw/. Never edited after write."
+    },
     "source": {
       "type": "string",
       "enum": ["paste", "email", "wechat", "ocr", "voice", "clip", "import"],
-      "description": "Adapter/source kind. MVP supports `paste` only."
+      "description": "Adapter/source kind. MVP implements `paste` only; the others are reserved for later adapters."
     },
-    "tags": { "type": "array", "items": { "type": "string" } },
-    "ref": { "type": "string", "description": "Optional external reference (URL, message id). Not sensitive content." },
-    "captured_at": { "type": "string", "format": "date-time" }
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional human title for the raw note. If omitted, the writer derives a slug from content/source."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "description": "Optional tags applied to the raw note frontmatter."
+    },
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional external reference (URL, message id). Metadata only — never sensitive content."
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional client-supplied capture time. Defaults to now if absent."
+    }
   }
 }

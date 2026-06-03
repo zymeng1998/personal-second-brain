@@ -1,0 +1,16 @@
+{
+  "name": "@sb/interfaces",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The stable boundary: TypeScript types + operation contracts aligned to the JSON schemas. Domain-neutral.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

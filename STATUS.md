@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1B — Schema Finalization (IN PROGRESS — SB-008, SB-009 Done; next SB-010)
+**Phase:** Phase 1B — Schema Finalization (COMPLETE — SB-008/009/010 Done; at mandatory stop point)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -12,10 +12,20 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Phase 1B progress — SB-008, SB-009 Done (EPIC-CORE-002)
-- **Done:** SB-008 (frontmatter v1, `fb00c5d`), SB-009 (event v1) — each an atomic commit.
-- **Next story:** SB-010 — capture interface v0 (TS contracts in `packages/interfaces` + finalize
-  `capture.schema.json`). Phase 1B human-review stop point is **after SB-010**.
+## Stop point — Phase 1B COMPLETE (EPIC-CORE-002, all 3 stories Done)
+- **Done (atomic commits):** SB-008 (frontmatter v1, `fb00c5d`), SB-009 (event v1, `0b9d7c8`),
+  SB-010 (capture interface v0, this commit). **Phase 1B complete — mandatory human review point.**
+- **Next phase:** Phase 1C — Vault Write Path (SB-011 raw write contract, then SB-012 immutability guard).
+  Do not start until the 1B schema decisions are reviewed.
+- **SB-010 (capture interface v0):** scaffolded `@sb/interfaces` (package.json + tsconfig + `src/*`):
+  `ids.ts` (branded `Ulid`/`SecureRef`), `note.ts` (per-type `NoteFrontmatter` discriminated union +
+  `Note`), `event.ts` (per-stream `Event` union + `Actor`), `capture.ts` (`CaptureRequest`/`CaptureResult`),
+  `scope.ts` (`PermissionScope` + least-privilege deny list), `operations.ts` (`CoreOperations` +
+  `OPERATION_CONTRACTS` documenting scope/errors per op), `index.ts`. Finalized
+  `schemas/json/capture.schema.json` → v1. Types only, no operation implementation.
+  Validation: `pnpm -C packages/interfaces tsc --noEmit` → exit 0; throwaway alignment smoke (one typed
+  value per note/event/capture type) → exit 0; domain-leakage grep clean (only the generic
+  `example-readonly` placeholder, never broker).
 - **SB-009 (event v1):** `event.schema.json` v1. Envelope required `event_id(ULID),stream,kind,
   occurred_at,actor`; per-stream kinds via allOf (capture→`captured`; memory→note/fact/entity/
   distillation kinds, subject_id required; projection→`indexed/projection_rebuilt/projection_reset`).

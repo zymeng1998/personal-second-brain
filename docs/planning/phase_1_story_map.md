@@ -113,12 +113,11 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 
 ## Next implementation unit
 
-**Phase 1A is COMPLETE.** All stories `Done` (each an atomic commit per the Atomic Story Rule):
-SB-001, SB-002, SB-006, SB-003, SB-004, SB-005, SB-007.
+**Phase 1A is COMPLETE** (SB-001..007, atomic commits). **Phase 1B is COMPLETE** — all stories `Done`
+(each an atomic commit per the Atomic Story Rule): **SB-008** frontmatter v1 (`fb00c5d`),
+**SB-009** event v1 (`0b9d7c8`), **SB-010** capture interface v0. Open questions #1, #2, #3 resolved.
 
-→ **Mandatory Phase 1A stop point: human review now.** Review the initializer end-to-end (init against a
-throwaway `SECOND_BRAIN_WORKSPACE`, then `--verify` green) before starting **Phase 1B — Schema
-Finalization** (next story **SB-008 — frontmatter schema v1**; depends on Phase 1A `Done`).
-
-*(Suggested within-1A order: SB-001 skeleton, SB-002 env/path-safety, SB-006 dry-run, then SB-003 tree,
-SB-004 event files, SB-005 READMEs, SB-007 verify — so the safe dry-run path exists before any real writes.)*
+→ **Mandatory Phase 1B stop point: human review now.** Review the schema decisions (ULID id scheme;
+per-type frontmatter rules; event envelope + per-stream kinds; capture request v1; `@sb/interfaces` v0
+contracts) before starting **Phase 1C — Vault Write Path** (next story **SB-011 — raw note write
+contract**; depends on SB-008, SB-010 `Done`).

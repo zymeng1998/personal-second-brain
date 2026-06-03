@@ -19,7 +19,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | Epic ID | Title | Phase | Priority | Status | Summary |
 |---|---|---|---|---|---|
 | EPIC-CORE-001 | Workspace & Local-First Foundation | 1A | P0 | In Progress | Create the external workspace tree safely; no real data. |
-| EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Progress | Finalize frontmatter v1, event v1, capture interface v0. |
+| EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Review | Finalize frontmatter v1, event v1, capture interface v0. (All 3 stories Done; awaiting 1B human review.) |
 | EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Backlog | Raw note write contract + immutability guard (L0). |
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Backlog | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Backlog | Minimal CLI capture + read-only list/get. |
@@ -49,7 +49,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-007 | Story | Add validation commands for workspace init | EPIC-CORE-001 | P0 | **Done** | 2 | SB-003, SB-004, SB-005 |
 | SB-008 | Story | Define frontmatter schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — (Phase 1A done) |
 | SB-009 | Story | Define event schema v1 | EPIC-CORE-002 | P0 | Done | 3 | — |
-| SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Backlog | 3 | SB-008, SB-009 |
+| SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Done | 3 | SB-008, SB-009 |
 | SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Backlog | 3 | SB-008, SB-010 |
 | SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Backlog | 3 | SB-011 |
 | SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Backlog | 3 | SB-011, SB-012, SB-014 |
@@ -264,7 +264,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-010 — Define capture interface v0
 
-- **Type:** Story · **Epic:** EPIC-CORE-002 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-002 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-008, SB-009
 - **Scope:** Define the v0 operation contracts in `packages/interfaces`: `capture`, `getNote`,
   `listNotes`, `appendEvent` — typed inputs/outputs aligned to the schemas; finalize
