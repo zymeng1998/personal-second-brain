@@ -1,0 +1,21 @@
+{
+  "name": "@sb/event-log",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Append-only JSONL event store (audit + replay spine). SB-014: capture-event append. Domain-neutral.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/capture-event.test.ts"
+  },
+  "dependencies": {
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

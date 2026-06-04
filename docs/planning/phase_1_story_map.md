@@ -121,6 +121,8 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 (`59d9333`) + **SB-012** raw immutability guard — overwrite/delete of L0 raw refused via a single guarded
 path; 13 tests green.
 
-→ Now in **Phase 1D — Event Log Write Path**: **SB-014 — write capture event to JSONL** (deps SB-009,
-SB-004 both `Done`). Then **Phase 1E** (SB-013 CLI capture, SB-015 list/get) and **Phase 1F** (SB-016
-validation, SB-017 immutability checks).
+**Phase 1D complete:** **SB-014 — write capture event to JSONL** is `Done` — `appendCaptureEvent()` in
+`@sb/event-log` appends one validated JSONL line, append-only; 5 tests green.
+
+→ Next: **Phase 1E — CLI Capture MVP** (SB-013 CLI capture — deps SB-011/012/014 all `Done`; SB-015
+list/get), then **Phase 1F** (SB-016 validation, SB-017 immutability checks) and **Phase 1G** (SB-018 wrap).

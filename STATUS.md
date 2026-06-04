@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1D — Event Log Write Path (IN PROGRESS — SB-011/012 `Done`; next SB-014)
+**Phase:** Phase 1D COMPLETE — SB-014 `Done`. Next: Phase 1E (SB-013 CLI capture, SB-015 list/get)
 **Last updated:** 2026-06-03
 
 ## Workflow rule in effect
@@ -12,9 +12,29 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Phase 1C COMPLETE — SB-012 `Done` (EPIC-CORE-003 Done). Now starting SB-014 (Phase 1D).
-- **SB-012 — raw immutability guard. Status:** `Done` (atomic commit + pushed). Phase 1C complete.
-  **Prev:** SB-011 `Done` + pushed (`59d9333`).
+## Phase 1D COMPLETE — SB-014 `Done` (EPIC-CORE-005 Done), committed + pushed
+- **SB-014 — write capture event to JSONL. Status:** `Done` (atomic commit + pushed).
+  **Prev (pushed):** SB-011 `59d9333`, SB-012 `a9501e2` (Phase 1C complete).
+  **Next story:** SB-013 — minimal CLI capture command (Phase 1E; deps SB-011/012/014 all `Done`).
+- **Scope delivered:** `@sb/event-log` with `appendCaptureEvent()` — appends one schema-valid capture
+  event as a single JSONL line to `<workspace>/events/capture_events.jsonl`, append-only (fs append mode,
+  never truncates). Builds `{stream:"capture",kind:"captured"}`, auto-stamps `recorded_at` +
+  `schema_version:"1.0.0"`, validates via dependency-free `validateCaptureEvent` (capture-stream branch
+  of event v1) before writing. `EventLogError` codes `unsafe_path`/`invalid_event`/`append_failed`;
+  nothing written on validation failure. Caller supplies the `event_id` ULID (runtime ULID generation
+  arrives with the CLI, SB-013).
+- **Out of scope (SB-014):** memory/projection events; replay/projection rebuild.
+- **Files changed (SB-014):** `packages/event-log/{package.json,tsconfig.json,README.md}`,
+  `packages/event-log/src/{index.ts,capture-event.ts,validate-event.ts,errors.ts}`,
+  `packages/event-log/test/capture-event.test.ts`, `pnpm-lock.yaml` (new `@sb/event-log` importer),
+  `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `pnpm install` → ok; `pnpm --filter @sb/event-log test` → **5/5 pass**
+  (one valid line w/ id+ts+actor+source_ref; N events = N lines, ordered, earlier lines unchanged;
+  invalid event writes nothing; bad subject_id rejected; relative path rejected);
+  `pnpm --filter @sb/event-log build` (`tsc --noEmit`) → exit 0; domain-leakage grep → event-log clean.
+- **Next recommended action:** human reviews append semantics + ordering; on approval, commit SB-014
+  atomically (`feat: event-log capture append (SB-014)`). That completes Phase 1D → next is Phase 1E
+  (SB-013 CLI capture, SB-015 list/get).
 - **Scope delivered:** the single guarded path that makes L0 raw immutable via the vault API.
   `guardRawImmutable(workspace, path, op)` throws `RawImmutabilityError` for any path under
   `vault/00_Raw/`; `updateRawNote`/`deleteRawNote` always reject (`overwrite_rejected`/`delete_rejected`)

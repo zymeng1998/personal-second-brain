@@ -21,7 +21,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-001 | Workspace & Local-First Foundation | 1A | P0 | In Progress | Create the external workspace tree safely; no real data. |
 | EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Review | Finalize frontmatter v1, event v1, capture interface v0. (All 3 stories Done; awaiting 1B human review.) |
 | EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Done | Raw note write contract + immutability guard (L0). |
-| EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Backlog | Append-only JSONL capture events. |
+| EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Done | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Backlog | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Backlog | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H/2 | P1 | Backlog | Minimal human-confirmed L1→L2/L3 proposals. |
@@ -53,7 +53,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Done | 3 | SB-008, SB-010 |
 | SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Done | 3 | SB-011 |
 | SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Backlog | 3 | SB-011, SB-012, SB-014 |
-| SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Backlog | 2 | SB-009, SB-004 |
+| SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Done | 2 | SB-009, SB-004 |
 | SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Backlog | 2 | SB-011 |
 | SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Backlog | 3 | SB-008 |
 | SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Backlog | 2 | SB-012 |
@@ -342,7 +342,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-014 — Write capture event to JSONL
 
-- **Type:** Story · **Epic:** EPIC-CORE-005 · **Priority:** P0 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-005 · **Priority:** P0 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-009, SB-004
 - **Scope:** In `packages/event-log`, append a schema-valid capture event to
   `events/capture_events.jsonl` (one JSON object per line). Append-only; never rewrite.
@@ -354,6 +354,13 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `packages/event-log/src/*`; tests.
 - **Out of Scope:** memory/projection events; replay.
 - **Notes:** Source-of-truth spine.
+- **Implementation note (In Review):** `@sb/event-log` scaffolded. `appendCaptureEvent()` builds a
+  `{stream:"capture",kind:"captured"}` event (auto-stamps `recorded_at` + `schema_version:"1.0.0"`),
+  validates it via dependency-free `validateCaptureEvent` (aligned to the capture-stream branch of
+  event v1: ULID `event_id`/`subject_id`, actor pattern, ISO timestamps, optional `source_ref`), then
+  appends one JSONL line via fs append mode (never truncates). `EventLogError` codes:
+  `unsafe_path`/`invalid_event`/`append_failed`; nothing is written on a validation failure. 5 tests
+  green. The caller supplies `event_id` (ULID) — runtime ULID generation will come with the CLI (SB-013).
 
 ## SB-015 — Add note listing / read-only query command
 
