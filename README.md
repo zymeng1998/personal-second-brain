@@ -6,8 +6,12 @@ It captures messy information, organizes it (PARA + Tiago Forte's CODE), distill
 reusable notes, projects queryable facts, and generates outputs — all over plain Markdown,
 YAML frontmatter, an append-only JSON event log, and rebuildable SQLite/DuckDB projections.
 
-> **Status:** Phase 0 — scaffolding and planning only. No application logic yet.
-> See [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md).
+> **Status:** **Phase 1 (MVP core) complete.** CLI capture writes immutable L0 raw notes + an
+> append-only capture event; the vault read API (`note list` / `note get`) and frontmatter validation
+> work; raw immutability is enforced and test-locked. **Next: Phase 2 — projections** (fact-store /
+> entity-graph / task-store + replay). One MVP item — the human-confirmed distillation skill — is
+> intentionally **deferred** (see [`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md)
+> Phase 1H). See [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md).
 
 ## Core principle: domain independence
 
@@ -52,7 +56,7 @@ sidecars/     retrieval, ai  (Python — boundary docs only in Phase 0)
 domain-apps/  broker (docs-only)
 schemas/      markdown, json, sql
 examples/     notes, captures, entities, projects, outputs
-scripts/      init_workspace, validate_notes, index_vault, query_memory (stubs)
+scripts/      init_workspace ✅, validate_notes ✅, index_vault, query_memory (stubs)
 ```
 
 ## Data lives outside this repo
@@ -61,13 +65,37 @@ Real notes, captures, events, indexes, and attachments live in a separate **work
 (`PersonalSecondBrainWorkspace/`), referenced via `.env`. **No real personal/client data is
 ever committed.** See [`docs/architecture/privacy_and_security.md`](docs/architecture/privacy_and_security.md).
 
-## Getting started (after Phase 1)
+## Getting started (Phase 1 MVP)
+
+These commands are implemented and verified end-to-end. The workspace lives **outside** this repo;
+point `SECOND_BRAIN_WORKSPACE` at a path that is not the repo, your home dir, or `/`.
 
 ```bash
-cp .env.example .env        # set SECOND_BRAIN_WORKSPACE to your workspace path
+cp .env.example .env                 # set SECOND_BRAIN_WORKSPACE to your workspace path
 pnpm install
-pnpm tsx scripts/init_workspace.ts   # creates the workspace tree
+export SECOND_BRAIN_WORKSPACE=/path/to/PersonalSecondBrainWorkspace
+
+# 1. Create (idempotent) + verify the workspace tree
+pnpm init:workspace                  # 27 dirs + 5 files; non-destructive, never overwrites data
+pnpm verify:workspace                # read-only structure check
+
+# 2. Capture into L0 raw + append a capture event
+pnpm --filter @sb/cli capture -- --content "hello second brain" --source paste --title "First note"
+echo "captured via stdin" | pnpm --filter @sb/cli capture -- --source paste
+
+# 3. Read back (read-only; never mutates the vault or events)
+pnpm --filter @sb/cli note -- list             # id  type  title, sorted by id
+pnpm --filter @sb/cli note -- get <ULID>       # verbatim markdown for one note
+
+# 4. Validate frontmatter across the vault (read-only; exit 0 valid / 1 invalid / 2 operational)
+pnpm validate:notes
+
+# 5. Run the test suite (immutability checks included)
+pnpm test
 ```
+
+`init_workspace` and `validate_notes` also accept `--workspace <path>` (and `--dry-run` /
+`--help` where applicable) instead of the environment variable.
 
 ## License
 

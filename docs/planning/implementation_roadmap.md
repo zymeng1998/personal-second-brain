@@ -3,20 +3,25 @@
 Phased plan. Each phase has a verifiable end state. Domain (broker) work is last and built only on
 `interfaces`.
 
-## Phase 0 — Scaffold & contracts ✅ (current)
+## Phase 0 — Scaffold & contracts ✅
 
 Docs, repo tree, READMEs, schema skeletons, `.gitignore`/`.env.example`/`AGENTS.md`/`CLAUDE.md`, stub
 scripts. **No application logic. Sidecars: boundary docs only. Broker: docs-only.**
 - **Done when:** structure + docs exist and pass human review.
 
-## Phase 1 — MVP core
+## Phase 1 — MVP core ✅ (distillation deferred)
 
 CLI capture → L0 raw + append-only event log; `note-vault` read/write with **raw-immutability guard**;
 typed YAML frontmatter validation; `interfaces` v0 (capture/getNote/listNotes/appendEvent);
 `init_workspace` + `validate_notes` implemented; one minimal human-confirmed distillation skill.
+- **Status:** **Complete (SB-001..018)** except the distillation skill (SB-019), which is **deferred**
+  to Phase 1H / Phase 2 pending a scope decision — see [`phase_1_story_map.md`](phase_1_story_map.md)
+  Phase 1H. Everything else shipped with atomic commits and green validation.
 - **Done when:** capture is loss-free, raw is provably immutable, all notes validate, and a second
-  tool can read vault+events via documented contracts. No domain concepts in core.
-- **Decide first:** frontmatter schema v1, event schema v1 (see open questions).
+  tool can read vault+events via documented contracts. No domain concepts in core. — **met** for the
+  capture+validate+read core (distillation excluded).
+- **Decided:** frontmatter schema v1 (SB-008), event schema v1 (SB-009), ULID id scheme (open questions
+  #1–#3 resolved).
 
 ## Phase 2 — Projections
 

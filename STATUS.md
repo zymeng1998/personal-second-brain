@@ -1,8 +1,37 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1F — Validation & Safety Checks (SB-016 `Done`; SB-017 `In Review` — awaiting human review/commit)
+**Phase:** **Phase 1 COMPLETE** (SB-001..018, distillation SB-019 deferred). **Next: Phase 2 — projections.**
 **Last updated:** 2026-06-04
+
+## SB-018 `Done` (Phase 1G, EPIC-CORE-001..006) — docs-only, committed + pushed
+- **SB-018 — update documentation & STATUS after Phase 1. Status:** `Done` (atomic, docs-only commit).
+  **Prev (pushed):** SB-017 `bb650b1`. **Final Phase 1 gate cleared.**
+- **Scope delivered (docs only):**
+  - `README.md` — status → "**Phase 1 (MVP core) complete**"; **getting-started rewritten** with the real,
+    end-to-end-verified flow (`pnpm init:workspace` / `verify:workspace` → `capture` flag+stdin →
+    `note list`/`note get` → `validate:notes` → `pnpm test`); scripts map marks `init_workspace` +
+    `validate_notes` implemented; distillation deferral noted.
+  - `docs/planning/implementation_roadmap.md` — Phase 0 ✅, Phase 1 ✅ (with the SB-019 distillation
+    carve-out and "decided: schema v1 / event v1 / ULID").
+  - `docs/planning/mvp_scope.md` — acceptance criteria annotated: **AC 1–4, 6 ✅**; **AC 5 (distillation) ⏳
+    deferred** (SB-019); distillation in-scope item flagged deferred.
+  - `docs/planning/open_questions.md` — **#4 (workspace creation) RESOLVED** (init_workspace; no template
+    seeding in Phase 1). (#1–#3 already resolved.)
+  - `docs/planning/story_backlog.md` — epic table 1A/1B/1E/1F → `Done`; SB-018 row+card → `In Review`.
+  - `docs/planning/phase_1_story_map.md` — Phase 1G status note.
+- **Honest carve-out:** the MVP's **human-confirmed distillation skill (SB-019) was never built**, so the
+  docs mark it **deferred** to Phase 1H / Phase 2 (pending the scope decision) instead of claiming Phase 1
+  is 100% of the original MVP. The capture + validate + read + immutability core is complete.
+- **Validation run (green):** getting-started smoke on a throwaway `SECOND_BRAIN_WORKSPACE=/tmp/psb-sb018-demo`
+  → init (27 dirs+5 files) → verify OK → capture (flag + stdin) both `ok:true` → `note list` shows both →
+  `note get <id>` prints frontmatter+body → `validate:notes` 2/2 valid; `pnpm test` exit 0 (note-vault 24,
+  event-log 5, cli 14, scripts 12); domain-leakage grep clean (only generic channels + negative broker test).
+  `git diff` is **docs-only** (README + docs/planning/* + STATUS).
+- **Next recommended action:** begin **Phase 2 (projections)** — but **first decide the SB-019 distillation
+  conflict** (add Phase 1H to build it now vs. fold distillation into Phase 2). Phase 2 epic: EPIC-CORE-008
+  (fact-store / entity-graph / task-store + event-log replay); refine + split the `5→split` stories
+  (SB-020..023) before implementation.
 
 ## SB-017 `In Review` (Phase 1F, EPIC-CORE-006) — implemented + validated, NOT yet committed
 - **SB-017 — checks/tests for raw immutability. Status:** `In Review` (atomic; awaiting human review →

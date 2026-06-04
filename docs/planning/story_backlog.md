@@ -18,12 +18,12 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 
 | Epic ID | Title | Phase | Priority | Status | Summary |
 |---|---|---|---|---|---|
-| EPIC-CORE-001 | Workspace & Local-First Foundation | 1A | P0 | In Progress | Create the external workspace tree safely; no real data. |
-| EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Review | Finalize frontmatter v1, event v1, capture interface v0. (All 3 stories Done; awaiting 1B human review.) |
+| EPIC-CORE-001 | Workspace & Local-First Foundation | 1A | P0 | Done | Create the external workspace tree safely; no real data. |
+| EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | Done | Finalize frontmatter v1, event v1, capture interface v0. |
 | EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Done | Raw note write contract + immutability guard (L0). |
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Done | Append-only JSONL capture events. |
-| EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | In Progress | Minimal CLI capture + read-only list/get. |
-| EPIC-CORE-006 | Note Validation | 1F | P0 | In Progress | Frontmatter validation + immutability checks. |
+| EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Done | Minimal CLI capture + read-only list/get. |
+| EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H/2 | P1 | Backlog | Minimal human-confirmed L1→L2/L3 proposals. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Backlog | fact-store / entity-graph / task-store + replay. |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
@@ -57,7 +57,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Done | 2 | SB-011 |
 | SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Done | 3 | SB-008 |
 | SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Done | 2 | SB-012 |
-| SB-018 | Story | Update documentation & STATUS after Phase 1 | EPIC-CORE-001..006 | P0 | Backlog | 1 | SB-007, SB-013, SB-016, SB-017 |
+| SB-018 | Story | Update documentation & STATUS after Phase 1 | EPIC-CORE-001..006 | P0 | Done | 1 | SB-007, SB-013, SB-016, SB-017 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -449,10 +449,17 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-018 — Update documentation & STATUS after Phase 1
 
-- **Type:** Story · **Epic:** EPIC-CORE-001..006 · **Priority:** P0 · **Points:** 1 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-001..006 · **Priority:** P0 · **Points:** 1 · **Status:** Done
 - **Dependencies:** SB-007, SB-013, SB-016, SB-017
 - **Scope:** Update `STATUS.md`, `README.md` (getting-started now real), and roadmap/mvp_scope to reflect
   Phase 1 completion; record resolved open questions. Documentation only.
+- **Delivered:** README status → "Phase 1 (MVP core) complete"; getting-started rewritten with the real,
+  end-to-end-verified flow (`init/verify:workspace`, `capture` flag+stdin, `note list/get`, `validate:notes`,
+  `pnpm test`) + scripts map marks `init_workspace`/`validate_notes` implemented. Roadmap Phase 0/1 marked ✅
+  (distillation SB-019 carve-out noted). mvp_scope acceptance criteria annotated (1–4,6 ✅; 5 distillation ⏳
+  deferred). Open question #4 (workspace creation) resolved. STATUS records Phase 1 complete + Phase 2 next.
+  **Honest carve-out:** the MVP's distillation skill (SB-019) was never built, so docs mark it deferred to
+  Phase 1H/Phase 2 rather than claiming completion. `git diff` is docs-only.
 - **Acceptance Criteria:**
   - STATUS reflects Phase 1 done + next phase; README getting-started commands actually work.
   - Resolved open questions marked; roadmap Phase 1 checked off.

@@ -96,6 +96,10 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 - **Acceptance criteria (sub-phase):**
   - All MVP acceptance criteria in [`mvp_scope.md`](mvp_scope.md) hold; README getting-started works;
     docs consistent with behavior; **no domain leakage** (grep clean).
+- **Status:** **SB-018 `Done`** — README + roadmap + mvp_scope + open_questions + STATUS updated to
+  reflect Phase 1 completion; getting-started commands re-run end-to-end (init/verify → capture → list/get →
+  validate → test, all green); `git diff` is docs-only. MVP AC 1–4 + 6 hold; AC 5 (distillation) ⏳ deferred
+  with SB-019. Awaiting final Phase 1 human review.
 - **Stop point:** Final Phase 1 human review. Commit `docs: Phase 1 complete + STATUS` and tag/checkpoint.
 
 ---
