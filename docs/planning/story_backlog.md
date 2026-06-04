@@ -23,7 +23,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Done | Raw note write contract + immutability guard (L0). |
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Done | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | In Progress | Minimal CLI capture + read-only list/get. |
-| EPIC-CORE-006 | Note Validation | 1F | P0 | Backlog | Frontmatter validation + immutability checks. |
+| EPIC-CORE-006 | Note Validation | 1F | P0 | In Progress | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H/2 | P1 | Backlog | Minimal human-confirmed L1→L2/L3 proposals. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Backlog | fact-store / entity-graph / task-store + replay. |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
@@ -55,7 +55,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Done | 3 | SB-011, SB-012, SB-014 |
 | SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Done | 2 | SB-009, SB-004 |
 | SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Done | 2 | SB-011 |
-| SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Backlog | 3 | SB-008 |
+| SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Done | 3 | SB-008 |
 | SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Backlog | 2 | SB-012 |
 | SB-018 | Story | Update documentation & STATUS after Phase 1 | EPIC-CORE-001..006 | P0 | Backlog | 1 | SB-007, SB-013, SB-016, SB-017 |
 
@@ -401,7 +401,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-016 — Implement frontmatter validation script
 
-- **Type:** Story · **Epic:** EPIC-CORE-006 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-006 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-008
 - **Scope:** Replace the `scripts/validate_notes.ts` stub: walk the vault, validate each note's
   frontmatter against schema v1, report violations with file + reason. Read-only.
@@ -414,6 +414,17 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `scripts/validate_notes.ts`; test fixtures under `examples/`.
 - **Out of Scope:** Auto-fixing; event validation.
 - **Notes:** Read-only, safe to run anytime.
+- **Implementation note (In Review):** `scripts/validate_notes.ts` implemented — scans
+  `<workspace>/vault/**/*.md`, parses YAML frontmatter (`yaml`), validates against
+  `frontmatter.schema.json` v1 with **Ajv (2020 dialect) + ajv-formats**. Reports per-file PASS/FAIL +
+  errors and a `checked/valid/invalid` summary. Exit codes **0** (all valid) / **1** (invalid) / **2**
+  (operational: unsafe workspace, missing schema, absent/unreadable vault, bad args). Workspace resolution
+  reuses `resolveWorkspaceConfig` (SB-002) with `--workspace` override; `--help` included. Strictly
+  read-only (no writes/format/mutation). **Deps added** (devDependencies): `ajv`, `ajv-formats`, `yaml`
+  — the libraries needed to validate against the real schema. **Test fixtures are inline in the test**
+  (`scripts/validate_notes.test.ts`, run via `pnpm test:scripts`) rather than under `examples/`, to keep
+  bad-on-purpose fixtures out of the committed example set; 12 tests green + real `pnpm validate:notes`
+  smoke (valid → exit 0, invalid → exit 1).
 
 ## SB-017 — Add checks/tests for raw immutability
 

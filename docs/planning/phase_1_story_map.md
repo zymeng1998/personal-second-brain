@@ -128,5 +128,9 @@ path; 13 tests green.
 `note list`/`note get`** are both `Done` — `@sb/note-vault` read API + CLI commands; 18 note-vault + 14
 CLI tests green; real smoke verified. (Folder filtering deferred; `--type` filter shipped.)
 
-→ Next: **Phase 1F — Validation & Safety Checks** (SB-016 frontmatter validation script — dep SB-008
-`Done`; SB-017 immutability checks — dep SB-012 `Done`), then **Phase 1G** (SB-018 wrap).
+**Now in Phase 1F — Validation & Safety Checks:** **SB-016 — frontmatter validation script** is `Done`
+— read-only `scripts/validate_notes.ts` (Ajv 2020 + ajv-formats + yaml) validates `vault/**/*.md` against
+schema v1; exit 0/1/2; 12 tests green + real smoke.
+
+→ Next: **SB-017 — immutability checks/tests** (dep SB-012 `Done`) to finish Phase 1F, then **Phase 1G**
+(SB-018 docs/STATUS wrap).

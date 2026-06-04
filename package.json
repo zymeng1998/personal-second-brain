@@ -13,12 +13,16 @@
     "verify:workspace": "tsx scripts/init_workspace.ts --verify",
     "validate:notes": "tsx scripts/validate_notes.ts",
     "index:vault": "tsx scripts/index_vault.ts",
-    "query:memory": "tsx scripts/query_memory.ts"
+    "query:memory": "tsx scripts/query_memory.ts",
+    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "tsx": "^4.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "yaml": "^2.5.0"
   },
   "comment": "Phase 0 scaffold. Script targets are stubs; no application logic yet."
 }

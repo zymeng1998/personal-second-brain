@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1E COMPLETE — SB-013 + SB-015 `Done`. Next: Phase 1F (SB-016, SB-017)
+**Phase:** Phase 1F — Validation & Safety Checks (IN PROGRESS — SB-016 `Done`; next SB-017)
 **Last updated:** 2026-06-04
 
 ## Workflow rule in effect
@@ -12,10 +12,32 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## Phase 1E COMPLETE — SB-015 `Done` (EPIC-CORE-004), committed + pushed
-- **SB-015 — read-only `note list` / `note get`. Status:** `Done` (atomic commit + pushed).
-  **Prev (pushed):** SB-013 `c5b8f33` (capture). **Next story:** SB-016 — frontmatter validation script
-  (Phase 1F; dep SB-008 `Done`). Folder filtering deferred (not a scheduled story).
+## SB-016 `Done` (Phase 1F, EPIC-CORE-006) — committed + pushed
+- **SB-016 — frontmatter validation script. Status:** `Done` (atomic commit + pushed).
+  **Prev (pushed):** SB-015 `2736ba3` (Phase 1E complete). **Next story:** SB-017 — raw immutability
+  checks/tests (finishes Phase 1F; dep SB-012 `Done`). Invalid fixtures kept inline in the test.
+- **Scope delivered:** `scripts/validate_notes.ts` — read-only validator. Scans
+  `<workspace>/vault/**/*.md`, parses YAML frontmatter (`yaml`), validates against
+  `schemas/markdown/frontmatter.schema.json` v1 with **Ajv 2020 + ajv-formats**. Per-file PASS/FAIL +
+  errors and a `checked/valid/invalid` summary. Exit **0** all-valid / **1** invalid / **2** operational
+  (unsafe workspace, missing schema, absent/unreadable vault, bad args). `--workspace` override + `--help`;
+  workspace safety reuses `resolveWorkspaceConfig` (SB-002). Strictly read-only.
+- **Dependencies added (devDependencies):** `ajv` ^8.17.1 (→8.20.0), `ajv-formats` ^3.0.1, `yaml` ^2.5.0
+  (→2.9.0) — needed to validate against the real schema (the libraries you sanctioned). `pnpm-lock.yaml`
+  updated.
+- **Out of scope (SB-016):** auto-fix, mutation, capture, event-log writing, retrieval, AI, sidecars,
+  dashboard, Obsidian, broker, DB, schema changes (none were needed).
+- **Files changed (SB-016):** `scripts/validate_notes.ts` (implemented), `scripts/validate_notes.test.ts`
+  (new — fixtures inline, run via `pnpm test:scripts`), `package.json` (deps + `test:scripts`),
+  `pnpm-lock.yaml`, `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`. (Test fixtures
+  kept inline rather than under `examples/` so bad-on-purpose notes don't pollute the committed examples.)
+- **Validation run (green):** `pnpm install` ok; `pnpm validate:notes -- --help` prints usage;
+  `pnpm validate:notes` on a CLI-captured workspace → exit 0; on a seeded-bad workspace → exit 1 with
+  per-error detail; `pnpm test:scripts` → **12/12**; note-vault 18/18, event-log 5/5, cli 14/14; cli
+  build exit 0; domain-leakage grep → `validate_notes.ts` clean (only pre-existing anti-leakage rules /
+  negative tests / deferred-broker docs elsewhere).
+- **Next recommended action:** human reviews the validator; on approval, commit SB-016 atomically
+  (`feat: frontmatter validation script (SB-016)`) + push. Then SB-017 (immutability checks) finishes Phase 1F.
 - **Scope delivered:** `@sb/note-vault` read-only API — `listNotes(workspace,{type?})` → `NoteSummary[]`
   (`id/type/title/layer/path`, ULID-sorted) and `getNote(workspace,id)` → verbatim content;
   `NoteReadError` (`unsafe_path`/`invalid_ulid`/`not_found`/`read_failed`). Frontmatter read via targeted
