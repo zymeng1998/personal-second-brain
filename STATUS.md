@@ -1,8 +1,36 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1F — Validation & Safety Checks (IN PROGRESS — SB-016 `Done`; next SB-017)
+**Phase:** Phase 1F — Validation & Safety Checks (SB-016 `Done`; SB-017 `In Review` — awaiting human review/commit)
 **Last updated:** 2026-06-04
+
+## SB-017 `In Review` (Phase 1F, EPIC-CORE-006) — implemented + validated, NOT yet committed
+- **SB-017 — checks/tests for raw immutability. Status:** `In Review` (atomic; awaiting human review →
+  commit). **Prev (pushed):** SB-016 `cdd37b8`. **Next story:** SB-018 (docs/STATUS wrap, Phase 1G).
+- **Scope delivered:** new `packages/note-vault/test/raw-immutability-invariant.test.ts` (6 tests) that
+  harden the L0 invariant *beyond* SB-012's vault-API cases: (1) `guardRawImmutable` returns the
+  operation-specific code (`overwrite_rejected`/`delete_rejected`) for a raw path; (2) it is a **no-op**
+  (must NOT throw) for non-raw paths (`00_Inbox`, `10_Working`, `events/*.jsonl`) so L1+ stays editable;
+  (3) path traversal that *resolves into* `00_Raw` (`00_Raw/../00_Raw/x.md`) is still guarded; (4) traversal
+  that *escapes* to `10_Working` is allowed; (5) slugged raw filenames (`<ULID>--<slug>.md`) are immutable
+  too (update+delete refused, bytes unchanged); (6) consolidated invariant — after a real `writeRawNote`,
+  re-write / `updateRawNote` / `deleteRawNote` are all refused and bytes are byte-identical (with a control
+  guarding the byte-comparison itself).
+- **Test wiring:** added the new file to `@sb/note-vault`'s `test` script, and added a **documented root
+  `pnpm test`** = `pnpm -r run test && pnpm run test:scripts` (the AC's "documented command"; recursive run
+  skips `@sb/interfaces`, which has no test script). The user's Terminal has `pnpm` on PATH, so the nested
+  `pnpm -r` resolves; validated in-sandbox via a temporary `pnpm`→`corepack pnpm` PATH shim.
+- **No new dependency, no production-code change** — tests + `package.json` test scripts only.
+- **Out of scope (SB-017):** OS-level filesystem permissions (the guard is API-level).
+- **Files changed (SB-017):** `packages/note-vault/test/raw-immutability-invariant.test.ts` (new),
+  `packages/note-vault/package.json` (test script + new file), `package.json` (root `test` script),
+  `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`. (No `pnpm-lock.yaml` change.)
+- **Validation run (green):** `pnpm test` → **exit 0** — note-vault **24/24** (18 + 6 new), event-log 5/5,
+  cli 14/14, scripts 12/12; `pnpm --filter @sb/note-vault build` (`tsc --noEmit`) → exit 0; domain-leakage
+  grep on the new test → clean.
+- **Next recommended action:** human reviews the immutability tests + the new root `pnpm test`; on approval,
+  commit SB-017 atomically (`test: raw immutability checks (SB-017)`) + push. That completes **Phase 1F**;
+  next is **Phase 1G / SB-018** (docs/STATUS wrap-up).
 
 ## Workflow rule in effect
 - **Atomic Story Rule (MANDATORY):** each story is implemented, reviewed, validated, and committed as one

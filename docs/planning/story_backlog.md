@@ -56,7 +56,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Done | 2 | SB-009, SB-004 |
 | SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Done | 2 | SB-011 |
 | SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Done | 3 | SB-008 |
-| SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Backlog | 2 | SB-012 |
+| SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Done | 2 | SB-012 |
 | SB-018 | Story | Update documentation & STATUS after Phase 1 | EPIC-CORE-001..006 | P0 | Backlog | 1 | SB-007, SB-013, SB-016, SB-017 |
 
 ### Later phases (coarse; refine before implementation)
@@ -428,10 +428,16 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-017 — Add checks/tests for raw immutability
 
-- **Type:** Story · **Epic:** EPIC-CORE-006 · **Priority:** P0 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-006 · **Priority:** P0 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-012
 - **Scope:** Add automated tests / a CLI check asserting the immutability guard: overwrite and delete
   attempts on `00_Raw/` are rejected and bytes are unchanged. Wire into the project's test command.
+- **Delivered:** New `packages/note-vault/test/raw-immutability-invariant.test.ts` (6 tests) hardening the
+  invariant beyond SB-012 — `guardRawImmutable` operation-specific codes; non-raw pass-through must NOT
+  throw; path-traversal that resolves into / escapes `00_Raw`; slugged raw filenames; and a consolidated
+  "every mutation path refused, bytes byte-identical" case. Wired into `@sb/note-vault` test script and a
+  new documented root `pnpm test` (`pnpm -r run test && pnpm run test:scripts`). Validation: `pnpm test`
+  exit 0 — note-vault 24/24, event-log 5/5, cli 14/14, scripts 12/12; tsc exit 0; leakage grep clean.
 - **Acceptance Criteria:**
   - Test suite includes overwrite-rejected and delete-rejected cases, both passing.
   - A documented command runs them.

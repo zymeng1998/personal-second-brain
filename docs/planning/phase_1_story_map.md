@@ -132,5 +132,10 @@ CLI tests green; real smoke verified. (Folder filtering deferred; `--type` filte
 — read-only `scripts/validate_notes.ts` (Ajv 2020 + ajv-formats + yaml) validates `vault/**/*.md` against
 schema v1; exit 0/1/2; 12 tests green + real smoke.
 
-→ Next: **SB-017 — immutability checks/tests** (dep SB-012 `Done`) to finish Phase 1F, then **Phase 1G**
-(SB-018 docs/STATUS wrap).
+**SB-017 — immutability checks/tests** is `In Review` — new
+`packages/note-vault/test/raw-immutability-invariant.test.ts` (6 tests) hardens the L0 invariant (guard
+codes, non-raw pass-through, path traversal in/out of `00_Raw`, slugged filenames, consolidated
+"bytes byte-identical" case), plus a documented root `pnpm test` aggregating all suites. `pnpm test` →
+exit 0 (note-vault 24, event-log 5, cli 14, scripts 12). Completes Phase 1F pending human review.
+
+→ Next (after SB-017 commit): **Phase 1G** (SB-018 docs/STATUS wrap).
