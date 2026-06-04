@@ -54,7 +54,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Done | 3 | SB-011 |
 | SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Done | 3 | SB-011, SB-012, SB-014 |
 | SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Done | 2 | SB-009, SB-004 |
-| SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Backlog | 2 | SB-011 |
+| SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Done | 2 | SB-011 |
 | SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Backlog | 3 | SB-008 |
 | SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Backlog | 2 | SB-012 |
 | SB-018 | Story | Update documentation & STATUS after Phase 1 | EPIC-CORE-001..006 | P0 | Backlog | 1 | SB-007, SB-013, SB-016, SB-017 |
@@ -376,7 +376,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-015 — Add note listing / read-only query command
 
-- **Type:** Story · **Epic:** EPIC-CORE-004 · **Priority:** P0 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-004 · **Priority:** P0 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-011
 - **Scope:** In `apps/cli`, add read-only `note list` and `note get <id>` via `listNotes`/`getNote`.
   No mutation. Optional simple filter (type/folder).
@@ -388,6 +388,16 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `apps/cli/src/*`; possibly `packages/note-vault/src/*` (read helpers).
 - **Out of Scope:** Search/retrieval (Phase 3); facts query.
 - **Notes:** Proves a second consumer reads via interfaces only.
+- **Implementation note (In Review):** `@sb/note-vault` gained a **read-only** API — `listNotes(workspace,
+  {type?})` → `NoteSummary[]` (id/type/title/layer/path, ULID-sorted) and `getNote(workspace,id)` →
+  verbatim content; `NoteReadError` (`unsafe_path`/`invalid_ulid`/`not_found`/`read_failed`). Frontmatter
+  fields are read via targeted extraction (no YAML dependency); `getNote` returns raw content so it is
+  correct regardless of frontmatter complexity. `@sb/cli` added `note list` / `note get <id>` (reuses the
+  capture path-safety via the now-exported `resolveSafeWorkspace`). Read-only verified (raw count + event
+  lines unchanged). 5 note-vault read tests + 5 CLI tests green (note-vault 18 total, cli 14 total);
+  real CLI smoke (capture → list → get) verified. No new dependency. **Folder filter** narrowed to a
+  `--type` filter (type is the documented, schema-backed discriminator). **Folder filtering is deferred**
+  and may become a future story only if a real need appears — not implemented now.
 
 ## SB-016 — Implement frontmatter validation script
 

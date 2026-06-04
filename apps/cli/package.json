@@ -6,9 +6,10 @@
   "type": "module",
   "scripts": {
     "capture": "tsx src/index.ts capture",
+    "note": "tsx src/index.ts note",
     "start": "tsx src/index.ts",
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/capture-command.test.ts"
+    "test": "node --import tsx --test test/capture-command.test.ts test/note-command.test.ts"
   },
   "dependencies": {
     "@sb/event-log": "workspace:*",

@@ -124,9 +124,9 @@ path; 13 tests green.
 **Phase 1D complete:** **SB-014 — write capture event to JSONL** is `Done` — `appendCaptureEvent()` in
 `@sb/event-log` appends one validated JSONL line, append-only; 5 tests green.
 
-**Now in Phase 1E — CLI Capture MVP:** **SB-013 — minimal CLI capture** is `Done` — `@sb/cli` `capture`
-runs end-to-end (CLI/stdin → raw note + capture event → structured result); 9 tests green + real smoke
-verified.
+**Phase 1E COMPLETE:** **SB-013 — minimal CLI capture** (`c5b8f33`) and **SB-015 — read-only
+`note list`/`note get`** are both `Done` — `@sb/note-vault` read API + CLI commands; 18 note-vault + 14
+CLI tests green; real smoke verified. (Folder filtering deferred; `--type` filter shipped.)
 
-→ Next: **SB-015 — read-only list/get** (dep SB-011 `Done`) to finish Phase 1E, then **Phase 1F**
-(SB-016 validation, SB-017 immutability checks) and **Phase 1G** (SB-018 wrap).
+→ Next: **Phase 1F — Validation & Safety Checks** (SB-016 frontmatter validation script — dep SB-008
+`Done`; SB-017 immutability checks — dep SB-012 `Done`), then **Phase 1G** (SB-018 wrap).

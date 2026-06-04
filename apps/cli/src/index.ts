@@ -8,6 +8,7 @@ import { argv as processArgv } from "node:process";
 import type { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { CaptureCliError, runCapture } from "./capture-command.js";
+import { runNoteGet, runNoteList } from "./note-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -30,6 +31,10 @@ Flags:
   --slug <slug>        Optional human-readable filename slug (non-canonical).
   --workspace <path>   Absolute workspace override; else SECOND_BRAIN_WORKSPACE / .env.
   --help               Show this help.
+
+Read-only:
+  sb note list [--type <kind>] [--workspace <path>]
+  sb note get <id> [--workspace <path>]
 `;
 
 interface ParsedCaptureArgs {
@@ -126,6 +131,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
     out(USAGE);
     return 0;
   }
+  if (command === "note") {
+    return handleNote(argv.slice(1), out, err);
+  }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
     return 1;
@@ -164,6 +172,80 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
     });
     out(`${JSON.stringify(result)}\n`);
     return 0;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+interface ParsedNoteArgs {
+  workspace?: string;
+  type?: string;
+  positionals: string[];
+}
+
+function parseNoteArgs(args: string[]): ParsedNoteArgs {
+  const parsed: ParsedNoteArgs = { positionals: [] };
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i] as string;
+    switch (arg) {
+      case "--":
+        break;
+      case "--workspace":
+        parsed.workspace = requireValue(args, ++i, arg);
+        break;
+      case "--type":
+        parsed.type = requireValue(args, ++i, arg);
+        break;
+      default:
+        if (arg.startsWith("--")) {
+          throw new CaptureCliError("bad_arguments", `unknown argument: ${arg}`);
+        }
+        parsed.positionals.push(arg);
+    }
+  }
+  return parsed;
+}
+
+async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: string) => void): Promise<number> {
+  // Drop standalone `--` separators (also forwarded by `pnpm run ... --`).
+  const args = rawArgs.filter((a) => a !== "--");
+  const sub = args[0];
+  if (sub === undefined || sub === "--help" || sub === "-h") {
+    out(USAGE);
+    return sub === undefined ? 1 : 0;
+  }
+
+  let parsed: ParsedNoteArgs;
+  try {
+    parsed = parseNoteArgs(args.slice(1));
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+
+  try {
+    if (sub === "list") {
+      const result = await runNoteList({
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+        ...(parsed.type !== undefined ? { type: parsed.type } : {}),
+      });
+      for (const note of result.notes) {
+        out(`${note.id}\t${note.type ?? "-"}\t${note.title ?? ""}\n`);
+      }
+      return 0;
+    }
+    if (sub === "get") {
+      const id = parsed.positionals[0];
+      const result = await runNoteGet({
+        id: id ?? "",
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+      });
+      out(result.content.endsWith("\n") ? result.content : `${result.content}\n`);
+      return 0;
+    }
+    err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown note subcommand: ${sub}`)))}\n`);
+    return 1;
   } catch (e) {
     err(`${JSON.stringify(errorEnvelope(e))}\n`);
     return 1;

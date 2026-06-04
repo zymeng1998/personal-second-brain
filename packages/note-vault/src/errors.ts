@@ -38,3 +38,18 @@ export class RawImmutabilityError extends Error {
     if (details !== undefined) this.details = details;
   }
 }
+
+/** Raised by the read-only note API (list/get). */
+export type NoteReadErrorCode = "unsafe_path" | "invalid_ulid" | "not_found" | "read_failed";
+
+export class NoteReadError extends Error {
+  readonly code: NoteReadErrorCode;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: NoteReadErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "NoteReadError";
+    this.code = code;
+    if (details !== undefined) this.details = details;
+  }
+}

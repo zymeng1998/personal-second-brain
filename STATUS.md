@@ -1,7 +1,7 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** Phase 1E — CLI Capture MVP (IN PROGRESS — SB-013 `Done`; next SB-015 list/get)
+**Phase:** Phase 1E COMPLETE — SB-013 + SB-015 `Done`. Next: Phase 1F (SB-016, SB-017)
 **Last updated:** 2026-06-04
 
 ## Workflow rule in effect
@@ -12,11 +12,30 @@
   interrupted session resumes from `git log` + `STATUS.md` + `story_backlog.md`. Full text:
   `docs/planning/backlog_workflow.md`.
 
-## SB-013 `Done` (Phase 1E, EPIC-CORE-004) — committed + pushed
-- **SB-013 — minimal CLI capture command. Status:** `Done` (atomic commit + pushed).
-  **Prev (pushed):** SB-014 `4457f73` (Phase 1D complete). **Next story:** SB-015 — read-only list/get.
-- **Tech debt logged** (`open_questions.md`): centralize ULID generation in a core package later
-  (the SB-013 `apps/cli/src/ulid.ts` generator is accepted scoped debt; do not refactor mid-story).
+## Phase 1E COMPLETE — SB-015 `Done` (EPIC-CORE-004), committed + pushed
+- **SB-015 — read-only `note list` / `note get`. Status:** `Done` (atomic commit + pushed).
+  **Prev (pushed):** SB-013 `c5b8f33` (capture). **Next story:** SB-016 — frontmatter validation script
+  (Phase 1F; dep SB-008 `Done`). Folder filtering deferred (not a scheduled story).
+- **Scope delivered:** `@sb/note-vault` read-only API — `listNotes(workspace,{type?})` → `NoteSummary[]`
+  (`id/type/title/layer/path`, ULID-sorted) and `getNote(workspace,id)` → verbatim content;
+  `NoteReadError` (`unsafe_path`/`invalid_ulid`/`not_found`/`read_failed`). Frontmatter read via targeted
+  field-extraction (no YAML dep); `getNote` returns raw content (correct regardless of frontmatter).
+  `@sb/cli` added `note list` / `note get <id>` (reuses capture path-safety via exported
+  `resolveSafeWorkspace`). Both commands are READ-ONLY (verified: raw count + event lines unchanged).
+- **Note:** the card's "type/folder" filter is implemented as `--type` (schema-backed discriminator);
+  folder filtering deferred. **Out of scope (SB-015):** search/retrieval (Phase 3), facts query, mutation.
+- **No new dependency.** Fixed a `pnpm run … --` separator bug in the `note` subcommand parser (smoke-caught).
+- **Files changed (SB-015):** `packages/note-vault/src/{read-notes.ts(new),errors.ts,index.ts}`,
+  `packages/note-vault/{package.json,README.md}`, `packages/note-vault/test/read-notes.test.ts(new)`;
+  `apps/cli/src/{note-command.ts(new),index.ts,capture-command.ts}`, `apps/cli/{package.json,README.md}`,
+  `apps/cli/test/note-command.test.ts(new)`; `docs/planning/{story_backlog.md,phase_1_story_map.md}`,
+  `STATUS.md`. (No `pnpm-lock.yaml` change — no new deps.)
+- **Validation run (green):** tests — note-vault **18/18**, event-log 5/5, cli **14/14**; builds —
+  note-vault/event-log/cli `tsc --noEmit` exit 0; real CLI smoke (capture → `note list` shows it →
+  `note get <id>` prints it; absent id → exit 1); leakage grep → only negative `source:"broker"` tests.
+- **Next recommended action:** human reviews the read API + commands; on approval, commit SB-015
+  atomically (`feat: read-only note list/get (SB-015)`) + push. That completes Phase 1E → Phase 1F
+  (SB-016 frontmatter validation, SB-017 immutability checks).
 - **Scope delivered:** `@sb/cli` `capture` — the first end-to-end path. `runCapture()` generates ULID
   note + event ids (dependency-free `src/ulid.ts`), one shared `captured_at`, calls `writeRawNote()`
   (SB-011) then `appendCaptureEvent()` (SB-014), prints `{ok,note_id,note_path,event_id,event_path,

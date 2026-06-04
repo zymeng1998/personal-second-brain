@@ -94,7 +94,7 @@ function assertSafeWorkspace(workspace: string, repoRoot: string): void {
   }
 }
 
-function resolveSafeWorkspace(override: string | undefined, repoRoot: string): string {
+export function resolveSafeWorkspace(override: string | undefined, repoRoot: string = REPO_ROOT): string {
   let workspace: string;
   try {
     if (override !== undefined) {

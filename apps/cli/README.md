@@ -3,10 +3,22 @@
 The **MVP surface**. Command-line capture into the vault + event log, plus read/list and the
 human-confirmed distillation workflow.
 
-- Status: **Phase 1E, SB-013 — `capture` only.** End-to-end capture: CLI input → `writeRawNote()`
-  (L0 raw note) → `appendCaptureEvent()` (capture event) → structured JSON result.
-- Calls the vault/event-log package APIs (no direct fs in the command).
-- Planned commands (MVP, incremental): `capture` ✅, `note get`, `note list`, `distill`.
+- Status: **Phase 1E, SB-013 + SB-015.** `capture` (CLI input → raw note + capture event) and the
+  read-only `note list` / `note get <id>`.
+- Calls the vault/event-log package APIs (no direct fs in the commands).
+- Planned commands (MVP, incremental): `capture` ✅, `note list` ✅, `note get` ✅, `distill`.
+
+## `note list` / `note get` (SB-015, read-only)
+
+```bash
+pnpm --filter @sb/cli note -- list [--type raw] [--workspace <path>]
+pnpm --filter @sb/cli note -- get <ULID> [--workspace <path>]
+```
+
+`note list` prints one `id\ttype\ttitle` line per note (sorted by id); `note get <id>` prints the note's
+verbatim markdown. Both are **read-only** (never write to the vault/events) and reuse the same workspace
+safety as `capture`. Errors print `{ ok:false, error:{ code, … } }` to stderr with a non-zero exit
+(`bad_arguments` for a missing id, `not_found` / `invalid_ulid` from the read API).
 
 ## `capture` (SB-013)
 
