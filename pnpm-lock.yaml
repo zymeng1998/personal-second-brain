@@ -18,6 +18,22 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  apps/cli:
+    dependencies:
+      '@sb/event-log':
+        specifier: workspace:*
+        version: link:../../packages/event-log
+      '@sb/note-vault':
+        specifier: workspace:*
+        version: link:../../packages/note-vault
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.22.4
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/event-log:
     dependencies:
       '@sb/interfaces':

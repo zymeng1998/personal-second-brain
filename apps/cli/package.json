@@ -1,0 +1,21 @@
+{
+  "name": "@sb/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MVP command-line surface. SB-013: end-to-end `capture` (raw note + capture event). Domain-neutral.",
+  "type": "module",
+  "scripts": {
+    "capture": "tsx src/index.ts capture",
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/capture-command.test.ts"
+  },
+  "dependencies": {
+    "@sb/event-log": "workspace:*",
+    "@sb/note-vault": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -22,7 +22,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-002 | Interfaces & Schemas | 1B | P0 | In Review | Finalize frontmatter v1, event v1, capture interface v0. (All 3 stories Done; awaiting 1B human review.) |
 | EPIC-CORE-003 | Markdown Vault & Raw Immutability | 1C | P0 | Done | Raw note write contract + immutability guard (L0). |
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Done | Append-only JSONL capture events. |
-| EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Backlog | Minimal CLI capture + read-only list/get. |
+| EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | In Progress | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Backlog | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H/2 | P1 | Backlog | Minimal human-confirmed L1→L2/L3 proposals. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Backlog | fact-store / entity-graph / task-store + replay. |
@@ -52,7 +52,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-010 | Story | Define capture interface v0 | EPIC-CORE-002 | P0 | Done | 3 | SB-008, SB-009 |
 | SB-011 | Story | Implement raw note write contract | EPIC-CORE-003 | P0 | Done | 3 | SB-008, SB-010 |
 | SB-012 | Story | Implement raw immutability guard | EPIC-CORE-003 | P0 | Done | 3 | SB-011 |
-| SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Backlog | 3 | SB-011, SB-012, SB-014 |
+| SB-013 | Story | Implement minimal CLI capture command | EPIC-CORE-004 | P0 | Done | 3 | SB-011, SB-012, SB-014 |
 | SB-014 | Story | Write capture event to JSONL | EPIC-CORE-005 | P0 | Done | 2 | SB-009, SB-004 |
 | SB-015 | Story | Add note listing / read-only query command | EPIC-CORE-004 | P0 | Backlog | 2 | SB-011 |
 | SB-016 | Story | Implement frontmatter validation script | EPIC-CORE-006 | P0 | Backlog | 3 | SB-008 |
@@ -327,7 +327,7 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 
 ## SB-013 — Implement minimal CLI capture command
 
-- **Type:** Story · **Epic:** EPIC-CORE-004 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-004 · **Priority:** P0 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-011, SB-012, SB-014
 - **Scope:** In `apps/cli`, add `capture` that reads content (arg/stdin), calls the `capture` interface
   → writes raw note (SB-011) + capture event (SB-014), prints the new id/paths. Manual `paste` source only.
@@ -339,6 +339,18 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `apps/cli/src/*`; `package.json` (bin/script).
 - **Out of Scope:** Non-paste adapters; distillation; retrieval.
 - **Notes:** Smallest possible end-to-end capture path.
+- **Implementation note (In Review):** `@sb/cli` scaffolded. `runCapture()` generates ULID note + event
+  ids (dependency-free `ulid.ts`, no new package), one shared `captured_at`, calls `writeRawNote()` then
+  `appendCaptureEvent()`, prints `{ok,note_id,note_path,event_id,event_path,captured_at}`. Event payload
+  links back to the raw note (`note_id`, workspace-relative `note_path`, `source`, `title?`, `tags?`,
+  `ref?`). Structured `CaptureCliError` (`bad_arguments`/`empty_content`/`invalid_source`/
+  `unsafe_workspace`/`event_append_failed`) to stderr + non-zero exit. Partial-failure: note kept if the
+  event append fails. Workspace safety REUSES `resolveWorkspaceConfig` (SB-002) + a CLI broad-path guard
+  (rejects `/`, single-segment roots, home dir, repo-containing paths). stdin + `--content` both supported.
+  9 tests green + real end-to-end smoke (both flag and stdin) verified.
+  **Deviation from AC:** the `00_Inbox/` L1 stub is **not** created (deferred with SB-011, per the
+  narrowed instruction); tracked for a later capture-orchestration story. Capture orchestrates the
+  package APIs directly (no `00_Inbox` stub, no distillation).
 
 ## SB-014 — Write capture event to JSONL
 

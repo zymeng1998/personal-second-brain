@@ -38,6 +38,13 @@ To resolve before / during the noted phase. Tracked here so they don't block sca
 | 15 | MCP adapter timing | Only after `interfaces` stabilizes; never in Phase 0/1 |
 | 16 | Sync mechanism | Git for text; iCloud/Syncthing optional; user choice |
 
+## Tech debt (tracked)
+
+- **ULID generation is currently duplicated.** SB-013 added a small hand-rolled ULID generator in
+  `apps/cli/src/ulid.ts` (accepted as scoped tech debt). **Future refactor:** centralize ULID generation
+  in a core package such as `@sb/interfaces` or `@sb/memory-kernel`, so the CLI / domain apps / event-log
+  do not each grow separate id generators. *(Do not refactor mid-story; schedule as its own story.)*
+
 ## Answered (recorded in ADRs)
 
 - Build vs fork → **combine** (ADR-007 + evaluation).

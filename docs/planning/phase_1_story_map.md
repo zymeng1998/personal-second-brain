@@ -124,5 +124,9 @@ path; 13 tests green.
 **Phase 1D complete:** **SB-014 — write capture event to JSONL** is `Done` — `appendCaptureEvent()` in
 `@sb/event-log` appends one validated JSONL line, append-only; 5 tests green.
 
-→ Next: **Phase 1E — CLI Capture MVP** (SB-013 CLI capture — deps SB-011/012/014 all `Done`; SB-015
-list/get), then **Phase 1F** (SB-016 validation, SB-017 immutability checks) and **Phase 1G** (SB-018 wrap).
+**Now in Phase 1E — CLI Capture MVP:** **SB-013 — minimal CLI capture** is `Done` — `@sb/cli` `capture`
+runs end-to-end (CLI/stdin → raw note + capture event → structured result); 9 tests green + real smoke
+verified.
+
+→ Next: **SB-015 — read-only list/get** (dep SB-011 `Done`) to finish Phase 1E, then **Phase 1F**
+(SB-016 validation, SB-017 immutability checks) and **Phase 1G** (SB-018 wrap).
