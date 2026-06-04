@@ -104,14 +104,37 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
 
 ---
 
-## Phase 1H — (Conditional) Minimal Distillation — OPEN QUESTION
+## Phase 1H — Minimal Human-Confirmed Distillation (SCHEDULED)
 
-- **Status:** Not scheduled in 1A–1G. **Conflict to resolve:** [`mvp_scope.md`](mvp_scope.md) lists a
-  "minimal human-confirmed distillation skill" as part of MVP, but the requested Phase 1 sub-phases
-  (1A–1G) end at review/commit and do not include it.
-- **Options for the human:** (a) add **Phase 1H** to implement SB-019 within the MVP; or (b) re-scope
-  distillation out of the MVP and into Phase 2. Until decided, SB-019 stays `Backlog` and the MVP is
-  treated as capture+validate only.
+- **Decision (2026-06-04):** Build the minimal distillation workflow **now**, before Phase 2 (chosen over
+  folding it into Phase 2). This closes the original MVP. EPIC-CORE-007.
+- **Objective:** A human-confirmed path that proposes an **L2 distilled note** from L1 working notes and,
+  on explicit human accept, writes the L2 note + emits a `distillation_accepted` memory event — **never**
+  editing L0 raw or L1, **never** writing without confirmation.
+- **Scope decisions (defaults; revisit if needed):**
+  - **L2 only.** L3 facts need the fact-store (Phase 2); Phase 1H proposes **distilled (L2)** notes only.
+    The original "propose L2/L3" is narrowed — L3 fact extraction moves to Phase 2 (EPIC-CORE-008).
+  - **Skill = agent layer, core = contracts + CLI.** The Claude-Code skill drafts the proposal; the TS
+    core provides `distill accept`, the only writing step, run by a human. (CLAUDE.md: skills never the backend.)
+  - **Proposal transport = JSON.** `distill propose` (read-only) surfaces L1 candidates + a proposal
+    scaffold; the skill fills it; `distill accept` consumes a proposal JSON from stdin/file.
+  - **Provenance + immutability.** An L2 distilled note requires `title` + `source_ref` to its L1/L0
+    origin id(s). The distillation path is forbidden from touching `00_Raw/` and from mutating L1 sources.
+- **Stories (split from the old `5→split` SB-019; all ≤3 pts):**
+  - **SB-019** — Distillation proposal **contract** in `@sb/interfaces` (types + operation descriptors only).
+  - **SB-024** — **L2 distilled-note writer** in `@sb/note-vault` (`writeDistilledNote`, never under `00_Raw`).
+  - **SB-025** — **memory-stream event append** in `@sb/event-log` (`appendMemoryEvent`, append-only).
+  - **SB-026** — CLI **`distill` command** (`propose` read-only + `accept` human-confirmed write).
+  - **SB-027** — **distillation skill** (`skills/distill/`) + a safety check asserting L0/L1 are never mutated.
+- **Dependencies:** SB-010, SB-011, SB-009, SB-014 (all `Done`).
+- **Acceptance criteria (sub-phase):**
+  - `distill propose` is read-only and lists L1 candidates / emits a proposal scaffold.
+  - `distill accept <proposal>` writes exactly one L2 distilled note (`type:distilled`, `layer:2`, with
+    `title` + `source_ref`) **and** appends exactly one `distillation_accepted` memory event.
+  - The full path provably never overwrites/deletes `00_Raw/` and never mutates the L1 source (byte-checked).
+  - No write occurs without an explicit `accept`; `validate:notes` passes on the produced L2 note.
+- **Stop point:** Human runs propose → accept against a throwaway workspace; raw + L1 unchanged; one L2
+  note + one event created; `validate:notes` green. Commit per-story (Atomic Story Rule).
 
 ---
 
@@ -136,10 +159,13 @@ CLI tests green; real smoke verified. (Folder filtering deferred; `--type` filte
 — read-only `scripts/validate_notes.ts` (Ajv 2020 + ajv-formats + yaml) validates `vault/**/*.md` against
 schema v1; exit 0/1/2; 12 tests green + real smoke.
 
-**SB-017 — immutability checks/tests** is `In Review` — new
-`packages/note-vault/test/raw-immutability-invariant.test.ts` (6 tests) hardens the L0 invariant (guard
-codes, non-raw pass-through, path traversal in/out of `00_Raw`, slugged filenames, consolidated
-"bytes byte-identical" case), plus a documented root `pnpm test` aggregating all suites. `pnpm test` →
-exit 0 (note-vault 24, event-log 5, cli 14, scripts 12). Completes Phase 1F pending human review.
+**Phase 1F COMPLETE:** **SB-016** frontmatter validation (`cdd37b8`) + **SB-017** immutability checks
+(`bb650b1`) — `raw-immutability-invariant.test.ts` (6 tests) + documented root `pnpm test`; all suites green.
 
-→ Next (after SB-017 commit): **Phase 1G** (SB-018 docs/STATUS wrap).
+**Phase 1G COMPLETE:** **SB-018 — docs/STATUS wrap** (`650edcc`) — README getting-started rewritten +
+verified end-to-end; roadmap/mvp_scope/open_questions updated; **Phase 1 MVP core complete**.
+
+→ **Now in Phase 1H — Minimal Human-Confirmed Distillation** (decision: build before Phase 2). SB-019 was
+split into **SB-019, SB-024, SB-025, SB-026, SB-027** (all ≤3 pts). **Next story: SB-019** — distillation
+proposal contract in `@sb/interfaces` (types + operation descriptors only; deps `Done`). Then SB-024 (L2
+writer) → SB-025 (memory event) → SB-026 (CLI `distill`) → SB-027 (skill + safety check).

@@ -1,8 +1,27 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** **Phase 1 COMPLETE** (SB-001..018, distillation SB-019 deferred). **Next: Phase 2 — projections.**
+**Phase:** **Phase 1 core COMPLETE** (SB-001..018). **Now: Phase 1H — Minimal Human-Confirmed Distillation**
+(decision 2026-06-04: build before Phase 2). **Next story: SB-019** (distillation proposal contract).
 **Last updated:** 2026-06-04
+
+## Phase 1H scheduled — SB-019 split (refinement committed-pending)
+- **Decision:** build the minimal human-confirmed distillation workflow now (chosen over folding into
+  Phase 2). EPIC-CORE-007 → `In Progress`. **L2-only** (L3 facts moved to Phase 2 / EPIC-CORE-008).
+- **Split** of the old `5→split` SB-019 into ≤3-pt atomic stories (cards in `story_backlog.md`,
+  sub-phase in `phase_1_story_map.md`):
+  - **SB-019** `Ready` (2) — distillation proposal **contract** in `@sb/interfaces` (types + descriptors
+    + `write:distill` scope; no impl). Dep SB-010 `Done`.
+  - **SB-024** (3) — `writeDistilledNote()` L2 writer in `@sb/note-vault` (never under `00_Raw/`).
+  - **SB-025** (2) — `appendMemoryEvent()` memory-stream append in `@sb/event-log` (append-only).
+  - **SB-026** (3) — CLI `distill` (`propose` read-only + `accept` human-confirmed write).
+  - **SB-027** (2) — `skills/distill/` skill + end-to-end L0/L1 never-mutated safety check.
+- **Key design decisions (documented in the map):** skill = agent layer / core = contracts+CLI; proposal
+  transport = JSON via stdin/file; L2 distilled note requires `title` + `source_ref`; the distillation path
+  is forbidden from touching L0 raw and from mutating L1 sources.
+- **Next recommended action:** on approval of this refinement, implement **SB-019** atomically (interfaces
+  types + operation descriptors only; `tsc --noEmit` + alignment smoke), set `In Review`, commit
+  (`feat: distillation proposal contract (SB-019)`), then proceed SB-024 → SB-025 → SB-026 → SB-027.
 
 ## SB-018 `Done` (Phase 1G, EPIC-CORE-001..006) — docs-only, committed + pushed
 - **SB-018 — update documentation & STATUS after Phase 1. Status:** `Done` (atomic, docs-only commit).

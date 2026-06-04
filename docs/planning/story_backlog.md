@@ -24,7 +24,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Done | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Done | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
-| EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H/2 | P1 | Backlog | Minimal human-confirmed L1→L2/L3 proposals. |
+| EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | In Progress | Minimal human-confirmed L1→L2 proposals (SB-019, SB-024..027). L3 facts moved to Phase 2. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Backlog | fact-store / entity-graph / task-store + replay. |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
@@ -59,11 +59,22 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | SB-017 | Story | Add checks/tests for raw immutability | EPIC-CORE-006 | P0 | Done | 2 | SB-012 |
 | SB-018 | Story | Update documentation & STATUS after Phase 1 | EPIC-CORE-001..006 | P0 | Done | 1 | SB-007, SB-013, SB-016, SB-017 |
 
+### Phase 1H — Minimal Human-Confirmed Distillation (detailed below)
+
+Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Phase 2). Cards below.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | Ready | 2 | SB-010 |
+| SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-019, SB-011 |
+| SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Backlog | 2 | SB-009, SB-014 |
+| SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-024, SB-025 |
+| SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Backlog | 2 | SB-026 |
+
 ### Later phases (coarse; refine before implementation)
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-019 | Story | Minimal human-confirmed distillation skill (propose L2) | EPIC-CORE-007 | P1 | Backlog | 5→split | SB-013, SB-016 |
 | SB-020 | Story | fact-store schema + ADD-only writes | EPIC-CORE-008 | P1 | Backlog | 5→split | SB-014 |
 | SB-021 | Story | entity-graph projection | EPIC-CORE-008 | P1 | Backlog | 5→split | SB-020 |
 | SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-020 |
@@ -468,6 +479,117 @@ files; STATUS/docs updated where the story says so; human review at the sub-phas
 - **Files Expected to Change:** `STATUS.md`, `README.md`, `docs/planning/*`.
 - **Out of Scope:** New features.
 - **Notes:** Final Phase 1 gate (Phase 1G).
+
+---
+
+# Phase 1H story cards (Minimal Human-Confirmed Distillation)
+
+Decomposed from the old `5→split` SB-019. **L2-only** (L3 facts → Phase 2). Project-wide DoD still applies:
+no domain/broker leakage; no real data; **L0 raw never overwritten and L1 sources never mutated** by the
+distillation path; events append-only; AC met; validation green; `git diff` limited to listed files.
+
+## SB-019 — Distillation proposal contract (interfaces)
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Ready
+- **Dependencies:** SB-010 (`Done`)
+- **Scope:** Add the **types + operation descriptors only** (no implementation) for distillation to
+  `@sb/interfaces`: a `DistillationProposal` (source note id(s), proposed L2 `title`, body, `tags?`,
+  rationale) and `DistillationResult` (new L2 `note_id`, `event_id`); add `proposeDistillation` (read-only)
+  and `acceptDistillation` (write) to `CoreOperations` + `OPERATION_CONTRACTS`; add a `write:distill`
+  permission scope to `scope.ts` (least-privilege; cannot write capture/raw).
+- **Acceptance Criteria:**
+  - `DistillationProposal`/`DistillationResult` types exported; `propose`/`accept` documented in
+    `OPERATION_CONTRACTS` with scopes (`read:notes` / `write:distill`) and error codes; `propose.readOnly=true`,
+    `accept.readOnly=false`.
+  - `tsc --noEmit` passes; a throwaway alignment smoke (one typed proposal + result value) compiles.
+- **Definition of Done:** Types compile; contracts documented; no implementation; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/interfaces exec tsc --noEmit` → exit 0; alignment smoke → exit 0.
+- **Files Expected to Change:** `packages/interfaces/src/{distillation.ts(new),operations.ts,scope.ts,index.ts}`,
+  `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`.
+- **Out of Scope:** Any implementation (writer/event/CLI/skill — later stories); L3 facts.
+- **Notes:** Mirrors the SB-010 capture-contract pattern (types + descriptors, no behavior).
+
+## SB-024 — L2 distilled-note writer (note-vault)
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-019, SB-011 (`Done`)
+- **Scope:** `writeDistilledNote()` in `@sb/note-vault` — writes a **mutable L2** note
+  (`type:distilled`, `layer:2`, required `title` + `source_ref` to the L1/L0 origin id) to a non-raw vault
+  folder (e.g. `vault/20_Distilled/`); schema-exact frontmatter; exclusive-create by id; **forbidden from
+  writing under `00_Raw/`** (reuse `isRawPath` guard) and from touching any L1 source file.
+- **Acceptance Criteria:**
+  - Writes a valid L2 distilled note (validates against `frontmatter.schema.json`); refuses a target under
+    `00_Raw/`; never reads-then-writes an L1 source (no mutation).
+  - Structured `DistilledNoteWriteError` codes (`invalid_ulid`/`unsafe_path`/`missing_title`/
+    `missing_source_ref`/`already_exists`).
+- **Definition of Done:** Tests green; `tsc --noEmit` exit 0; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/note-vault test` (new `distilled-note-writer.test.ts`) green; build exit 0.
+- **Files Expected to Change:** `packages/note-vault/src/{distilled-note-writer.ts(new),errors.ts,index.ts}`,
+  `packages/note-vault/test/distilled-note-writer.test.ts(new)`, `packages/note-vault/{package.json,README.md}`,
+  `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** CLI, events, the skill, L3 facts, editing/superseding existing L2 notes.
+- **Notes:** L2 is curated/editable (unlike L0); this story only covers create.
+
+## SB-025 — Memory-stream event append (event-log)
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-009, SB-014 (`Done`)
+- **Scope:** `appendMemoryEvent()` in `@sb/event-log` — appends one validated **memory-stream** event
+  (`note_created` or `distillation_accepted`, `subject_id` required) as a single JSONL line to the event
+  log, **append-only** (reuse SB-014 append semantics + the memory-stream branch of event schema v1).
+- **Acceptance Criteria:**
+  - Appends one valid memory event (auto-stamps `recorded_at`, `schema_version`); rejects an invalid event
+    (missing `subject_id`/bad kind) writing nothing; N appends → N ordered lines, earlier lines unchanged.
+  - Reuses the existing `EventLogError` codes; relative/unsafe paths rejected.
+- **Definition of Done:** Tests green; `tsc --noEmit` exit 0; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/event-log test` (new memory-event cases) green; build exit 0.
+- **Files Expected to Change:** `packages/event-log/src/{memory-event.ts(new),validate-event.ts,index.ts}`,
+  `packages/event-log/test/memory-event.test.ts(new)`, `packages/event-log/{package.json,README.md}`,
+  `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** projection events; replay; fact events (Phase 2).
+- **Notes:** Mirrors `appendCaptureEvent` (SB-014) for the memory stream.
+
+## SB-026 — CLI `distill` command (propose + accept)
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-024, SB-025
+- **Scope:** `@sb/cli` `distill` subcommand. `distill propose` (READ-ONLY): lists L1 working-note
+  candidates and prints a `DistillationProposal` **scaffold** JSON to stdout (no writes). `distill accept`
+  (HUMAN-CONFIRMED WRITE): reads a completed proposal JSON from `--file`/stdin, generates L2 + event ULIDs,
+  calls `writeDistilledNote()` (SB-024) then `appendMemoryEvent('distillation_accepted')` (SB-025), prints
+  `{ ok, note_id, note_path, event_id, ... }`. Partial-failure: L2 note kept if event append fails. Reuses
+  the capture path-safety guard.
+- **Acceptance Criteria:**
+  - `propose` writes nothing (raw/L1/events byte-unchanged) and emits a valid scaffold.
+  - `accept` writes exactly one L2 note + appends exactly one `distillation_accepted` event; bad/missing
+    proposal → structured stderr error + non-zero exit; no write without `accept`.
+- **Definition of Done:** Tests green; build exit 0; real propose→accept smoke; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/cli test` (new `distill-command.test.ts`) green; build exit 0; smoke on
+  a throwaway workspace (capture an L1 note, propose, accept → L2 + event; raw unchanged).
+- **Files Expected to Change:** `apps/cli/src/{distill-command.ts(new),index.ts}`,
+  `apps/cli/test/distill-command.test.ts(new)`, `apps/cli/{package.json,README.md}`, `docs/planning/*`,
+  `STATUS.md`.
+- **Out of Scope:** the LLM proposal logic (that's the skill, SB-027); L3 facts.
+- **Notes:** `accept` is the only writing step and is always human-invoked.
+
+## SB-027 — Distillation skill + L0/L1 safety check
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-026
+- **Scope:** A Claude-Code **skill** under `skills/distill/` (agent workflow, not backend): reads L1 notes,
+  drafts an L2 `DistillationProposal`, shows it to the human, and only on explicit confirmation calls
+  `cli distill accept`. Plus an automated **safety check/test** asserting the whole distillation path never
+  overwrites/deletes `00_Raw/` and never mutates the L1 source (byte-checked end-to-end).
+- **Acceptance Criteria:**
+  - `skills/distill/SKILL.md` documents the propose→confirm→accept workflow and the never-mutate-L0/L1 rule.
+  - A test/check captures an L1 note, runs propose→accept, and asserts: raw bytes unchanged, L1 source bytes
+    unchanged, exactly one L2 note + one event created. Wired into `pnpm test`.
+- **Definition of Done:** Skill documented; safety check green under `pnpm test`; leakage grep clean.
+- **Validation:** `pnpm test` includes the distillation safety check (green); manual skill dry-run documented.
+- **Files Expected to Change:** `skills/distill/SKILL.md(new)`, a safety test under `apps/cli/test/` or
+  `packages/note-vault/test/`, `package.json`/`*/package.json` (test wiring), `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** multi-note synthesis heuristics; L3 facts; auto-accept (always human-confirmed).
+- **Notes:** Closes EPIC-CORE-007 and the original MVP distillation criterion (mvp_scope AC 5).
 
 ---
 
