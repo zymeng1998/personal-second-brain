@@ -65,7 +65,7 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | Ready | 2 | SB-010 |
+| SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | In Review | 2 | SB-010 |
 | SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-019, SB-011 |
 | SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Backlog | 2 | SB-009, SB-014 |
 | SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-024, SB-025 |
@@ -490,7 +490,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-019 — Distillation proposal contract (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Ready
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
 - **Dependencies:** SB-010 (`Done`)
 - **Scope:** Add the **types + operation descriptors only** (no implementation) for distillation to
   `@sb/interfaces`: a `DistillationProposal` (source note id(s), proposed L2 `title`, body, `tags?`,

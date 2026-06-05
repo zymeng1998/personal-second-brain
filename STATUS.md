@@ -2,8 +2,42 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018). **Now: Phase 1H — Minimal Human-Confirmed Distillation**
-(decision 2026-06-04: build before Phase 2). **Next story: SB-019** (distillation proposal contract).
-**Last updated:** 2026-06-04
+(decision 2026-06-04: build before Phase 2). **SB-019 `In Review`** (distillation proposal contract).
+**Next story: SB-024** (L2 distilled-note writer).
+**Last updated:** 2026-06-05
+
+## SB-019 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+- **SB-019 — distillation proposal contract (interfaces). Status:** `In Review` (atomic; awaiting human
+  review → commit). **Dep:** SB-010 `Done`. **Next story:** SB-024 (L2 `writeDistilledNote` in
+  `@sb/note-vault`). Mirrors the SB-010 capture-contract pattern: **types + operation descriptors only,
+  no behavior.**
+- **Scope delivered (contracts only):**
+  - New `packages/interfaces/src/distillation.ts` — `ProposeDistillationInput` (`source_ids: Ulid[]`),
+    `DistillationProposal` (`source_ids`, `title`, `body`, `tags?`, `rationale`), `DistillationResult`
+    (`note_id`, `event_id`). Module doc records the invariants the later writer/CLI must enforce: never
+    touch `00_Raw/`, never mutate L1 sources, L2 note needs `title` + `source_ref`, accept emits exactly
+    one `distillation_accepted` memory event.
+  - `scope.ts` — added `write:distill` to `PermissionScope` (distinct from `write:capture`; `write:raw`
+    stays in `ALWAYS_DENIED_SCOPES`, so least-privilege holds: distill cannot write capture/raw).
+  - `operations.ts` — added `proposeDistillation(input)→DistillationProposal` (read-only) and
+    `acceptDistillation(proposal)→DistillationResult` (write) to `CoreOperations`, plus
+    `OPERATION_CONTRACTS` entries: `proposeDistillation` `{scope:"read:notes", readOnly:true,
+    errors:[not_found,scope_denied,io_error]}`; `acceptDistillation` `{scope:"write:distill",
+    readOnly:false, errors:[validation_failed,not_found,raw_immutable,scope_denied,duplicate_id,io_error]}`.
+    Reused the existing `InterfaceErrorCode` union (no new codes needed).
+  - `index.ts` — re-exports the three new types.
+- **No implementation, no new dependency, no schema change.** (`distillation_accepted` MemoryKind already
+  existed in `event.ts` from SB-009.)
+- **Out of scope (SB-019):** any writer/event/CLI/skill behavior (SB-024..027); L3 facts (Phase 2).
+- **Files changed (SB-019):** `packages/interfaces/src/{distillation.ts(new),operations.ts,scope.ts,
+  index.ts}`, `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `@sb/interfaces` `tsc --noEmit` → **exit 0**; throwaway alignment smoke
+  (one typed `ProposeDistillationInput` + `DistillationProposal` + `DistillationResult`, `write:distill`
+  scope, and `OPERATION_CONTRACTS.{propose,accept}Distillation.readOnly`/`.scope` reads) compiled under
+  `--strict --module nodenext` → **exit 0** (temp file removed); domain-leakage grep on the changed files →
+  clean (only the pre-existing generic `example-readonly` placeholder in `scope.ts`, never broker).
+- **Next recommended action:** human reviews the contract; on approval, commit SB-019 atomically
+  (`feat: distillation proposal contract (SB-019)`). Then proceed SB-024 → SB-025 → SB-026 → SB-027.
 
 ## Docs (2026-06-05) — media transcription intake convention documented
 - **Context:** the standalone `psb-media-transcriber` (live, v0.1.0) writes to its own artifact store

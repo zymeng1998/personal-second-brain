@@ -34,6 +34,12 @@ export type {
 
 export type { CaptureSource, CaptureRequest, CaptureResult } from "./capture.js";
 
+export type {
+  ProposeDistillationInput,
+  DistillationProposal,
+  DistillationResult,
+} from "./distillation.js";
+
 export type { PermissionScope, CapabilityGrant } from "./scope.js";
 export { ALWAYS_DENIED_SCOPES } from "./scope.js";
 

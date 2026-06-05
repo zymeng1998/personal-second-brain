@@ -4,6 +4,11 @@
  * input, output, error codes, and the permission scope it requires.
  */
 import type { CaptureRequest, CaptureResult } from "./capture.js";
+import type {
+  DistillationProposal,
+  DistillationResult,
+  ProposeDistillationInput,
+} from "./distillation.js";
 import type { Event } from "./event.js";
 import type { Ulid } from "./ids.js";
 import type { Layer, Note, NoteType } from "./note.js";
@@ -57,6 +62,17 @@ export interface CoreOperations {
   listNotes(input?: ListNotesInput): Promise<Note[]>;
   /** Append one event. Append-only; never rewrites earlier lines. */
   appendEvent(input: Event): Promise<AppendEventResult>;
+  /**
+   * Propose an L2 distilled note from L1/L0 source notes. Read-only: returns a
+   * proposal scaffold for a human/skill to fill; writes nothing.
+   */
+  proposeDistillation(input: ProposeDistillationInput): Promise<DistillationProposal>;
+  /**
+   * Accept a (human-confirmed) distillation proposal: write exactly one L2
+   * `distilled` note and emit one `distillation_accepted` memory event. Never
+   * touches L0 raw and never mutates the L1 sources.
+   */
+  acceptDistillation(proposal: DistillationProposal): Promise<DistillationResult>;
 }
 
 /** Design-level documentation of each operation's required scope + possible errors. */
@@ -85,6 +101,16 @@ export const OPERATION_CONTRACTS: Readonly<Record<keyof CoreOperations, Operatio
   appendEvent: {
     scope: "append:events",
     errors: ["validation_failed", "io_error"],
+    readOnly: false,
+  },
+  proposeDistillation: {
+    scope: "read:notes",
+    errors: ["not_found", "scope_denied", "io_error"],
+    readOnly: true,
+  },
+  acceptDistillation: {
+    scope: "write:distill",
+    errors: ["validation_failed", "not_found", "raw_immutable", "scope_denied", "duplicate_id", "io_error"],
     readOnly: false,
   },
 } as const;

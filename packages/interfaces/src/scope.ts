@@ -8,6 +8,7 @@
 /** A capability scope string. Hierarchical, colon-separated; `*` is a wildcard segment. */
 export type PermissionScope =
   | "write:capture"
+  | "write:distill"
   | "append:events"
   | "read:notes"
   | `read:notes:${string}`
