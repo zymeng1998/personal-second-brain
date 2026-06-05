@@ -71,6 +71,14 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 | SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Done | 3 | SB-024, SB-025 |
 | SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Done | 2 | SB-026 |
 
+### Phase 1 review follow-ups (backlog; from the 2026-06-05 final review)
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-028 | Story | Record multi-source provenance on the L2 note | EPIC-CORE-007 | P2 | Backlog | 2 | SB-024, SB-026 |
+| SB-029 | Story | L1 working-note creation so `distill propose` has candidates | EPIC-CORE-007 | P2 | Backlog | 3 | SB-026 |
+| SB-033 | Story | Test-coverage measurement + `init_workspace` automated test | EPIC-CORE-001 | P2 | Backlog | 3 | — |
+
 ### Later phases (coarse; refine before implementation)
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
@@ -603,6 +611,78 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
   `packages/note-vault/test/`, `package.json`/`*/package.json` (test wiring), `docs/planning/*`, `STATUS.md`.
 - **Out of Scope:** multi-note synthesis heuristics; L3 facts; auto-accept (always human-confirmed).
 - **Notes:** Closes EPIC-CORE-007 and the original MVP distillation criterion (mvp_scope AC 5).
+
+---
+
+# Phase 1 review follow-up cards (from the 2026-06-05 final review)
+
+## SB-028 — Record multi-source provenance on the L2 note
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-024 (`Done`), SB-026 (`Done`)
+- **Context (review finding, MEDIUM):** a `DistillationProposal` carries `source_ids[]`, but
+  `writeDistilledNote` records only `source_ids[0]` as the note's single `source_ref`; secondary sources
+  survive only in the `distillation_accepted` event payload. A note distilled from N sources should be
+  traceable to all N from the note itself, not just the event log.
+- **Scope:** Without breaking the schema's single `source_ref` rule for curated notes, also record the
+  remaining `source_ids` on the L2 note — e.g. as `links` (wikilink targets) and/or `entities`/a dedicated
+  additive field — so provenance is reconstructable from the note. Update `writeDistilledNote` + the CLI
+  `accept` path to thread the full list onto the note frontmatter.
+- **Acceptance Criteria:**
+  - An L2 note distilled from ≥2 sources records `source_ref` = primary **and** the remaining origin ids on
+    the note (validates against `frontmatter.schema.json`).
+  - The `distillation_accepted` event still carries the full `source_ids` list (unchanged).
+- **Definition of Done:** tests green; `tsc --noEmit` exit 0; leakage grep clean; schema still validates.
+- **Validation:** new/updated cases in `distilled-note-writer.test.ts` + `distill-command.test.ts`; build exit 0.
+- **Files Expected to Change:** `packages/note-vault/src/distilled-note-writer.ts`,
+  `apps/cli/src/distill-command.ts`, the two tests, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** schema change to allow multiple `source_ref` (use existing additive fields instead); L3 facts.
+- **Notes:** Decide the exact carrier field (`links` vs `entities` vs a new `sources`-style field for L2)
+  during refinement; the frontmatter schema currently reserves `sources` for L5 output notes.
+
+## SB-029 — L1 working-note creation so `distill propose` has candidates
+
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-026 (`Done`)
+- **Context (review finding, MEDIUM):** `distill propose` lists L1 `working` notes as candidates, but
+  nothing in Phase 1 creates L1 working notes (capture writes only L0 raw). So `propose` always returns
+  `candidates: []`; the workflow is functional only because `accept` takes arbitrary `source_ids`. The
+  "surface candidates" UX has no data source yet.
+- **Scope:** Add a minimal, in-scope path to create an **L1 working note** from an L0 raw source
+  (`writeWorkingNote()` in `@sb/note-vault` + a CLI command, e.g. `work create --from <rawId>` or a promote
+  step), writing `type:working`, `layer:1`, required `source_ref` to the L0 origin under a non-raw folder.
+  This makes `distill propose` surface real candidates end-to-end.
+- **Acceptance Criteria:**
+  - A documented command creates exactly one L1 working note referencing its L0 source (schema-valid),
+    never under `00_Raw/`, never mutating the source.
+  - `distill propose` then lists the new working note as a candidate.
+- **Definition of Done:** tests green; build exit 0; E2E capture→work-create→propose shows the candidate; leakage clean.
+- **Validation:** new writer + command tests; E2E smoke; build exit 0.
+- **Files Expected to Change:** `packages/note-vault/src/{working-note-writer.ts(new),errors.ts,index.ts}`,
+  `apps/cli/src/*`, tests, READMEs, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** AI-assisted working-note drafting (skill layer); L3 facts; editing existing working notes.
+- **Notes:** Refine the exact command surface (`work create` vs `note promote`) before marking `Ready`;
+  decide the target folder (e.g. `10_Projects`/`20_Areas`) consistent with `memory_layers.md`.
+
+## SB-033 — Test-coverage measurement + `init_workspace` automated test
+
+- **Type:** Story · **Epic:** EPIC-CORE-001 (cross-cutting quality) · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** —
+- **Context (review finding, MEDIUM):** the suite is broad (80 tests) but there is **no coverage
+  measurement** (global rule targets ≥80%), and `scripts/init_workspace.ts` has **no automated test** (only
+  manual + the ad-hoc E2E). A regression in the initializer would not be caught by `pnpm test`.
+- **Scope:** Wire coverage reporting into `pnpm test` (Node's built-in `--experimental-test-coverage` or
+  `c8`), with a documented threshold; add `scripts/init_workspace.test.ts` covering dry-run, verify
+  (pass/fail), idempotent re-init, and the append-only event-file invariant (existing file not truncated).
+- **Acceptance Criteria:**
+  - `pnpm test` (or a `test:coverage` target) reports coverage; the threshold is documented.
+  - `init_workspace.test.ts` is green and wired into the scripts test run.
+- **Definition of Done:** coverage reported; init test green under `pnpm test`; no production-code change required.
+- **Validation:** `pnpm test` green with coverage output; init test exercises dry-run/verify/idempotency/append-only.
+- **Files Expected to Change:** `package.json` (coverage + scripts test wiring),
+  `scripts/init_workspace.test.ts(new)`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** raising existing modules to a specific % (measure first, then a follow-up if needed).
+- **Notes:** Keep coverage non-blocking initially (report, don't fail the build) until a baseline is known.
 
 ---
 

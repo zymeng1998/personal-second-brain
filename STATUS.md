@@ -3,8 +3,32 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Next: Phase 2 — Structured Projections** (EPIC-CORE-008, SB-020..023; refine + split before implementing).
+**Phase 1 final review: PASS (ship-ready)** — see below. **Next: Phase 2 — Structured Projections**
+(EPIC-CORE-008, SB-020..023; refine + split before implementing).
 **Last updated:** 2026-06-05
+
+## Phase 1 — FINAL REVIEW (2026-06-05): PASS / ship-ready
+- **Scope:** complete code review + full end-to-end test of Phase 1 (SB-001..027) — interfaces,
+  note-vault, event-log, cli, scripts (init/validate), and the `skills/distill` skill.
+- **Verdict:** ✅ ship-ready. **No CRITICAL or HIGH issues.**
+- **Dynamic testing (all green):** 4 package builds `tsc --noEmit` exit 0; full suite **80/80**
+  (event-log 11, note-vault 33, cli 24, scripts 12); E2E on a throwaway workspace — init→verify→idempotent
+  re-init (byte-identical), capture (flag+stdin)→list→get→`validate:notes` 2/2, distill propose (read-only)
+  →accept → 1 L2 note + 1 `distillation_accepted` event, **L0 raw + capture_events byte-unchanged**,
+  immutability API (`updateRawNote`/`deleteRawNote` → `overwrite_rejected`/`delete_rejected`, bytes
+  unchanged), append-only ordered ULIDs, domain-leakage grep clean. No `console.log`/`any`/`TODO` in src.
+- **MEDIUM findings → backlog (this commit):**
+  - **SB-028** — multi-source provenance loss: an L2 note records only `source_ids[0]` as `source_ref`;
+    secondary sources live only in the event payload.
+  - **SB-029** — `distill propose` has no practical candidate source yet (nothing creates L1 working notes;
+    `propose` returns `candidates: []`).
+  - **SB-033** — no coverage measurement (global ≥80% rule) + `init_workspace.ts` has no automated test.
+- **LOW findings → one small maintenance commit (next):** dedupe `EVENT_SCHEMA_VERSION`; add a low-risk
+  `scripts/tsconfig.json` + `typecheck:scripts` if it passes cleanly; document `actor` semantics. (Frontmatter
+  parser consolidation and `CoreOperations` binding are deliberately NOT done now — deferred, low priority.)
+- **Other LOW (noted, not scheduled):** 3+ frontmatter parse/build impls (DRY); `resolveSafeWorkspace`
+  transiently mutates `process.env`; `validate_notes` assumes LF; `CoreOperations`/`OPERATION_CONTRACTS`
+  are documentary only; `actor` is `"cli"` for capture vs `"human"` for distill-accept.
 
 ## SB-027 `Done` (Phase 1H, EPIC-CORE-007) — implemented + validated; committing now (closes Phase 1H)
 - **SB-027 — distillation skill + L0/L1 safety check. Status:** `In Review` (atomic; awaiting human review →
