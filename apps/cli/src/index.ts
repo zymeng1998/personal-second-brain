@@ -3,12 +3,14 @@
  * stdin when `--content` is absent, runs the capture, and prints a structured
  * JSON result to stdout (or a structured error to stderr with a non-zero exit).
  */
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { argv as processArgv } from "node:process";
 import type { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { CaptureCliError, runCapture } from "./capture-command.js";
 import { runNoteGet, runNoteList } from "./note-command.js";
+import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -35,6 +37,11 @@ Flags:
 Read-only:
   sb note list [--type <kind>] [--workspace <path>]
   sb note get <id> [--workspace <path>]
+
+Distillation (human-confirmed L1 → L2):
+  sb distill propose [--limit <n>] [--workspace <path>]        # READ-ONLY: list L1 candidates + scaffold
+  sb distill accept --file <proposal.json> [--workspace <path>]
+  cat proposal.json | sb distill accept [--workspace <path>]   # accept is the only writing step
 `;
 
 interface ParsedCaptureArgs {
@@ -133,6 +140,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "note") {
     return handleNote(argv.slice(1), out, err);
+  }
+  if (command === "distill") {
+    return handleDistill(argv.slice(1), out, err, stdin);
   }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
@@ -245,6 +255,112 @@ async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: 
       return 0;
     }
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown note subcommand: ${sub}`)))}\n`);
+    return 1;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+interface ParsedDistillArgs {
+  workspace?: string;
+  file?: string;
+  limit?: number;
+}
+
+function parseDistillArgs(args: string[]): ParsedDistillArgs {
+  const parsed: ParsedDistillArgs = {};
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i] as string;
+    switch (arg) {
+      case "--":
+        break;
+      case "--workspace":
+        parsed.workspace = requireValue(args, ++i, arg);
+        break;
+      case "--file":
+        parsed.file = requireValue(args, ++i, arg);
+        break;
+      case "--limit": {
+        const value = requireValue(args, ++i, arg);
+        const n = Number.parseInt(value, 10);
+        if (!Number.isInteger(n) || n < 0) {
+          throw new CaptureCliError("bad_arguments", `--limit must be a non-negative integer: ${value}`);
+        }
+        parsed.limit = n;
+        break;
+      }
+      default:
+        throw new CaptureCliError("bad_arguments", `unknown argument: ${arg}`);
+    }
+  }
+  return parsed;
+}
+
+async function handleDistill(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+  stdin: Readable | NodeJS.ReadStream,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  const sub = args[0];
+  if (sub === undefined || sub === "--help" || sub === "-h") {
+    out(USAGE);
+    return sub === undefined ? 1 : 0;
+  }
+
+  let parsed: ParsedDistillArgs;
+  try {
+    parsed = parseDistillArgs(args.slice(1));
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+
+  try {
+    if (sub === "propose") {
+      const result = await runDistillPropose({
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+        ...(parsed.limit !== undefined ? { limit: parsed.limit } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
+    if (sub === "accept") {
+      let raw: string;
+      if (parsed.file !== undefined) {
+        try {
+          raw = await readFile(parsed.file, "utf8");
+        } catch (e) {
+          throw new DistillCliError("bad_arguments", `cannot read proposal file: ${parsed.file}`, {
+            cause: e instanceof Error ? e.message : String(e),
+          });
+        }
+      } else {
+        const isTty = "isTTY" in stdin && (stdin as NodeJS.ReadStream).isTTY === true;
+        raw = isTty ? "" : await readStream(stdin);
+      }
+      if (raw.trim().length === 0) {
+        throw new DistillCliError(
+          "bad_arguments",
+          "no proposal provided: pass --file <path> or pipe proposal JSON via stdin",
+        );
+      }
+      let proposal: unknown;
+      try {
+        proposal = JSON.parse(raw);
+      } catch {
+        throw new DistillCliError("bad_proposal", "proposal is not valid JSON");
+      }
+      const result = await runDistillAccept({
+        proposal,
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
+    err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown distill subcommand: ${sub}`)))}\n`);
     return 1;
   } catch (e) {
     err(`${JSON.stringify(errorEnvelope(e))}\n`);

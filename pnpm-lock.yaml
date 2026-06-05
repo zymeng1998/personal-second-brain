@@ -32,6 +32,9 @@ importers:
       '@sb/event-log':
         specifier: workspace:*
         version: link:../../packages/event-log
+      '@sb/interfaces':
+        specifier: workspace:*
+        version: link:../../packages/interfaces
       '@sb/note-vault':
         specifier: workspace:*
         version: link:../../packages/note-vault

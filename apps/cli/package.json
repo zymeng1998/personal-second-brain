@@ -2,17 +2,19 @@
   "name": "@sb/cli",
   "version": "0.0.0",
   "private": true,
-  "description": "MVP command-line surface. SB-013: end-to-end `capture` (raw note + capture event). Domain-neutral.",
+  "description": "MVP command-line surface. SB-013: `capture`; SB-015: `note`; SB-026: `distill`. Domain-neutral.",
   "type": "module",
   "scripts": {
     "capture": "tsx src/index.ts capture",
     "note": "tsx src/index.ts note",
+    "distill": "tsx src/index.ts distill",
     "start": "tsx src/index.ts",
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/capture-command.test.ts test/note-command.test.ts"
+    "test": "node --import tsx --test test/capture-command.test.ts test/note-command.test.ts test/distill-command.test.ts"
   },
   "dependencies": {
     "@sb/event-log": "workspace:*",
+    "@sb/interfaces": "workspace:*",
     "@sb/note-vault": "workspace:*"
   },
   "devDependencies": {

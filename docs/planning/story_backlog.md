@@ -67,8 +67,8 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 |---|---|---|---|---|---|---|---|
 | SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | In Review | 2 | SB-010 |
 | SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Done | 3 | SB-019, SB-011 |
-| SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | In Review | 2 | SB-009, SB-014 |
-| SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-024, SB-025 |
+| SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Done | 2 | SB-009, SB-014 |
+| SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | In Review | 3 | SB-024, SB-025 |
 | SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Backlog | 2 | SB-026 |
 
 ### Later phases (coarse; refine before implementation)
@@ -538,7 +538,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-025 — Memory-stream event append (event-log)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-009 (`Done`), SB-014 (`Done`)
 - **Scope:** `appendMemoryEvent()` in `@sb/event-log` — appends one validated **memory-stream** event
   (`note_created` or `distillation_accepted`, `subject_id` required) as a single JSONL line to the event
@@ -557,8 +557,8 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-026 — CLI `distill` command (propose + accept)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-024, SB-025
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-024 (`Done`), SB-025 (`Done`)
 - **Scope:** `@sb/cli` `distill` subcommand. `distill propose` (READ-ONLY): lists L1 working-note
   candidates and prints a `DistillationProposal` **scaffold** JSON to stdout (no writes). `distill accept`
   (HUMAN-CONFIRMED WRITE): reads a completed proposal JSON from `--file`/stdin, generates L2 + event ULIDs,
@@ -577,6 +577,13 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
   `STATUS.md`.
 - **Out of Scope:** the LLM proposal logic (that's the skill, SB-027); L3 facts.
 - **Notes:** `accept` is the only writing step and is always human-invoked.
+- **Decision (impl):** `@sb/interfaces` added as an `@sb/cli` dependency (the contract type
+  `DistillationProposal` flows through the CLI per the contracts-first boundary) → `pnpm-lock.yaml` updated
+  (new cli importer dep, as with SB-013). A proposal's `source_ids[0]` becomes the L2 note's single
+  `source_ref` (the schema has only one `source_ref` for non-output notes); the **full** `source_ids` list
+  is preserved in the `distillation_accepted` event payload. `accept`'s memory event uses `actor:"human"`
+  (human-in-the-loop confirmation). New `DistillCliError`
+  (`bad_arguments`/`bad_proposal`/`event_append_failed`); workspace-safety errors reuse `CaptureCliError`.
 
 ## SB-027 — Distillation skill + L0/L1 safety check
 

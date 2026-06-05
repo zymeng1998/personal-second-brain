@@ -2,11 +2,43 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018). **Now: Phase 1H — Minimal Human-Confirmed Distillation**
-(decision 2026-06-04: build before Phase 2). **SB-019 `Done`** (`fd57289`), **SB-024 `Done`** (`ba40614`).
-**SB-025 `In Review`** (memory-stream event append). **Next story: SB-026** (CLI `distill`).
+(decision 2026-06-04: build before Phase 2). **SB-019/024/025 `Done`** (`fd57289`/`ba40614`/`2cc26cc`).
+**SB-026 `In Review`** (CLI `distill`). **Next (last 1H story): SB-027** (distillation skill + safety check).
 **Last updated:** 2026-06-05
 
-## SB-025 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+## SB-026 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+- **SB-026 — CLI `distill` command (propose + accept). Status:** `In Review` (atomic; awaiting human review →
+  commit). **Deps:** SB-024 `Done` (`ba40614`), SB-025 `Done` (`2cc26cc`). **Next story:** SB-027 (the
+  `skills/distill/` skill + an L0/L1-never-mutated safety check) — the last Phase 1H story.
+- **Scope delivered:**
+  - New `apps/cli/src/distill-command.ts` — `runDistillPropose()` (READ-ONLY: lists L1 `working` candidates
+    via `listNotes` + returns a blank `DistillationProposal` scaffold; writes nothing) and
+    `runDistillAccept()` (HUMAN-CONFIRMED WRITE: validates a parsed proposal, generates L2 + event ULIDs,
+    calls `writeDistilledNote()` then `appendMemoryEvent('distillation_accepted')`, returns
+    `{ok,note_id,note_path,event_id,event_path,source_ref,source_ids,created_at}`). `DistillCliError`
+    (`bad_arguments`/`bad_proposal`/`event_append_failed`); workspace safety reuses `resolveSafeWorkspace`
+    (SB-013).
+  - `apps/cli/src/index.ts` — `distill` dispatch + `handleDistill` (`propose`/`accept` subcommands;
+    `--workspace`/`--file`/`--limit`; `accept` reads proposal JSON from `--file` or stdin); USAGE updated.
+  - **Design:** proposal `source_ids[0]` → the note's single `source_ref` (schema has one `source_ref` for
+    non-output notes); the full `source_ids` list is preserved in the event payload. `accept`'s memory
+    event uses `actor:"human"`. Partial failure: L2 note kept if the event append fails.
+- **Dependency added:** `@sb/interfaces` → `@sb/cli` (the `DistillationProposal` contract type flows through
+  the CLI per the contracts-first boundary). `pnpm-lock.yaml` updated (new cli importer dep). No other deps.
+- **Out of scope (SB-026):** the LLM proposal logic (the skill, SB-027); L3 facts.
+- **Files changed (SB-026):** `apps/cli/src/{distill-command.ts(new),index.ts}`,
+  `apps/cli/test/distill-command.test.ts(new)`, `apps/cli/{package.json,README.md}`, `pnpm-lock.yaml`,
+  `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `pnpm --filter @sb/cli test` → **23/23** (14 existing + 9 new: propose lists
+  candidates + scaffold & writes nothing, `--limit`, accept writes 1 L2 + 1 `distillation_accepted` event,
+  accept via stdin, bad/empty proposal + invalid JSON + unknown subcommand error paths); build `tsc
+  --noEmit` → exit 0; **real propose→accept smoke** on a throwaway workspace (capture L0 → propose
+  read-only → accept → 1 L2 note in `80_Wiki` + 1 memory event; **raw byte-unchanged**; clean stderr); root
+  `pnpm test` → exit 0 (event-log 11, note-vault 33, cli 23, scripts 12); domain-leakage grep → clean.
+- **Next recommended action:** human reviews the `distill` command + tests; on approval, commit SB-026
+  atomically (`feat: CLI distill command (SB-026)`) + push. Then SB-027 finishes Phase 1H.
+
+## SB-025 `Done` (Phase 1H, EPIC-CORE-007) — committed + pushed (`2cc26cc`)
 - **SB-025 — memory-stream event append (event-log). Status:** `In Review` (atomic; awaiting human review →
   commit). **Deps:** SB-009 `Done`, SB-014 `Done`. **Next story:** SB-026 (CLI `distill` — `propose`
   read-only + `accept` human-confirmed write). Mirrors `appendCaptureEvent` (SB-014) for the memory stream.
