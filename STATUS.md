@@ -3,9 +3,30 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)** — see below. **Next: Phase 2 — Structured Projections**
-(EPIC-CORE-008, SB-020..023; refine + split before implementing).
+**Phase 1 final review: PASS (ship-ready)** — see below. **Phase 2 (EPIC-CORE-008) REFINED** — the
+`5→split` stories are decomposed into ≤3-pt stories (SB-020/034/023/035/036/021/037/022/038/039); see
+[`docs/planning/phase_2_story_map.md`](docs/planning/phase_2_story_map.md). **Next: confirm the open
+decisions (SQLite driver, ULID centralization, fact-creation scope, task source) to promote SB-020 →
+`Ready`, then implement SB-020 → SB-034 → SB-023 → …** (one atomic story at a time).
 **Last updated:** 2026-06-05
+
+## Phase 2 — REFINEMENT (2026-06-05): done; awaiting decision review
+- **What:** decomposed EPIC-CORE-008 (`5→split` SB-020/021/023) into ≤3-pt atomic stories with cards
+  (Scope/AC/DoD/Validation/Files/Deps) and a new [`phase_2_story_map.md`](docs/planning/phase_2_story_map.md)
+  (objective, "Done when" gate, architecture, dependency graph, sub-phases 2A–2E). Epic → `Refined`.
+- **Stories (order):** SB-020 (contracts) → SB-034 (SQLite store bootstrap) → SB-023 (pure projector core)
+  → SB-035 (`addFact` ADD-only) → SB-036 (`supersedeFact`+query) → SB-021 (entity nodes) → SB-037 (edges +
+  `entity_merged`) → SB-022 (task-store) → SB-038 (rebuild command) → SB-039 (drop+replay reproducibility gate).
+- **Architecture (fixed):** event-sourced; SQLite `db/memory.sqlite` (rebuildable); ADD-only facts
+  (`{id,statement,source_ref,captured_at,observed_at,confidence 0–1,supersedes?}`); manual-confirm entity
+  merges; pure deterministic projector (live + replay share it). Done-when: drop `db/` + replay → identical.
+- **Open decisions to confirm before any story → `Ready`:** (1) SQLite driver (`node:sqlite` vs
+  `better-sqlite3` vs `sql.js`); (2) centralize ULID generation now (retire `apps/cli/src/ulid.ts`) vs
+  defer; (3) Phase 2 = projection/replay machinery + programmatic `addFact` only, AI extraction OUT;
+  (4) task-store source (note `status` vs a task event). Leans documented in the story map.
+- **Next recommended action:** human resolves the 4 open decisions → mark SB-020 `Ready` → implement it
+  atomically (interfaces types + descriptors only), then proceed down the chain. **No implementation has
+  started.**
 
 ## Phase 1 — FINAL REVIEW (2026-06-05): PASS / ship-ready
 - **Scope:** complete code review + full end-to-end test of Phase 1 (SB-001..027) — interfaces,

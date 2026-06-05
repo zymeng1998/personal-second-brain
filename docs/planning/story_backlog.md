@@ -25,7 +25,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Done | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
-| EPIC-CORE-008 | Structured Projections | 2 | P1 | Backlog | fact-store / entity-graph / task-store + replay. |
+| EPIC-CORE-008 | Structured Projections | 2 | P1 | Refined | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). Decomposed into ≤3-pt stories (SB-020/034/023/035/036/021/037/022/038/039); see [`phase_2_story_map.md`](phase_2_story_map.md). |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Backlog | secure_refs, permission scopes, secret handling. |
@@ -79,14 +79,28 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 | SB-029 | Story | L1 working-note creation so `distill propose` has candidates | EPIC-CORE-007 | P2 | Backlog | 3 | SB-026 |
 | SB-033 | Story | Test-coverage measurement + `init_workspace` automated test | EPIC-CORE-001 | P2 | Backlog | 3 | — |
 
+### Phase 2 — Structured Projections (EPIC-CORE-008, refined; see [`phase_2_story_map.md`](phase_2_story_map.md))
+
+Decomposed from the old `5→split` SB-020/021/023 (split rule). **`Backlog` — refined, not yet `Ready`**;
+promote after the open decisions in the story map are confirmed at review. Cards below.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-009, SB-010 |
+| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-020 |
+| SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-034 |
+| SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
+| SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035 |
+| SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
+| SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | Backlog | 3 | SB-021 |
+| SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-023 |
+| SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035, SB-021 |
+| SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-038 |
+
 ### Later phases (coarse; refine before implementation)
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-020 | Story | fact-store schema + ADD-only writes | EPIC-CORE-008 | P1 | Backlog | 5→split | SB-014 |
-| SB-021 | Story | entity-graph projection | EPIC-CORE-008 | P1 | Backlog | 5→split | SB-020 |
-| SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-020 |
-| SB-023 | Story | Event-log replay rebuilds projections | EPIC-CORE-008 | P1 | Backlog | 5→split | SB-020 |
 | SB-030 | Story | Retrieval sidecar skeleton (stdio JSONL contract) | EPIC-CORE-009 | P1 | Backlog | 5→split | SB-009, SB-010 |
 | SB-031 | Story | DuckDB + BGE-M3 index build | EPIC-CORE-009 | P1 | Backlog | 5→split | SB-030 |
 | SB-032 | Story | TS retrieval facade + query command | EPIC-CORE-009 | P1 | Backlog | 5→split | SB-031 |
@@ -686,6 +700,160 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ---
 
+# Phase 2 story cards (EPIC-CORE-008 — refined; `Backlog` until open decisions confirmed)
+
+> Sequencing, dependency graph, and the open decisions are in [`phase_2_story_map.md`](phase_2_story_map.md).
+> Project-wide DoD still applies (no domain leakage; no real data committed; raw L0 never overwritten;
+> events append-only; `db/` is disposable/rebuildable; AC + validation green; STATUS/docs updated).
+
+## SB-020 — Fact + projection contracts (interfaces)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-009 (`Done`), SB-010 (`Done`)
+- **Scope:** Add **types + operation descriptors only** (no impl) to `@sb/interfaces`: a `Fact`
+  (`{ id, statement, source_ref, captured_at, observed_at, confidence, supersedes? }`), minimal
+  `EntityNode`/`EntityEdge` and `Task` projection types, and projection operation descriptors
+  (`addFact`/`supersedeFact`/`listFacts`/`rebuildProjections`) + scopes (`write:facts`, `read:facts`) in
+  `operations.ts`/`scope.ts`. Mirrors the SB-010/SB-019 contract pattern.
+- **Acceptance Criteria:** types exported; `confidence` documented as 0–1; ADD-only documented; `tsc
+  --noEmit` passes; throwaway alignment smoke compiles.
+- **Definition of Done:** types compile; contracts documented; no impl; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/interfaces exec tsc --noEmit` exit 0; alignment smoke exit 0.
+- **Files Expected to Change:** `packages/interfaces/src/{fact.ts(new),projection.ts(new),operations.ts,scope.ts,index.ts}`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** any impl; SQLite; AI extraction; L4 indexes.
+
+## SB-034 — Projection store bootstrap (SQLite `db/memory.sqlite`)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-020
+- **Scope:** `@sb/memory-kernel` opens/creates `<workspace>/db/memory.sqlite` and applies an idempotent
+  schema migration (fact/entity/task tables + a `schema_version` table). `db/` is treated as fully
+  disposable/rebuildable. Centralize ULID generation here (or in `@sb/interfaces`) to retire the duplicated
+  `apps/cli/src/ulid.ts` (tech-debt) — **pending open decision #2**.
+- **Acceptance Criteria:** opening a fresh workspace creates the DB + tables idempotently; re-open is a
+  no-op; deleting `db/` and re-opening recreates empty tables; workspace path-safety reused.
+- **Definition of Done:** tests green; `tsc --noEmit` exit 0; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/memory-kernel test` green; build exit 0.
+- **Files Expected to Change:** `packages/memory-kernel/{package.json,tsconfig.json,README.md,src/*,test/*}`, `pnpm-lock.yaml` (if a driver dep is added), `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** projecting events (SB-023); fact/entity/task writes (later).
+- **Notes:** **Open decision #1 (SQLite driver: `node:sqlite` vs `better-sqlite3` vs `sql.js`)** must be
+  resolved before `Ready`.
+
+## SB-023 — Replay projector core (pure event→state fold)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-034
+- **Scope:** A **pure, deterministic** `apply(state, event) → state'` projector in `@sb/memory-kernel`
+  that folds memory events (`fact_added`/`fact_superseded`/`entity_merged`/`note_created`/`note_updated`)
+  into in-memory projection state, plus a `project(events) → state` reducer. No I/O — this is the shared
+  engine used by both live writes and full replay (OQ #8 determinism).
+- **Acceptance Criteria:** given an ordered event list, `project()` yields deterministic state; replaying
+  the same events twice yields identical state; unknown/forward-compatible fields are preserved; ADD-only
+  fact semantics (supersede marks, never deletes).
+- **Definition of Done:** unit tests green; `tsc --noEmit` exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/memory-kernel test` green; build exit 0.
+- **Files Expected to Change:** `packages/memory-kernel/src/{projector.ts(new),index.ts}`, tests, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** SQLite persistence (SB-038 wires fold→DB); reading the event log from disk.
+
+## SB-035 — fact-store table + `addFact` (ADD-only)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-023
+- **Scope:** `@sb/fact-store` `addFact()`: validate the fact (provenance `source_ref` + `confidence` 0–1
+  required), append a `fact_added` memory event (source of truth), then apply it to the SQLite projection
+  via the SB-023 projector. **ADD-only**: never UPDATE/DELETE existing fact rows.
+- **Acceptance Criteria:** one `addFact` appends exactly one `fact_added` event and inserts exactly one
+  row; missing provenance/confidence rejected (structured error); no row is ever updated/deleted.
+- **Definition of Done:** tests green; build exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/fact-store test` green; build exit 0.
+- **Files Expected to Change:** `packages/fact-store/{package.json,tsconfig.json,README.md,src/*,test/*}`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** supersede/query (SB-036); AI extraction.
+
+## SB-036 — fact-store `supersedeFact` + current-facts query
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-035
+- **Scope:** `supersedeFact(oldId, newFact)`: append a `fact_superseded` event + add the new fact
+  referencing the old via `supersedes` (never mutate the old row), and a read API returning **current**
+  (non-superseded) facts, with provenance.
+- **Acceptance Criteria:** supersede adds a new fact + marks the old superseded (old row bytes/values
+  unchanged); the current-facts query excludes superseded facts; chains (A←B←C) resolve to the latest.
+- **Definition of Done:** tests green; build exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/fact-store test` green; build exit 0.
+- **Files Expected to Change:** `packages/fact-store/src/*`, tests, README, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** entity/task projections; replay rebuild.
+
+## SB-021 — entity-graph nodes projection
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-023
+- **Scope:** `@sb/entity-graph`: project **entity nodes** from `50_Entities/` notes (+ `entities` refs on
+  other notes) into SQLite, keyed by ULID. Rebuildable from notes + events.
+- **Acceptance Criteria:** each entity note yields one node (id/title/aliases); re-projection is
+  idempotent; nodes carry provenance back to their source note.
+- **Definition of Done:** tests green; build exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/entity-graph test` green; build exit 0.
+- **Files Expected to Change:** `packages/entity-graph/{package.json,tsconfig.json,README.md,src/*,test/*}`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** edges/merges (SB-037).
+
+## SB-037 — entity-graph edges + manual-confirm `entity_merged`
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-021
+- **Scope:** Project **edges** (from `[[wikilinks]]`/`entities` relations) and handle **manual-confirm
+  merges** via an explicit `entity_merged` event (OQ #7 — never auto-merge). Merged entities resolve to a
+  canonical node; edges repoint.
+- **Acceptance Criteria:** edges are derived deterministically; an `entity_merged` event repoints edges to
+  the canonical node and is never inferred automatically; replay reproduces the merged graph.
+- **Definition of Done:** tests green; build exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/entity-graph test` green; build exit 0.
+- **Files Expected to Change:** `packages/entity-graph/src/*`, tests, README, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** automatic merge heuristics; retrieval/graph indexes (Phase 3).
+
+## SB-022 — task-store projection
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-023
+- **Scope:** `@sb/task-store`: project tasks into SQLite. **Source = open decision #4** (lean: derive from
+  note frontmatter `status` + `note_created/updated` events; no new event kind). Rebuildable.
+- **Acceptance Criteria:** tasks are derived deterministically from the chosen source; re-projection is
+  idempotent; each task carries provenance to its source note.
+- **Definition of Done:** tests green; build exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/task-store test` green; build exit 0.
+- **Files Expected to Change:** `packages/task-store/{package.json,tsconfig.json,README.md,src/*,test/*}`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** task scheduling/reminders; UI.
+- **Notes:** Confirm the task source (open decision #4) before `Ready`.
+
+## SB-038 — Replay rebuild command (drop `db/` → rebuild + events)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-035, SB-021
+- **Scope:** A command/script (`@sb/cli` or `scripts/`) that reads the event log (+ L0–L2), runs the
+  SB-023 projector, and **rebuilds** all SQLite projections from scratch; emits `projection_rebuilt` /
+  `projection_reset` projection events. Safe to drop `db/` first.
+- **Acceptance Criteria:** running rebuild on a populated workspace reconstructs fact/entity/task
+  projections; emits the projection events; never writes to `00_Raw/`; event log unchanged (read-only input).
+- **Definition of Done:** tests green; build exit 0; real rebuild smoke; leakage clean.
+- **Validation:** `pnpm --filter @sb/cli test` (or scripts test) green; build exit 0; smoke on a throwaway workspace.
+- **Files Expected to Change:** `apps/cli/src/*` or `scripts/*`, `packages/memory-kernel/src/*`, tests, READMEs, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** the reproducibility assertion (SB-039).
+
+## SB-039 — Replay reproducibility gate (drop+replay identical)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-038
+- **Scope:** The epic **"Done when"** gate as an automated test: populate a workspace, snapshot
+  projections, **drop `db/` and replay**, and assert the rebuilt projections are **row/byte-identical**.
+  Wired into `pnpm test`.
+- **Acceptance Criteria:** the drop+replay test is green and wired into `pnpm test`; any non-determinism
+  fails the test.
+- **Definition of Done:** test green under `pnpm test`; leakage clean.
+- **Validation:** `pnpm test` includes the reproducibility gate (green).
+- **Files Expected to Change:** a test under `packages/memory-kernel/test/` or `apps/cli/test/`, test wiring, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** performance tuning; L4 indexes.
+
+---
+
 # Later-epic notes (coarse)
 
 These remain `Backlog`/`Deferred`. Refine (split to ≤3 points + add AC/validation/files) before any
@@ -695,8 +863,9 @@ implementation. Detailed cards will be written when each phase is reached.
   (and optionally candidate L3 facts) from an L1 note; never edits raw; human confirms; emits a memory
   event on acceptance. Likely splits into "propose note" + "record acceptance event". *(See conflict
   note in `phase_1_story_map.md`: distillation is part of MVP scope but not in Phase 1A–1G.)*
-- **EPIC-CORE-008 Projections (SB-020–023):** SQLite fact-store (ADD-only + provenance), entity-graph,
-  task-store, and event-replay rebuild. Split each by table/operation.
+- **EPIC-CORE-008 Projections:** **REFINED** (2026-06-05) into ≤3-pt stories — see the Phase 2 table above
+  and detailed cards, plus [`phase_2_story_map.md`](phase_2_story_map.md). SQLite fact-store (ADD-only +
+  provenance), entity-graph, task-store, and event-replay rebuild.
 - **EPIC-CORE-009 Retrieval Sidecar (SB-030–032):** Python sidecar skeleton over stdio JSONL, DuckDB+VSS
   +BGE-M3 index build (design ported, not copied, from sspaeti — reference only), TS facade + query.
 - **EPIC-CORE-010 Surfaces (SB-040–041):** optional Obsidian helper, then dashboard. All via interfaces.
