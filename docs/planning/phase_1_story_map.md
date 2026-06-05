@@ -122,7 +122,7 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
     origin id(s). The distillation path is forbidden from touching `00_Raw/` and from mutating L1 sources.
 - **Stories (split from the old `5→split` SB-019; all ≤3 pts):**
   - **SB-019** (`In Review`) — Distillation proposal **contract** in `@sb/interfaces` (types + operation descriptors only).
-  - **SB-024** — **L2 distilled-note writer** in `@sb/note-vault` (`writeDistilledNote`, never under `00_Raw`).
+  - **SB-024** (`In Review`) — **L2 distilled-note writer** in `@sb/note-vault` (`writeDistilledNote`, default `80_Wiki`, never under `00_Raw`).
   - **SB-025** — **memory-stream event append** in `@sb/event-log` (`appendMemoryEvent`, append-only).
   - **SB-026** — CLI **`distill` command** (`propose` read-only + `accept` human-confirmed write).
   - **SB-027** — **distillation skill** (`skills/distill/`) + a safety check asserting L0/L1 are never mutated.
@@ -167,6 +167,7 @@ verified end-to-end; roadmap/mvp_scope/open_questions updated; **Phase 1 MVP cor
 
 → **Now in Phase 1H — Minimal Human-Confirmed Distillation** (decision: build before Phase 2). SB-019 was
 split into **SB-019, SB-024, SB-025, SB-026, SB-027** (all ≤3 pts). **SB-019** (distillation proposal
-contract in `@sb/interfaces` — types + operation descriptors only) is **`In Review`** (implemented +
-validated; awaiting human review → commit). **Next story: SB-024** (L2 writer) → SB-025 (memory event) →
-SB-026 (CLI `distill`) → SB-027 (skill + safety check).
+contract in `@sb/interfaces`) is **`Done`** (committed `fd57289`). **SB-024** (`writeDistilledNote` L2
+writer in `@sb/note-vault`, default `80_Wiki`) is **`In Review`** (implemented + validated; awaiting human
+review → commit). **Next story: SB-025** (memory-stream event append) → SB-026 (CLI `distill`) → SB-027
+(skill + safety check).

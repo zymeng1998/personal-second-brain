@@ -2,11 +2,49 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018). **Now: Phase 1H — Minimal Human-Confirmed Distillation**
-(decision 2026-06-04: build before Phase 2). **SB-019 `In Review`** (distillation proposal contract).
-**Next story: SB-024** (L2 distilled-note writer).
+(decision 2026-06-04: build before Phase 2). **SB-019 `Done`** (committed `fd57289`).
+**SB-024 `In Review`** (L2 distilled-note writer). **Next story: SB-025** (memory-stream event append).
 **Last updated:** 2026-06-05
 
-## SB-019 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+## SB-024 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+- **SB-024 — L2 distilled-note writer (note-vault). Status:** `In Review` (atomic; awaiting human review →
+  commit). **Deps:** SB-019 `Done` (`fd57289`), SB-011 `Done`. **Next story:** SB-025 (`appendMemoryEvent`
+  in `@sb/event-log`). Create-only (no edit/supersede — later story).
+- **Scope delivered:**
+  - New `packages/note-vault/src/distilled-note-writer.ts` — `writeDistilledNote(input)` creates a
+    **mutable L2** curated note (`type:distilled`, `layer:2`) under a non-raw folder. Requires `title`
+    **and** `source_ref` (distillation provenance rule, stricter than the schema, which only requires
+    `title`). Exclusive-create by id (`flag:"wx"`); frontmatter schema-exact for the `distilled` branch;
+    `createdAt` defaults to now if omitted.
+  - **Folder decision:** the card's `vault/20_Distilled/` is not in the canonical tree; per
+    `memory_layers.md` (L2 → PARA + `50_Entities/`/`80_Wiki/`) distilled notes default to
+    **`vault/80_Wiki/`** (`DISTILLED_RELATIVE_DIR`), overridable via `dirRelative`. `init_workspace`
+    untouched (no new workspace folder).
+  - **Safety:** refuses any target resolving under `00_Raw/` (reuses `isRawPath`); refuses a `dirRelative`
+    that escapes the workspace; never reads or mutates the referenced L1 source (only records its id).
+  - `errors.ts` — new `DistilledNoteWriteError` + `DistilledNoteWriteErrorCode`
+    (`invalid_ulid`/`unsafe_path`/`missing_title`/`missing_source_ref`/`already_exists`/`write_failed`).
+  - `index.ts` — exports `writeDistilledNote`, `DISTILLED_RELATIVE_DIR`, the input/result types, and the
+    new error class + code.
+- **No new dependency** (ajv/ajv-formats/yaml used by the test are existing root devDeps, hoisted; the test
+  loads them via `createRequire` to avoid ESM/CJS default-import interop errors under the package's
+  `verbatimModuleSyntax` + NodeNext `tsc`). No schema change, no `pnpm-lock.yaml` change.
+- **Out of scope (SB-024):** CLI, distillation events (SB-025), the skill (SB-027), L3 facts,
+  editing/superseding existing L2 notes.
+- **Files changed (SB-024):** `packages/note-vault/src/{distilled-note-writer.ts(new),errors.ts,index.ts}`,
+  `packages/note-vault/test/distilled-note-writer.test.ts(new)`,
+  `packages/note-vault/{package.json,README.md}`, `docs/planning/{story_backlog.md,phase_1_story_map.md}`,
+  `STATUS.md`.
+- **Validation run (green):** `pnpm --filter @sb/note-vault test` → **33/33** (8 new SB-024 cases: valid L2
+  note + schema-validated frontmatter, slug+tags, refuses `00_Raw` target, refuses workspace escape,
+  missing/empty title, missing source_ref, non-ULID id + non-ULID source_ref, never-overwrite,
+  L1-source-byte-identical); `pnpm --filter @sb/note-vault build` (`tsc --noEmit`) → **exit 0**; root
+  `pnpm test` → exit 0 (event-log 5, note-vault 33, cli 14, scripts 12; via a temp `pnpm`→`corepack pnpm`
+  PATH shim, as in SB-017); domain-leakage grep on the new files → clean.
+- **Next recommended action:** human reviews `writeDistilledNote()` + tests; on approval, commit SB-024
+  atomically (`feat: L2 distilled-note writer (SB-024)`) + push. Then SB-025 (memory-stream event append).
+
+## SB-019 `Done` (Phase 1H, EPIC-CORE-007) — committed + pushed (`fd57289`)
 - **SB-019 — distillation proposal contract (interfaces). Status:** `In Review` (atomic; awaiting human
   review → commit). **Dep:** SB-010 `Done`. **Next story:** SB-024 (L2 `writeDistilledNote` in
   `@sb/note-vault`). Mirrors the SB-010 capture-contract pattern: **types + operation descriptors only,

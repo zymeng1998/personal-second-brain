@@ -66,7 +66,7 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | In Review | 2 | SB-010 |
-| SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-019, SB-011 |
+| SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | In Review | 3 | SB-019, SB-011 |
 | SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Backlog | 2 | SB-009, SB-014 |
 | SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-024, SB-025 |
 | SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Backlog | 2 | SB-026 |
@@ -511,8 +511,8 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-024 — L2 distilled-note writer (note-vault)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-019, SB-011 (`Done`)
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-019 (`Done`), SB-011 (`Done`)
 - **Scope:** `writeDistilledNote()` in `@sb/note-vault` — writes a **mutable L2** note
   (`type:distilled`, `layer:2`, required `title` + `source_ref` to the L1/L0 origin id) to a non-raw vault
   folder (e.g. `vault/20_Distilled/`); schema-exact frontmatter; exclusive-create by id; **forbidden from
@@ -529,6 +529,12 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
   `docs/planning/*`, `STATUS.md`.
 - **Out of Scope:** CLI, events, the skill, L3 facts, editing/superseding existing L2 notes.
 - **Notes:** L2 is curated/editable (unlike L0); this story only covers create.
+- **Decision (impl):** the card's `vault/20_Distilled/` was illustrative and is **not** in the canonical
+  workspace tree ([`repo_structure.md`](repo_structure.md)). Per [`memory_layers.md`](../architecture/memory_layers.md)
+  (L2 → PARA + `50_Entities/`/`80_Wiki/`), distilled notes default to **`vault/80_Wiki/`** (overridable via
+  `dirRelative`); no new workspace folder was introduced (init_workspace untouched). The writer also
+  adds a `write_failed` IO code (mirrors `RawNoteWriteError`) beyond the AC's enumerated set, and an extra
+  workspace-escape guard on `dirRelative`.
 
 ## SB-025 — Memory-stream event append (event-log)
 

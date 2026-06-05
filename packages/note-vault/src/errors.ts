@@ -24,6 +24,27 @@ export class RawNoteWriteError extends Error {
   }
 }
 
+/** Structured errors for the L2 distilled-note write path (SB-024). */
+export type DistilledNoteWriteErrorCode =
+  | "invalid_ulid"
+  | "unsafe_path"
+  | "missing_title"
+  | "missing_source_ref"
+  | "already_exists"
+  | "write_failed";
+
+export class DistilledNoteWriteError extends Error {
+  readonly code: DistilledNoteWriteErrorCode;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: DistilledNoteWriteErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "DistilledNoteWriteError";
+    this.code = code;
+    if (details !== undefined) this.details = details;
+  }
+}
+
 /** Raised when a mutation (overwrite/delete) is refused because the target is L0 raw. */
 export type RawImmutabilityErrorCode = "overwrite_rejected" | "delete_rejected";
 
