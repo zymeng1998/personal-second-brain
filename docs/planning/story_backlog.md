@@ -66,8 +66,8 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | In Review | 2 | SB-010 |
-| SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | In Review | 3 | SB-019, SB-011 |
-| SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Backlog | 2 | SB-009, SB-014 |
+| SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Done | 3 | SB-019, SB-011 |
+| SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | In Review | 2 | SB-009, SB-014 |
 | SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Backlog | 3 | SB-024, SB-025 |
 | SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Backlog | 2 | SB-026 |
 
@@ -511,7 +511,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-024 — L2 distilled-note writer (note-vault)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-019 (`Done`), SB-011 (`Done`)
 - **Scope:** `writeDistilledNote()` in `@sb/note-vault` — writes a **mutable L2** note
   (`type:distilled`, `layer:2`, required `title` + `source_ref` to the L1/L0 origin id) to a non-raw vault
@@ -538,8 +538,8 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-025 — Memory-stream event append (event-log)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
-- **Dependencies:** SB-009, SB-014 (`Done`)
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
+- **Dependencies:** SB-009 (`Done`), SB-014 (`Done`)
 - **Scope:** `appendMemoryEvent()` in `@sb/event-log` — appends one validated **memory-stream** event
   (`note_created` or `distillation_accepted`, `subject_id` required) as a single JSONL line to the event
   log, **append-only** (reuse SB-014 append semantics + the memory-stream branch of event schema v1).

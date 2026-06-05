@@ -122,8 +122,8 @@ human-review stop point**. No implementation starts unless the story is `Ready` 
     origin id(s). The distillation path is forbidden from touching `00_Raw/` and from mutating L1 sources.
 - **Stories (split from the old `5→split` SB-019; all ≤3 pts):**
   - **SB-019** (`In Review`) — Distillation proposal **contract** in `@sb/interfaces` (types + operation descriptors only).
-  - **SB-024** (`In Review`) — **L2 distilled-note writer** in `@sb/note-vault` (`writeDistilledNote`, default `80_Wiki`, never under `00_Raw`).
-  - **SB-025** — **memory-stream event append** in `@sb/event-log` (`appendMemoryEvent`, append-only).
+  - **SB-024** (`Done`) — **L2 distilled-note writer** in `@sb/note-vault` (`writeDistilledNote`, default `80_Wiki`, never under `00_Raw`).
+  - **SB-025** (`In Review`) — **memory-stream event append** in `@sb/event-log` (`appendMemoryEvent`, append-only).
   - **SB-026** — CLI **`distill` command** (`propose` read-only + `accept` human-confirmed write).
   - **SB-027** — **distillation skill** (`skills/distill/`) + a safety check asserting L0/L1 are never mutated.
 - **Dependencies:** SB-010, SB-011, SB-009, SB-014 (all `Done`).
@@ -166,8 +166,7 @@ schema v1; exit 0/1/2; 12 tests green + real smoke.
 verified end-to-end; roadmap/mvp_scope/open_questions updated; **Phase 1 MVP core complete**.
 
 → **Now in Phase 1H — Minimal Human-Confirmed Distillation** (decision: build before Phase 2). SB-019 was
-split into **SB-019, SB-024, SB-025, SB-026, SB-027** (all ≤3 pts). **SB-019** (distillation proposal
-contract in `@sb/interfaces`) is **`Done`** (committed `fd57289`). **SB-024** (`writeDistilledNote` L2
-writer in `@sb/note-vault`, default `80_Wiki`) is **`In Review`** (implemented + validated; awaiting human
-review → commit). **Next story: SB-025** (memory-stream event append) → SB-026 (CLI `distill`) → SB-027
-(skill + safety check).
+split into **SB-019, SB-024, SB-025, SB-026, SB-027** (all ≤3 pts). **SB-019** (`fd57289`) and **SB-024**
+(`ba40614`) are **`Done`**. **SB-025** (`appendMemoryEvent` memory-stream append in `@sb/event-log`) is
+**`In Review`** (implemented + validated; awaiting human review → commit). **Next story: SB-026** (CLI
+`distill` — `propose` read-only + `accept` human-confirmed write) → SB-027 (skill + safety check).

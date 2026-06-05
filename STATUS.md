@@ -2,11 +2,44 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018). **Now: Phase 1H — Minimal Human-Confirmed Distillation**
-(decision 2026-06-04: build before Phase 2). **SB-019 `Done`** (committed `fd57289`).
-**SB-024 `In Review`** (L2 distilled-note writer). **Next story: SB-025** (memory-stream event append).
+(decision 2026-06-04: build before Phase 2). **SB-019 `Done`** (`fd57289`), **SB-024 `Done`** (`ba40614`).
+**SB-025 `In Review`** (memory-stream event append). **Next story: SB-026** (CLI `distill`).
 **Last updated:** 2026-06-05
 
-## SB-024 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+## SB-025 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+- **SB-025 — memory-stream event append (event-log). Status:** `In Review` (atomic; awaiting human review →
+  commit). **Deps:** SB-009 `Done`, SB-014 `Done`. **Next story:** SB-026 (CLI `distill` — `propose`
+  read-only + `accept` human-confirmed write). Mirrors `appendCaptureEvent` (SB-014) for the memory stream.
+- **Scope delivered:**
+  - New `packages/event-log/src/memory-event.ts` — `appendMemoryEvent(input)` appends one validated
+    memory-stream event as a single JSONL line to `<workspace>/events/memory_events.jsonl`, **append-only**
+    (fs append mode; never truncates). Builds `{stream:"memory", kind}` for the Phase 1H kinds
+    (`note_created` / `distillation_accepted`; `subject_id` required), auto-stamps `recorded_at` +
+    `schema_version:"1.0.0"`, validates **before** writing (nothing written on failure). `AppendableMemoryKind`
+    restricts the public API to the two Phase 1H kinds.
+  - `validate-event.ts` — new dependency-free `validateMemoryEvent` aligned with the memory-stream branch
+    of event v1 (accepts the full memory enum for forward-compat; `subject_id` ULID required). Factored a
+    shared `validateOptionalEnvelope` helper (recorded_at/source_ref/schema_version/payload) reused by both
+    validators.
+  - `index.ts` — exports `appendMemoryEvent`, `MEMORY_EVENTS_RELATIVE_PATH`, the input/result/kind types,
+    and `validateMemoryEvent`.
+  - Reuses the existing `EventLogError` codes (`unsafe_path` / `invalid_event` / `append_failed`); no new
+    error code.
+- **No new dependency, no schema change, no `pnpm-lock.yaml` change.**
+- **Out of scope (SB-025):** projection events; replay/projection rebuild; fact events (Phase 2).
+- **Files changed (SB-025):** `packages/event-log/src/{memory-event.ts(new),validate-event.ts,index.ts}`,
+  `packages/event-log/test/memory-event.test.ts(new)`, `packages/event-log/{package.json,README.md}`,
+  `docs/planning/{story_backlog.md,phase_1_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `pnpm --filter @sb/event-log test` → **11/11** (5 capture + 6 new memory:
+  valid line w/ auto-stamps, N ordered appends + earlier-unchanged, missing subject_id writes nothing,
+  unknown kind writes nothing, non-ULID subject_id rejected, relative workspace rejected);
+  `pnpm --filter @sb/event-log build` (`tsc --noEmit`) → **exit 0**; root `pnpm test` → exit 0 (event-log
+  11, note-vault 33, cli 14, scripts 12; via temp `pnpm`→`corepack pnpm` PATH shim); domain-leakage grep
+  on the new files → clean.
+- **Next recommended action:** human reviews `appendMemoryEvent()` + tests; on approval, commit SB-025
+  atomically (`feat: memory-stream event append (SB-025)`) + push. Then SB-026 (CLI `distill`).
+
+## SB-024 `Done` (Phase 1H, EPIC-CORE-007) — committed + pushed (`ba40614`)
 - **SB-024 — L2 distilled-note writer (note-vault). Status:** `In Review` (atomic; awaiting human review →
   commit). **Deps:** SB-019 `Done` (`fd57289`), SB-011 `Done`. **Next story:** SB-025 (`appendMemoryEvent`
   in `@sb/event-log`). Create-only (no edit/supersede — later story).

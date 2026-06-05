@@ -2,14 +2,14 @@
   "name": "@sb/event-log",
   "version": "0.0.0",
   "private": true,
-  "description": "Append-only JSONL event store (audit + replay spine). SB-014: capture-event append. Domain-neutral.",
+  "description": "Append-only JSONL event store (audit + replay spine). SB-014: capture-event append; SB-025: memory-event append. Domain-neutral.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/capture-event.test.ts"
+    "test": "node --import tsx --test test/capture-event.test.ts test/memory-event.test.ts"
   },
   "dependencies": {
     "@sb/interfaces": "workspace:*"
