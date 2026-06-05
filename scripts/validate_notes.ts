@@ -14,16 +14,27 @@
  */
 import { readFileSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import Ajv2020 from "ajv/dist/2020.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
-import addFormats from "ajv-formats";
 import { parse as parseYaml } from "yaml";
 import { WORKSPACE_ENV_VAR, WorkspaceConfigError, resolveWorkspaceConfig } from "./lib/workspace_env.js";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SCHEMA_PATH = join(REPO_ROOT, "schemas", "markdown", "frontmatter.schema.json");
+
+// ajv + ajv-formats ship as CJS with awkward ESM-default interop under NodeNext;
+// load them via createRequire so this script type-checks (tsc) and runs (tsx) identically.
+const require = createRequire(import.meta.url);
+interface AjvInstance {
+  compile(schema: unknown): ValidateFunction;
+}
+type AjvCtor = new (opts?: Record<string, unknown>) => AjvInstance;
+const ajvMod = require("ajv/dist/2020.js") as { default?: AjvCtor } & AjvCtor;
+const Ajv2020: AjvCtor = ajvMod.default ?? ajvMod;
+const afMod = require("ajv-formats") as { default?: (ajv: AjvInstance) => void } & ((ajv: AjvInstance) => void);
+const addFormats: (ajv: AjvInstance) => void = afMod.default ?? afMod;
 
 const USAGE = `validate_notes — read-only frontmatter validation against schema v1
 

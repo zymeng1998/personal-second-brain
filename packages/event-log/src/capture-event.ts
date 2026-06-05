@@ -10,12 +10,10 @@ import { appendFile, mkdir } from "node:fs/promises";
 import { dirname, isAbsolute, join } from "node:path";
 import type { Actor, CaptureEvent, Ulid } from "@sb/interfaces";
 import { EventLogError } from "./errors.js";
-import { validateCaptureEvent } from "./validate-event.js";
+import { EVENT_SCHEMA_VERSION, validateCaptureEvent } from "./validate-event.js";
 
 /** Workspace-relative path of the capture event stream. */
 export const CAPTURE_EVENTS_RELATIVE_PATH = join("events", "capture_events.jsonl");
-
-const EVENT_SCHEMA_VERSION = "1.0.0";
 
 export interface AppendCaptureEventInput {
   /** Absolute workspace root. */

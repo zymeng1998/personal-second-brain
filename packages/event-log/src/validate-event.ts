@@ -8,6 +8,20 @@ import { isUlid } from "@sb/interfaces";
 import type { CaptureEvent, MemoryEvent, MemoryKind } from "@sb/interfaces";
 import { EventLogError } from "./errors.js";
 
+/**
+ * Event envelope schema version stamped onto every appended event. Single source
+ * of truth for both the capture and memory append paths.
+ */
+export const EVENT_SCHEMA_VERSION = "1.0.0";
+
+/**
+ * Actor semantics (who caused an event):
+ *  - `human`        — a human's explicit decision (e.g. confirming `distill accept`).
+ *  - `cli`          — a mechanical CLI action with no per-event human judgement (e.g. `capture`).
+ *  - `skill:<name>` — a Claude-Code skill acting through documented workflows.
+ *  - `sidecar:<name>` — a Python sidecar (retrieval/indexing).
+ * Never silent/anonymous. Names are lowercase, hyphen-separated.
+ */
 const ACTOR_PATTERN = /^(human|cli|skill:[a-z0-9][a-z0-9-]*|sidecar:[a-z0-9][a-z0-9-]*)$/;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
 

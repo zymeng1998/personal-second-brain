@@ -15,7 +15,8 @@
     "index:vault": "tsx scripts/index_vault.ts",
     "query:memory": "tsx scripts/query_memory.ts",
     "test": "pnpm -r run test && pnpm run test:scripts",
-    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts"
+    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts",
+    "typecheck:scripts": "tsc -p scripts/tsconfig.json"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",

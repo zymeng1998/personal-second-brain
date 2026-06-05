@@ -15,12 +15,10 @@ import { appendFile, mkdir } from "node:fs/promises";
 import { dirname, isAbsolute, join } from "node:path";
 import type { Actor, MemoryEvent, Ulid } from "@sb/interfaces";
 import { EventLogError } from "./errors.js";
-import { validateMemoryEvent } from "./validate-event.js";
+import { EVENT_SCHEMA_VERSION, validateMemoryEvent } from "./validate-event.js";
 
 /** Workspace-relative path of the memory event stream. */
 export const MEMORY_EVENTS_RELATIVE_PATH = join("events", "memory_events.jsonl");
-
-const EVENT_SCHEMA_VERSION = "1.0.0";
 
 /** Memory kinds the Phase 1H append path emits (subset of the schema's memory enum). */
 export type AppendableMemoryKind = "note_created" | "distillation_accepted";
