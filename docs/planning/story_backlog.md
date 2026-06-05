@@ -611,5 +611,12 @@ implementation. Detailed cards will be written when each phase is reached.
   appears), permission/scope model in interfaces, then enforcement at the boundary.
 - **EPIC-CORE-012 Domain App Boundary (SB-060–061):** capability/scope contract for domain apps; a
   **generic** `domain-apps/example-readonly/` smoke test (never broker) proving interface-only access.
+- **EPIC-CORE-013 Media Transcription Intake (SB-070–072):** **Backlog.** Optional adapter that ingests
+  transcripts from the standalone `psb-media-transcriber` artifact store (`~/PersonalSecondBrainMediaArtifacts/`,
+  layout `<YYYY>/<MM>/<media_id>/` + `by-name/`) as L0 captures via `interfaces` only. MUST read the artifact
+  store read-only, carry `media_id` + artifact-dir ref as provenance, be idempotent on `media_id`, and preserve
+  the organize-**by-name** convention. Workflow + binding rules documented in
+  [`../workflows/media_transcription_intake.md`](../workflows/media_transcription_intake.md). Refine + split
+  (≤3 pts: read/list artifacts → capture-with-provenance → idempotent re-ingest) before implementation.
 - **EPIC-DOMAIN-001 Broker (SB-900):** **Deferred.** No detailed stories. Begins only after the core is
   stable and SB-060/061 are `Done`; lives entirely under `domain-apps/broker/`, core untouched.

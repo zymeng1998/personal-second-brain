@@ -5,6 +5,18 @@
 (decision 2026-06-04: build before Phase 2). **Next story: SB-019** (distillation proposal contract).
 **Last updated:** 2026-06-04
 
+## Docs (2026-06-05) — media transcription intake convention documented
+- **Context:** the standalone `psb-media-transcriber` (live, v0.1.0) writes to its own artifact store
+  `~/PersonalSecondBrainMediaArtifacts/` (`<YYYY>/<MM>/<media_id>/` + a `by-name/` symlink view named by
+  original video filename). It does **not** write into the vault; integration is a future optional adapter.
+- **Documented:** new [`docs/workflows/media_transcription_intake.md`](docs/workflows/media_transcription_intake.md)
+  (how transcripts arrive, the by-name convention, binding rules: read-only, provenance via `media_id`,
+  idempotent re-ingest, preserve organize-by-name). Added coarse **EPIC-CORE-013 (SB-070–072)** to
+  `story_backlog.md` so the adapter is tracked. Transcriber repo README updated with the canonical artifact
+  output layout + `by-name/` rule (source of truth).
+- **No code/scope change** in the core; docs-only here. No vault writes from transcription until EPIC-CORE-013
+  is refined + implemented. **Next story is still SB-019** (Phase 1H distillation contract).
+
 ## Phase 1H scheduled — SB-019 split (refinement committed-pending)
 - **Decision:** build the minimal human-confirmed distillation workflow now (chosen over folding into
   Phase 2). EPIC-CORE-007 → `In Progress`. **L2-only** (L3 facts moved to Phase 2 / EPIC-CORE-008).
