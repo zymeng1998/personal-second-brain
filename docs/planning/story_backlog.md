@@ -24,7 +24,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-005 | Event Log & Audit Spine | 1D | P0 | Done | Append-only JSONL capture events. |
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Done | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
-| EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | In Progress | Minimal human-confirmed L1→L2 proposals (SB-019, SB-024..027). L3 facts moved to Phase 2. |
+| EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Backlog | fact-store / entity-graph / task-store + replay. |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
@@ -68,8 +68,8 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 | SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | In Review | 2 | SB-010 |
 | SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Done | 3 | SB-019, SB-011 |
 | SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Done | 2 | SB-009, SB-014 |
-| SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | In Review | 3 | SB-024, SB-025 |
-| SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Backlog | 2 | SB-026 |
+| SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Done | 3 | SB-024, SB-025 |
+| SB-027 | Story | Distillation skill + L0/L1 safety check | EPIC-CORE-007 | P1 | Done | 2 | SB-026 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -557,7 +557,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-026 — CLI `distill` command (propose + accept)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-024 (`Done`), SB-025 (`Done`)
 - **Scope:** `@sb/cli` `distill` subcommand. `distill propose` (READ-ONLY): lists L1 working-note
   candidates and prints a `DistillationProposal` **scaffold** JSON to stdout (no writes). `distill accept`
@@ -587,8 +587,8 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-027 — Distillation skill + L0/L1 safety check
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
-- **Dependencies:** SB-026
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+- **Dependencies:** SB-026 (`Done`)
 - **Scope:** A Claude-Code **skill** under `skills/distill/` (agent workflow, not backend): reads L1 notes,
   drafts an L2 `DistillationProposal`, shows it to the human, and only on explicit confirmation calls
   `cli distill accept`. Plus an automated **safety check/test** asserting the whole distillation path never

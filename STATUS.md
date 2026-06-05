@@ -1,12 +1,41 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
-**Phase:** **Phase 1 core COMPLETE** (SB-001..018). **Now: Phase 1H — Minimal Human-Confirmed Distillation**
-(decision 2026-06-04: build before Phase 2). **SB-019/024/025 `Done`** (`fd57289`/`ba40614`/`2cc26cc`).
-**SB-026 `In Review`** (CLI `distill`). **Next (last 1H story): SB-027** (distillation skill + safety check).
+**Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
+Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
+**Next: Phase 2 — Structured Projections** (EPIC-CORE-008, SB-020..023; refine + split before implementing).
 **Last updated:** 2026-06-05
 
-## SB-026 `In Review` (Phase 1H, EPIC-CORE-007) — implemented + validated, NOT yet committed
+## SB-027 `Done` (Phase 1H, EPIC-CORE-007) — implemented + validated; committing now (closes Phase 1H)
+- **SB-027 — distillation skill + L0/L1 safety check. Status:** `In Review` (atomic; awaiting human review →
+  commit). **Dep:** SB-026 `Done` (`7feff6b`). **The last Phase 1H story** — closes EPIC-CORE-007 and the
+  original MVP distillation criterion (mvp_scope AC 5).
+- **Scope delivered:**
+  - New `skills/distill/SKILL.md` — the agent-workflow skill (frontmatter `name`/`description` + body).
+    Documents the **propose → confirm → accept** workflow via the `@sb/cli distill` commands and the
+    non-negotiable safety rules: never mutate L0 raw, never mutate L1 sources, `accept` is the only write
+    and is always human-confirmed (no auto-accept), provenance mandatory. Skill = agent layer, never the
+    backend (per ADR-007 / CLAUDE.md).
+  - New `apps/cli/test/distill-safety.test.ts` — the automated end-to-end guarantee: captures an L0 raw
+    note, seeds an L1 working source, runs `propose` (asserts read-only: raw snapshot + L1 bytes unchanged)
+    then `accept`, and asserts **raw L0 bytes + file set unchanged**, **L1 source bytes unchanged**, and
+    **exactly one L2 note + exactly one `distillation_accepted` event** created. Byte-checked via dir
+    snapshots. Wired into `@sb/cli`'s `test` script (so it runs under root `pnpm test`).
+- **Docs updated:** `mvp_scope.md` AC 5 ⏳→✅ (distillation delivered in Phase 1H; status header now
+  "Phase 1A–1H"); EPIC-CORE-007 epic row → `In Review`.
+- **No new dependency, no schema change, no production-code change** (skill doc + test only).
+- **Out of scope (SB-027):** multi-note synthesis heuristics; L3 facts; auto-accept.
+- **Files changed (SB-027):** `skills/distill/SKILL.md(new)`, `apps/cli/test/distill-safety.test.ts(new)`,
+  `apps/cli/package.json` (test wiring), `docs/planning/{story_backlog.md,phase_1_story_map.md,mvp_scope.md}`,
+  `STATUS.md`.
+- **Validation run (green):** `pnpm --filter @sb/cli test` → **24/24** (23 + the safety check); build `tsc
+  --noEmit` → exit 0; root `pnpm test` → exit 0 (event-log 11, note-vault 33, cli 24, scripts 12; safety
+  check confirmed running in root); domain-leakage grep on the new files (incl. SKILL.md) → clean.
+- **Next recommended action:** human reviews the skill + safety check; on approval, commit SB-027 atomically
+  (`feat: distillation skill + L0/L1 safety check (SB-027)`) + push. **That completes Phase 1H** — then mark
+  EPIC-CORE-007 `Done` and begin **Phase 2** (EPIC-CORE-008: refine + split SB-020..023 before implementing).
+
+## SB-026 `Done` (Phase 1H, EPIC-CORE-007) — committed + pushed (`7feff6b`)
 - **SB-026 — CLI `distill` command (propose + accept). Status:** `In Review` (atomic; awaiting human review →
   commit). **Deps:** SB-024 `Done` (`ba40614`), SB-025 `Done` (`2cc26cc`). **Next story:** SB-027 (the
   `skills/distill/` skill + an L0/L1-never-mutated safety check) — the last Phase 1H story.
