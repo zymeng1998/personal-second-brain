@@ -87,7 +87,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | In Review | 2 | SB-009, SB-010 |
-| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-020 |
+| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | Ready | 3 | SB-020 |
 | SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-034 |
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035 |
@@ -724,20 +724,23 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-034 — Projection store bootstrap (SQLite `db/memory.sqlite`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-020
-- **Scope:** `@sb/memory-kernel` opens/creates `<workspace>/db/memory.sqlite` and applies an idempotent
-  schema migration (fact/entity/task tables + a `schema_version` table). `db/` is treated as fully
-  disposable/rebuildable. Centralize ULID generation here (or in `@sb/interfaces`) to retire the duplicated
-  `apps/cli/src/ulid.ts` (tech-debt) — **pending open decision #2**.
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Ready
+- **Dependencies:** SB-020 (`Done`)
+- **Decisions (RESOLVED 2026-06-05):** SQLite driver = **`node:sqlite`** (built-in, zero-dep); **centralize
+  ULID** generation in this story (shared util; retire `apps/cli/src/ulid.ts`).
+- **Scope:** `@sb/memory-kernel` opens/creates `<workspace>/db/memory.sqlite` via **`node:sqlite`** and
+  applies an idempotent schema migration (fact/entity/task tables + a `schema_version` table). `db/` is
+  treated as fully disposable/rebuildable. Add a shared ULID utility (core module) and switch
+  `apps/cli/src/ulid.ts` consumers to it (retire the duplicate).
 - **Acceptance Criteria:** opening a fresh workspace creates the DB + tables idempotently; re-open is a
   no-op; deleting `db/` and re-opening recreates empty tables; workspace path-safety reused.
 - **Definition of Done:** tests green; `tsc --noEmit` exit 0; leakage grep clean.
 - **Validation:** `pnpm --filter @sb/memory-kernel test` green; build exit 0.
 - **Files Expected to Change:** `packages/memory-kernel/{package.json,tsconfig.json,README.md,src/*,test/*}`, `pnpm-lock.yaml` (if a driver dep is added), `docs/planning/*`, `STATUS.md`.
 - **Out of Scope:** projecting events (SB-023); fact/entity/task writes (later).
-- **Notes:** **Open decision #1 (SQLite driver: `node:sqlite` vs `better-sqlite3` vs `sql.js`)** must be
-  resolved before `Ready`.
+- **Notes:** ULID centralization adds a shared core util used by cli/event-log/memory-kernel — keep that
+  slice clean (no behavior change to existing ULID output, which is spec-compliant). `node:sqlite` is
+  experimental in Node 22 (warning is acceptable).
 
 ## SB-023 — Replay projector core (pure event→state fold)
 

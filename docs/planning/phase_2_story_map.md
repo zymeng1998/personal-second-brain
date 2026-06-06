@@ -29,21 +29,20 @@ stays the single source of truth; `db/` is disposable.
 - **Domain-neutral**, no broker concepts; `db/` is L3 (rebuildable), distinct from L4 indexes (Phase 3,
   DuckDB) and from the event log (source of truth).
 
-## Open decisions — confirm at the refinement review (before any story → `Ready`)
+## Open decisions
 
-1. **SQLite driver.** Lean: **`node:sqlite`** (built-in, zero-dep, matches the project's dependency-light
-   style) — but it is experimental in Node 22 (may need a flag). Alternatives: `better-sqlite3` (mature,
-   native build) or `sql.js` (wasm). Decision affects `@sb/memory-kernel` deps + `pnpm-lock.yaml`.
-2. **ULID centralization (tech-debt #).** Facts/entities/tasks all need ULIDs. Fold the
-   "centralize ULID generation" tech-debt item (currently the hand-rolled `apps/cli/src/ulid.ts`) into a
-   small `@sb/interfaces`/`@sb/memory-kernel` ULID utility **now** (so projections don't grow a 3rd
-   generator), or keep deferred? Lean: **centralize now** as SB-034's first slice or a tiny dep.
-3. **Fact creation surface.** Phase 2 covers the **projection + replay machinery** and a programmatic
-   `addFact`/`supersedeFact` (write event → project). **AI/LLM fact extraction is OUT** (the `@sb/ai`
-   package, later). Confirm this scope boundary.
-4. **task-store source.** Where do tasks come from — notes with a `status`/task marker, or a dedicated task
-   event/kind? Lean: derive from note frontmatter (`status`) + `note_created/updated` events; no new event
-   kind. Confirm before SB-022 → `Ready`.
+1. **SQLite driver — RESOLVED (2026-06-05): `node:sqlite`** (built-in, zero runtime dependency; matches the
+   project's dependency-light style). Experimental in Node 22 (emits a warning); acceptable. No
+   `pnpm-lock.yaml` change. Implemented in SB-034.
+2. **ULID centralization — RESOLVED (2026-06-05): centralize now.** Add a shared ULID utility (in
+   `@sb/interfaces` or a small core module) used by cli/event-log/memory-kernel; retire the duplicated
+   `apps/cli/src/ulid.ts`. Done as part of SB-034 (its own sub-step/commit-safe slice).
+3. **Fact creation surface — CONFIRMED (default):** Phase 2 = the **projection + replay machinery** + a
+   programmatic `addFact`/`supersedeFact` (append event → project). **AI/LLM fact extraction is OUT** (the
+   `@sb/ai` package, later).
+4. **task-store source — STILL OPEN** (affects SB-022 only, not the critical path to SB-034). Lean: derive
+   from note frontmatter (`status`) + `note_created/updated` events; no new event kind. Confirm before
+   SB-022 → `Ready`.
 
 ## Sub-phases & sequencing (all stories ≤3 pts)
 

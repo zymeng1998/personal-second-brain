@@ -3,12 +3,14 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
-**SB-020 (fact + projection contracts) `In Review`** (first Phase 2 story; contracts-only). **Next: SB-034**
-(SQLite store bootstrap) — needs the SQLite-driver decision confirmed first.
+**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020 (fact +
+projection contracts) `Done`** (committed `f772ad1`). **Decisions resolved (2026-06-05):** SQLite driver =
+**`node:sqlite`** (built-in, zero-dep); **centralize ULID** in SB-034 (retire `apps/cli/src/ulid.ts`).
+**SB-034 (SQLite store bootstrap) is now `Ready`** — teed up; awaiting go-ahead to implement. (Task-store
+source decision still open, but only blocks SB-022.)
 **Last updated:** 2026-06-05
 
-## SB-020 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-020 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`f772ad1`)
 - **SB-020 — fact + projection contracts (interfaces). Status:** `In Review` (atomic; awaiting human review →
   commit). **Deps:** SB-009 `Done`, SB-010 `Done`. **Next story:** SB-034 (projection store bootstrap,
   SQLite). Contracts-only (types + operation descriptors, no behavior) — mirrors SB-010/SB-019.
