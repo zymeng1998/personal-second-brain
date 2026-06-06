@@ -9,6 +9,9 @@
 export type PermissionScope =
   | "write:capture"
   | "write:distill"
+  | "write:facts"
+  | "read:facts"
+  | "rebuild:projections"
   | "append:events"
   | "read:notes"
   | `read:notes:${string}`

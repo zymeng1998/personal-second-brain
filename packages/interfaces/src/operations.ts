@@ -10,8 +10,10 @@ import type {
   ProposeDistillationInput,
 } from "./distillation.js";
 import type { Event } from "./event.js";
+import type { AddFactInput, Fact, FactFilter, SupersedeFactInput } from "./fact.js";
 import type { Ulid } from "./ids.js";
 import type { Layer, Note, NoteType } from "./note.js";
+import type { RebuildProjectionsInput, RebuildProjectionsResult } from "./projection.js";
 import type { PermissionScope } from "./scope.js";
 
 export interface GetNoteInput {
@@ -73,6 +75,24 @@ export interface CoreOperations {
    * touches L0 raw and never mutates the L1 sources.
    */
   acceptDistillation(proposal: DistillationProposal): Promise<DistillationResult>;
+  /**
+   * Add a new L3 fact (ADD-only). Appends a `fact_added` memory event (source of
+   * truth) and projects it into the fact-store. Provenance + confidence required.
+   */
+  addFact(input: AddFactInput): Promise<Fact>;
+  /**
+   * Supersede an existing fact with a corrected one (ADD-only): appends a
+   * `fact_superseded` event + a new fact referencing the old via `supersedes`.
+   * The superseded fact row is never mutated.
+   */
+  supersedeFact(input: SupersedeFactInput): Promise<Fact>;
+  /** List current (non-superseded) facts. Read-only. */
+  listFacts(filter?: FactFilter): Promise<Fact[]>;
+  /**
+   * Rebuild the L3 projections (facts/entities/tasks) from the event log (+
+   * L0–L2). `db/` is disposable; emits a `projection_rebuilt` event. Deterministic.
+   */
+  rebuildProjections(input?: RebuildProjectionsInput): Promise<RebuildProjectionsResult>;
 }
 
 /** Design-level documentation of each operation's required scope + possible errors. */
@@ -111,6 +131,26 @@ export const OPERATION_CONTRACTS: Readonly<Record<keyof CoreOperations, Operatio
   acceptDistillation: {
     scope: "write:distill",
     errors: ["validation_failed", "not_found", "raw_immutable", "scope_denied", "duplicate_id", "io_error"],
+    readOnly: false,
+  },
+  addFact: {
+    scope: "write:facts",
+    errors: ["validation_failed", "scope_denied", "duplicate_id", "io_error"],
+    readOnly: false,
+  },
+  supersedeFact: {
+    scope: "write:facts",
+    errors: ["validation_failed", "not_found", "scope_denied", "duplicate_id", "io_error"],
+    readOnly: false,
+  },
+  listFacts: {
+    scope: "read:facts",
+    errors: ["scope_denied", "io_error"],
+    readOnly: true,
+  },
+  rebuildProjections: {
+    scope: "rebuild:projections",
+    errors: ["validation_failed", "io_error"],
     readOnly: false,
   },
 } as const;

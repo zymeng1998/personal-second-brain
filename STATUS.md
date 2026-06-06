@@ -3,12 +3,40 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)** — see below. **Phase 2 (EPIC-CORE-008) REFINED** — the
-`5→split` stories are decomposed into ≤3-pt stories (SB-020/034/023/035/036/021/037/022/038/039); see
-[`docs/planning/phase_2_story_map.md`](docs/planning/phase_2_story_map.md). **Next: confirm the open
-decisions (SQLite driver, ULID centralization, fact-creation scope, task source) to promote SB-020 →
-`Ready`, then implement SB-020 → SB-034 → SB-023 → …** (one atomic story at a time).
+**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
+**SB-020 (fact + projection contracts) `In Review`** (first Phase 2 story; contracts-only). **Next: SB-034**
+(SQLite store bootstrap) — needs the SQLite-driver decision confirmed first.
 **Last updated:** 2026-06-05
+
+## SB-020 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-020 — fact + projection contracts (interfaces). Status:** `In Review` (atomic; awaiting human review →
+  commit). **Deps:** SB-009 `Done`, SB-010 `Done`. **Next story:** SB-034 (projection store bootstrap,
+  SQLite). Contracts-only (types + operation descriptors, no behavior) — mirrors SB-010/SB-019.
+- **Scope delivered (contracts only):**
+  - New `packages/interfaces/src/fact.ts` — `Fact`
+    (`{id, statement, source_ref, captured_at, observed_at, confidence, supersedes?}`), `Confidence` (0–1),
+    `AddFactInput`, `SupersedeFactInput`, `FactFilter`. ADD-only documented (corrections are new facts via
+    `supersedes`); provenance + timestamps + confidence required (ADR-004 / OQ #6).
+  - New `packages/interfaces/src/projection.ts` — `EntityNode`, `EntityEdge`, `Task`, `ProjectionName`,
+    `RebuildProjectionsInput`/`Result`. Projections documented as disposable/rebuildable from the event log.
+  - `scope.ts` — added `write:facts`, `read:facts`, `rebuild:projections` (least-privilege; distinct from
+    capture/distill/raw).
+  - `operations.ts` — added `addFact`/`supersedeFact` (write:facts), `listFacts` (read:facts, read-only),
+    `rebuildProjections` (rebuild:projections) to `CoreOperations` + `OPERATION_CONTRACTS`. Reused the
+    existing `InterfaceErrorCode` union (no new codes).
+  - `index.ts` — re-exports the new fact + projection types.
+- **No implementation, no new dependency, no schema change.** Decisions deferred to later stories: SQLite
+  driver (SB-034), ULID centralization (SB-034), task source (SB-022).
+- **Out of scope (SB-020):** any impl; SQLite; AI extraction; L4 indexes.
+- **Files changed (SB-020):** `packages/interfaces/src/{fact.ts(new),projection.ts(new),operations.ts,scope.ts,index.ts}`,
+  `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/interfaces` `tsc --noEmit` → **exit 0**; throwaway alignment smoke (one
+  typed value per new type + `write:facts`/`read:facts` scopes + `OPERATION_CONTRACTS.{addFact,listFacts}`
+  reads) compiled under `--strict --module nodenext` → **exit 0** (temp file removed); leakage grep on the
+  new files → clean.
+- **Next recommended action:** human reviews the contracts; on approval, commit SB-020 atomically
+  (`feat: fact + projection contracts (SB-020)`). Then SB-034 — but **first confirm the SQLite driver**
+  (`node:sqlite` vs `better-sqlite3` vs `sql.js`) + ULID-centralization decision.
 
 ## Phase 2 — REFINEMENT (2026-06-05): done; awaiting decision review
 - **What:** decomposed EPIC-CORE-008 (`5→split` SB-020/021/023) into ≤3-pt atomic stories with cards

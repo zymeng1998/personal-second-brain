@@ -65,7 +65,7 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | In Review | 2 | SB-010 |
+| SB-019 | Story | Distillation proposal contract (interfaces) | EPIC-CORE-007 | P1 | Done | 2 | SB-010 |
 | SB-024 | Story | L2 distilled-note writer (note-vault) | EPIC-CORE-007 | P1 | Done | 3 | SB-019, SB-011 |
 | SB-025 | Story | Memory-stream event append (event-log) | EPIC-CORE-007 | P1 | Done | 2 | SB-009, SB-014 |
 | SB-026 | Story | CLI `distill` command (propose + accept) | EPIC-CORE-007 | P1 | Done | 3 | SB-024, SB-025 |
@@ -86,7 +86,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-009, SB-010 |
+| SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | In Review | 2 | SB-009, SB-010 |
 | SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-020 |
 | SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-034 |
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
@@ -512,7 +512,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-019 — Distillation proposal contract (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-010 (`Done`)
 - **Scope:** Add the **types + operation descriptors only** (no implementation) for distillation to
   `@sb/interfaces`: a `DistillationProposal` (source note id(s), proposed L2 `title`, body, `tags?`,
@@ -708,7 +708,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-020 — Fact + projection contracts (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
 - **Dependencies:** SB-009 (`Done`), SB-010 (`Done`)
 - **Scope:** Add **types + operation descriptors only** (no impl) to `@sb/interfaces`: a `Fact`
   (`{ id, statement, source_ref, captured_at, observed_at, confidence, supersedes? }`), minimal

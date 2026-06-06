@@ -40,6 +40,23 @@ export type {
   DistillationResult,
 } from "./distillation.js";
 
+export type {
+  Confidence,
+  Fact,
+  AddFactInput,
+  SupersedeFactInput,
+  FactFilter,
+} from "./fact.js";
+
+export type {
+  EntityNode,
+  EntityEdge,
+  Task,
+  ProjectionName,
+  RebuildProjectionsInput,
+  RebuildProjectionsResult,
+} from "./projection.js";
+
 export type { PermissionScope, CapabilityGrant } from "./scope.js";
 export { ALWAYS_DENIED_SCOPES } from "./scope.js";
 
