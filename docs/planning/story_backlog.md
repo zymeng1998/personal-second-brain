@@ -89,7 +89,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | In Review | 2 | SB-009, SB-010 |
 | SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | In Review | 3 | SB-020 |
 | SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | In Review | 3 | SB-034 |
-| SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
+| SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035 |
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
 | SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | Backlog | 3 | SB-021 |
@@ -760,8 +760,10 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-035 — fact-store table + `addFact` (ADD-only)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-023
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-023 (`Done`)
+- **Note (impl):** required a one-token enabling change in `@sb/event-log` — widened
+  `AppendableMemoryKind` to include `fact_added` (the validator already accepted the full memory enum).
 - **Scope:** `@sb/fact-store` `addFact()`: validate the fact (provenance `source_ref` + `confidence` 0–1
   required), append a `fact_added` memory event (source of truth), then apply it to the SQLite projection
   via the SB-023 projector. **ADD-only**: never UPDATE/DELETE existing fact rows.

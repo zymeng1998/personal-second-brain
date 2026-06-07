@@ -59,6 +59,25 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  packages/fact-store:
+    dependencies:
+      '@sb/event-log':
+        specifier: workspace:*
+        version: link:../event-log
+      '@sb/interfaces':
+        specifier: workspace:*
+        version: link:../interfaces
+      '@sb/memory-kernel':
+        specifier: workspace:*
+        version: link:../memory-kernel
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.22.4
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/interfaces:
     devDependencies:
       typescript:

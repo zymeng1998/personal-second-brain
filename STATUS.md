@@ -3,12 +3,38 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020 `Done`**
-(`f772ad1`), **SB-034 `Done`** (`a8ff719`); **SB-023 (pure replay projector core) `In Review`**.
-**Next: SB-035** (fact-store `addFact`). (Task-store source decision still open — blocks SB-022 only.)
+**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020/034/023
+`Done`** (`f772ad1`/`a8ff719`/`b160f71`); **SB-035 (fact-store `addFact`, ADD-only) `In Review`**.
+**Next: SB-036** (`supersedeFact` + current-facts query). (Task-store source decision still open — blocks SB-022 only.)
 **Last updated:** 2026-06-05
 
-## SB-023 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-035 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-035 — fact-store table + `addFact` (ADD-only). Status:** `In Review` (atomic; awaiting human review →
+  commit). **Dep:** SB-023 `Done`. **Next story:** SB-036 (`supersedeFact` + current-facts query).
+- **Scope delivered:**
+  - New `@sb/fact-store` package — `addFact(opts)`: validates statement (non-empty), `source_ref` (ULID,
+    provenance required), `observed_at`, `confidence` (0–1); appends one `fact_added` memory event (source
+    of truth) via `appendMemoryEvent`; then inserts **exactly one** row into the SQLite `facts` projection
+    (`@sb/memory-kernel`). **ADD-only** — never UPDATEs/DELETEs. `insertFact(store, fact)` is the shared
+    INSERT path (live write + future replay rebuild → live == replay). `FactStoreError`
+    (`invalid_statement`/`invalid_source_ref`/`invalid_observed_at`/`invalid_confidence`/`projection_write_failed`).
+  - **Enabling change (`@sb/event-log`):** widened `AppendableMemoryKind` to include `fact_added` (one
+    token; `validateMemoryEvent` already accepted the full memory enum). Beyond the card's listed files but
+    necessary; noted in the card.
+- **Dependency note:** `@sb/fact-store` deps `@sb/interfaces` + `@sb/event-log` + `@sb/memory-kernel`
+  (workspace). `pnpm-lock.yaml` updated for the new importer. `node:sqlite` built-in (no new external dep).
+- **Out of scope (SB-035):** supersede/query (SB-036); AI extraction.
+- **Files changed (SB-035):** `packages/fact-store/{package.json,tsconfig.json,README.md,src/{index,add-fact,errors}.ts,test/add-fact.test.ts}` (new),
+  `packages/event-log/src/memory-event.ts` (AppendableMemoryKind +`fact_added`), `pnpm-lock.yaml`,
+  `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/fact-store` test **6/6** (one event + one row; row matches projector view
+  i.e. live==replay; invalid source_ref/confidence(×2)/statement rejected writing nothing; ADD-only two
+  rows + first unchanged) + build exit 0; event-log build exit 0; root `pnpm test` exit 0 (event-log 11,
+  memory-kernel 13, note-vault 33, fact-store 6, cli 24, scripts 12 = **99**); domain-leakage grep clean.
+- **Next recommended action:** human reviews `addFact`; on approval, commit SB-035 atomically
+  (`feat: fact-store addFact (SB-035)`) + push. Then SB-036.
+
+## SB-023 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`b160f71`)
 - **SB-023 — replay projector core. Status:** `In Review` (atomic; awaiting human review → commit).
   **Dep:** SB-034 `Done`. **Next story:** SB-035 (fact-store `addFact`, which folds via this projector).
 - **Scope delivered:**
