@@ -40,10 +40,10 @@ To resolve before / during the noted phase. Tracked here so they don't block sca
 
 ## Tech debt (tracked)
 
-- **ULID generation is currently duplicated.** SB-013 added a small hand-rolled ULID generator in
-  `apps/cli/src/ulid.ts` (accepted as scoped tech debt). **Future refactor:** centralize ULID generation
-  in a core package such as `@sb/interfaces` or `@sb/memory-kernel`, so the CLI / domain apps / event-log
-  do not each grow separate id generators. *(Do not refactor mid-story; schedule as its own story.)*
+- ~~**ULID generation is currently duplicated.**~~ **RESOLVED (SB-034, 2026-06-05):** centralized in
+  `@sb/interfaces` (`ulid()` in `src/ulid.ts`, exported from the package index); `apps/cli/src/ulid.ts`
+  removed and its consumers now import `ulid` from `@sb/interfaces`. Output is byte-identical (same standard
+  ULID encoding); `isUlid()` still accepts every produced value.
 
 ## Answered (recorded in ADRs)
 

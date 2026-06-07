@@ -1,0 +1,86 @@
+/**
+ * Tests for the SB-034 projection store bootstrap. Uses Node's built-in test
+ * runner; each store opens a fresh temp workspace. `node:sqlite` is built-in
+ * (no flag on Node 22; emits an experimental warning).
+ */
+import { existsSync, rmSync } from "node:fs";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import assert from "node:assert/strict";
+import { after, test } from "node:test";
+import { MemoryKernelError, openProjectionStore, projectionDbPath, SCHEMA_VERSION } from "../src/index.js";
+
+const tmpDirs: string[] = [];
+const EXPECTED_TABLES = ["entity_edges", "entity_nodes", "facts", "schema_version", "tasks"];
+
+async function makeWorkspace(): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), "sb-memory-kernel-"));
+  tmpDirs.push(dir);
+  return dir;
+}
+
+function tableNames(store: { db: { prepare: (sql: string) => { all: () => unknown[] } } }): string[] {
+  const rows = store.db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+    .all() as Array<{ name: string }>;
+  return rows.map((r) => r.name);
+}
+
+after(async () => {
+  await Promise.all(tmpDirs.map((d) => rm(d, { recursive: true, force: true })));
+});
+
+test("opens a fresh store, creates db/memory.sqlite + all tables at schema v1", async () => {
+  const ws = await makeWorkspace();
+  const store = openProjectionStore(ws);
+  try {
+    assert.equal(store.path, join(ws, "db", "memory.sqlite"));
+    assert.ok(existsSync(store.path), "db file should exist");
+    assert.equal(store.schemaVersion, SCHEMA_VERSION);
+    assert.deepEqual(tableNames(store), EXPECTED_TABLES);
+  } finally {
+    store.close();
+  }
+});
+
+test("re-opening is idempotent (no duplicate schema_version row, same version)", async () => {
+  const ws = await makeWorkspace();
+  const first = openProjectionStore(ws);
+  first.close();
+
+  const second = openProjectionStore(ws);
+  try {
+    assert.equal(second.schemaVersion, SCHEMA_VERSION);
+    const count = second.db.prepare("SELECT COUNT(*) AS n FROM schema_version").get() as { n: number };
+    assert.equal(count.n, 1, "schema_version must have exactly one row after re-open");
+    assert.deepEqual(tableNames(second), EXPECTED_TABLES);
+  } finally {
+    second.close();
+  }
+});
+
+test("db/ is disposable: deleting the file and re-opening recreates it", async () => {
+  const ws = await makeWorkspace();
+  const first = openProjectionStore(ws);
+  first.close();
+
+  rmSync(projectionDbPath(ws));
+  assert.equal(existsSync(projectionDbPath(ws)), false);
+
+  const rebuilt = openProjectionStore(ws);
+  try {
+    assert.ok(existsSync(rebuilt.path));
+    assert.equal(rebuilt.schemaVersion, SCHEMA_VERSION);
+    assert.deepEqual(tableNames(rebuilt), EXPECTED_TABLES);
+  } finally {
+    rebuilt.close();
+  }
+});
+
+test("rejects a relative / non-absolute workspace path", () => {
+  assert.throws(
+    () => openProjectionStore("relative/ws"),
+    (err: unknown) => err instanceof MemoryKernelError && err.code === "unsafe_path",
+  );
+});

@@ -1,0 +1,21 @@
+{
+  "name": "@sb/memory-kernel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Projection store + coordination. SB-034: SQLite (node:sqlite) bootstrap for rebuildable L3 projections. Domain-neutral.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/store.test.ts"
+  },
+  "dependencies": {
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

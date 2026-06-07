@@ -14,12 +14,12 @@ import { fileURLToPath } from "node:url";
 import { RAW_SOURCE_KINDS, writeRawNote } from "@sb/note-vault";
 import type { RawSourceKind } from "@sb/note-vault";
 import { appendCaptureEvent } from "@sb/event-log";
+import { ulid } from "@sb/interfaces";
 import {
   resolveWorkspaceConfig,
   WorkspaceConfigError,
   WORKSPACE_ENV_VAR,
 } from "../../../scripts/lib/workspace_env.js";
-import { ulid } from "./ulid.js";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 

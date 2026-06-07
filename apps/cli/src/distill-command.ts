@@ -15,9 +15,9 @@
 import { relative } from "node:path";
 import { listNotes, writeDistilledNote } from "@sb/note-vault";
 import { appendMemoryEvent } from "@sb/event-log";
+import { ulid } from "@sb/interfaces";
 import type { DistillationProposal } from "@sb/interfaces";
 import { CaptureCliError, resolveSafeWorkspace } from "./capture-command.js";
-import { ulid } from "./ulid.js";
 
 export type DistillCliErrorCode = "bad_arguments" | "bad_proposal" | "event_append_failed";
 

@@ -5,6 +5,7 @@
  */
 export type { Ulid, SecureRef } from "./ids.js";
 export { ULID_PATTERN, SECURE_REF_PATTERN, isUlid } from "./ids.js";
+export { ulid } from "./ulid.js";
 
 export type {
   Layer,

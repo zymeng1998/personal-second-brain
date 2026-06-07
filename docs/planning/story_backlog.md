@@ -87,7 +87,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | In Review | 2 | SB-009, SB-010 |
-| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | Ready | 3 | SB-020 |
+| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | In Review | 3 | SB-020 |
 | SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-034 |
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035 |
@@ -724,7 +724,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-034 — Projection store bootstrap (SQLite `db/memory.sqlite`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Ready
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
 - **Dependencies:** SB-020 (`Done`)
 - **Decisions (RESOLVED 2026-06-05):** SQLite driver = **`node:sqlite`** (built-in, zero-dep); **centralize
   ULID** generation in this story (shared util; retire `apps/cli/src/ulid.ts`).

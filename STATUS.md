@@ -3,12 +3,40 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020 (fact +
-projection contracts) `Done`** (committed `f772ad1`). **Decisions resolved (2026-06-05):** SQLite driver =
-**`node:sqlite`** (built-in, zero-dep); **centralize ULID** in SB-034 (retire `apps/cli/src/ulid.ts`).
-**SB-034 (SQLite store bootstrap) is now `Ready`** — teed up; awaiting go-ahead to implement. (Task-store
-source decision still open, but only blocks SB-022.)
+**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020 `Done`**
+(`f772ad1`); **SB-034 (SQLite projection store bootstrap) `In Review`**. Driver = `node:sqlite` (built-in);
+ULID centralized in `@sb/interfaces` (tech-debt retired). **Next: SB-023** (pure replay projector core).
+(Task-store source decision still open — blocks SB-022 only.)
 **Last updated:** 2026-06-05
+
+## SB-034 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-034 — projection store bootstrap (SQLite). Status:** `In Review` (atomic; awaiting human review →
+  commit). **Dep:** SB-020 `Done`. **Next story:** SB-023 (pure event→state projector core).
+- **Scope delivered:**
+  - New `@sb/memory-kernel` package — `openProjectionStore(workspace)` opens/creates
+    `<workspace>/db/memory.sqlite` via the built-in **`node:sqlite`** `DatabaseSync` and applies an
+    idempotent schema migration (`facts`, `entity_nodes`, `entity_edges`, `tasks`, `schema_version`).
+    Returns `{ db, path, schemaVersion, close() }` (raw `db` handle for SB-035+). `db/` is disposable —
+    deleting it and re-opening recreates the schema. `MemoryKernelError`
+    (`unsafe_path`/`open_failed`/`migration_failed`); absolute-path guard.
+  - **ULID centralized (tech-debt retired):** new `@sb/interfaces` `ulid()` (`src/ulid.ts`, exported from
+    index); `apps/cli/src/ulid.ts` **deleted**; `capture-command.ts` + `distill-command.ts` now import
+    `ulid` from `@sb/interfaces`. Byte-identical output (same standard encoding). Added `"types":["node"]`
+    to the interfaces tsconfig (for `node:crypto`).
+- **Dependency note:** `node:sqlite` is **built-in** (no new dep; works without a flag on Node 22.20, emits
+  an experimental warning). `pnpm-lock.yaml` updated only for the new `@sb/memory-kernel` workspace importer.
+- **Out of scope (SB-034):** projecting events (SB-023); fact/entity/task writes (SB-035+); replay (SB-038).
+- **Files changed (SB-034):** `packages/memory-kernel/{package.json,tsconfig.json,README.md,src/{index,store,errors}.ts,test/store.test.ts}` (new),
+  `packages/interfaces/src/{ulid.ts(new),index.ts}`, `packages/interfaces/tsconfig.json`,
+  `apps/cli/src/{capture-command.ts,distill-command.ts}`, `apps/cli/src/ulid.ts` (deleted), `pnpm-lock.yaml`,
+  `docs/planning/{story_backlog.md,phase_2_story_map.md,open_questions.md}`, `STATUS.md`.
+- **Validation run (green):** `@sb/memory-kernel` test **4/4** (fresh open creates db + 5 tables at schema
+  v1; re-open idempotent single schema_version row; drop-db-and-reopen recreates; relative path rejected)
+  + build exit 0; `@sb/interfaces` + `@sb/cli` builds exit 0; **cli 24/24** unchanged (ULID swap); root
+  `pnpm test` exit 0 (memory-kernel 4, event-log 11, note-vault 33, cli 24, scripts 12 = 84); CLI capture
+  smoke → note_id is a valid ULID; domain-leakage grep clean.
+- **Next recommended action:** human reviews the store + ULID centralization; on approval, commit SB-034
+  atomically (`feat: SQLite projection store bootstrap + ULID centralization (SB-034)`) + push. Then SB-023.
 
 ## SB-020 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`f772ad1`)
 - **SB-020 — fact + projection contracts (interfaces). Status:** `In Review` (atomic; awaiting human review →
