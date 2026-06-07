@@ -7,6 +7,8 @@ export type FactStoreErrorCode =
   | "invalid_source_ref"
   | "invalid_observed_at"
   | "invalid_confidence"
+  | "invalid_supersedes"
+  | "supersede_target_not_found"
   | "projection_write_failed";
 
 export class FactStoreError extends Error {

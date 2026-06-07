@@ -21,7 +21,11 @@ import { EVENT_SCHEMA_VERSION, validateMemoryEvent } from "./validate-event.js";
 export const MEMORY_EVENTS_RELATIVE_PATH = join("events", "memory_events.jsonl");
 
 /** Memory kinds the append path emits (subset of the schema's memory enum; widened per story). */
-export type AppendableMemoryKind = "note_created" | "distillation_accepted" | "fact_added";
+export type AppendableMemoryKind =
+  | "note_created"
+  | "distillation_accepted"
+  | "fact_added"
+  | "fact_superseded";
 
 export interface AppendMemoryEventInput {
   /** Absolute workspace root. */

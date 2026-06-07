@@ -90,7 +90,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | In Review | 3 | SB-020 |
 | SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | In Review | 3 | SB-034 |
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
-| SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035 |
+| SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | In Review | 3 | SB-035 |
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
 | SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | Backlog | 3 | SB-021 |
 | SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-023 |
@@ -776,8 +776,9 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-036 — fact-store `supersedeFact` + current-facts query
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-035
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-035 (`Done`)
+- **Note (impl):** widened `@sb/event-log` `AppendableMemoryKind` to include `fact_superseded` (one token).
 - **Scope:** `supersedeFact(oldId, newFact)`: append a `fact_superseded` event + add the new fact
   referencing the old via `supersedes` (never mutate the old row), and a read API returning **current**
   (non-superseded) facts, with provenance.

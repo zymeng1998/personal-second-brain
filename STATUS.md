@@ -3,12 +3,40 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020/034/023
-`Done`** (`f772ad1`/`a8ff719`/`b160f71`); **SB-035 (fact-store `addFact`, ADD-only) `In Review`**.
-**Next: SB-036** (`supersedeFact` + current-facts query). (Task-store source decision still open — blocks SB-022 only.)
+**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020/034/023/035
+`Done`** (`f772ad1`/`a8ff719`/`b160f71`/`95be41e`); **SB-036 (`supersedeFact` + current-facts query)
+`In Review`**. **Next: SB-021** (entity-graph nodes). (Task-store source decision still open — blocks SB-022 only.)
 **Last updated:** 2026-06-05
 
-## SB-035 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-036 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-036 — fact-store `supersedeFact` + current-facts query. Status:** `In Review` (atomic; awaiting human
+  review → commit). **Dep:** SB-035 `Done`. **Next story:** SB-021 (entity-graph nodes projection).
+- **Scope delivered:**
+  - Refactored a shared `recordFact(opts, supersedes?)` core out of `addFact` (store opened once;
+    `validateFactInput` extracted). `addFact` = `recordFact(opts)` (unchanged behavior).
+  - New `supersedeFact(opts)` — appends a `fact_superseded` event + inserts a NEW fact row referencing the
+    old via `supersedes`; **never mutates/deletes** the old row; validates the target exists first
+    (`supersede_target_not_found`) and that `supersedes` is a ULID (`invalid_supersedes`). ADD-only.
+  - New `listCurrentFacts(opts)` — current (non-superseded) facts from SQLite via
+    `WHERE id NOT IN (SELECT supersedes …)`, ordered by id, with `source_ref`/`minConfidence`/`limit`
+    filters. Read-only. Resolves supersede chains (A←B←C → C).
+  - **Enabling change (`@sb/event-log`):** widened `AppendableMemoryKind` to include `fact_superseded`.
+- **No new dependency, no schema change.**
+- **Out of scope (SB-036):** entity/task projections; replay rebuild.
+- **Files changed (SB-036):** `packages/fact-store/src/{add-fact.ts(refactor),supersede-fact.ts(new),query.ts(new),errors.ts,index.ts}`,
+  `packages/fact-store/test/{supersede-fact.test.ts(new),query.test.ts(new)}`,
+  `packages/fact-store/{package.json,README.md}`, `packages/event-log/src/memory-event.ts`,
+  `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/fact-store` test **15/15** (6 add + 4 supersede + 5 query: supersede
+  retains old row byte-identical + new references it + events `fact_added`,`fact_superseded`; chain → latest
+  current; supersede non-existent rejected writing nothing; non-ULID supersedes rejected; query filters
+  source_ref/minConfidence/limit; superseded excluded) + build exit 0; event-log build exit 0; root `pnpm
+  test` exit 0 (event-log 11, memory-kernel 13, note-vault 33, cli 24, fact-store 15, scripts 12 = **108**);
+  domain-leakage grep clean.
+- **Next recommended action:** human reviews supersede + query; on approval, commit SB-036 atomically
+  (`feat: fact-store supersedeFact + current-facts query (SB-036)`) + push. Then SB-021.
+
+## SB-035 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`95be41e`)
 - **SB-035 — fact-store table + `addFact` (ADD-only). Status:** `In Review` (atomic; awaiting human review →
   commit). **Dep:** SB-023 `Done`. **Next story:** SB-036 (`supersedeFact` + current-facts query).
 - **Scope delivered:**

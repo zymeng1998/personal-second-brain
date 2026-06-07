@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/add-fact.test.ts"
+    "test": "node --import tsx --test test/add-fact.test.ts test/supersede-fact.test.ts test/query.test.ts"
   },
   "dependencies": {
     "@sb/event-log": "workspace:*",

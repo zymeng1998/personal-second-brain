@@ -62,8 +62,8 @@ export function insertFact(store: ProjectionStore, fact: Fact): void {
     );
 }
 
-/** Record a new L3 fact (ADD-only): append a `fact_added` event, then project one row. */
-export async function addFact(opts: AddFactOptions): Promise<AddFactResult> {
+/** Validate the shared fact fields. Throws FactStoreError on the first problem. */
+export function validateFactInput(opts: AddFactOptions): void {
   if (typeof opts.statement !== "string" || opts.statement.trim().length === 0) {
     throw new FactStoreError("invalid_statement", "a fact requires a non-empty statement");
   }
@@ -80,6 +80,17 @@ export async function addFact(opts: AddFactOptions): Promise<AddFactResult> {
       confidence: opts.confidence,
     });
   }
+}
+
+/**
+ * Shared ADD-only record path for both `addFact` (no `supersedes`) and
+ * `supersedeFact` (with `supersedes`). Validates, appends the memory event
+ * (`fact_added` / `fact_superseded`) — the source of truth — then inserts exactly
+ * one new row. When `supersedes` is given, the target fact must already exist
+ * (its row is NEVER modified). The store is opened once.
+ */
+export async function recordFact(opts: AddFactOptions, supersedes?: Ulid): Promise<AddFactResult> {
+  validateFactInput(opts);
 
   const now = opts.now ?? new Date().toISOString();
   const capturedAt = opts.captured_at ?? now;
@@ -87,6 +98,7 @@ export async function addFact(opts: AddFactOptions): Promise<AddFactResult> {
   const eventId = ulid();
   const actor: Actor = opts.actor ?? "cli";
   const sourceRef = opts.source_ref as Ulid;
+  const kind = supersedes !== undefined ? "fact_superseded" : "fact_added";
 
   const fact: Fact = {
     id,
@@ -95,40 +107,60 @@ export async function addFact(opts: AddFactOptions): Promise<AddFactResult> {
     captured_at: capturedAt,
     observed_at: opts.observed_at,
     confidence: opts.confidence,
+    ...(supersedes !== undefined ? { supersedes } : {}),
   };
 
-  // 1. Append the fact_added event (source of truth). EventLogError propagates on failure.
-  const eventResult = await appendMemoryEvent({
-    workspace: opts.workspace,
-    event_id: eventId,
-    kind: "fact_added",
-    subject_id: id,
-    occurred_at: opts.observed_at,
-    actor,
-    source_ref: sourceRef,
-    payload: {
-      statement: fact.statement,
-      source_ref: sourceRef,
-      captured_at: capturedAt,
-      observed_at: opts.observed_at,
-      confidence: opts.confidence,
-    },
-  });
-
-  // 2. Project into SQLite (ADD-only). If this fails, the event is still the source
-  //    of truth and the projection is rebuildable (SB-038) — surface a clear error.
+  // openProjectionStore validates the workspace (absolute) and creates db/ if needed.
   const store = openProjectionStore(opts.workspace);
   try {
-    insertFact(store, fact);
-  } catch (err) {
-    throw new FactStoreError(
-      "projection_write_failed",
-      `fact_added event recorded (${eventId}) but the projection insert failed; rebuildable via replay`,
-      { event_id: eventId, cause: err instanceof Error ? err.message : String(err) },
-    );
+    // Validate the supersede target exists BEFORE recording anything.
+    if (supersedes !== undefined) {
+      const exists = store.db.prepare("SELECT 1 AS x FROM facts WHERE id = ?").get(supersedes) !== undefined;
+      if (!exists) {
+        throw new FactStoreError("supersede_target_not_found", `cannot supersede a fact that does not exist: ${supersedes}`, {
+          supersedes,
+        });
+      }
+    }
+
+    // 1. Append the memory event (source of truth). EventLogError propagates on failure.
+    const eventResult = await appendMemoryEvent({
+      workspace: opts.workspace,
+      event_id: eventId,
+      kind,
+      subject_id: id,
+      occurred_at: opts.observed_at,
+      actor,
+      source_ref: sourceRef,
+      payload: {
+        statement: fact.statement,
+        source_ref: sourceRef,
+        captured_at: capturedAt,
+        observed_at: opts.observed_at,
+        confidence: opts.confidence,
+        ...(supersedes !== undefined ? { supersedes } : {}),
+      },
+    });
+
+    // 2. Project into SQLite (ADD-only). The event is the source of truth; a failed
+    //    insert is rebuildable via replay (SB-038) — surface a clear error.
+    try {
+      insertFact(store, fact);
+    } catch (err) {
+      throw new FactStoreError(
+        "projection_write_failed",
+        `${kind} event recorded (${eventId}) but the projection insert failed; rebuildable via replay`,
+        { event_id: eventId, cause: err instanceof Error ? err.message : String(err) },
+      );
+    }
+
+    return { fact, event_id: eventResult.event_id, event_path: eventResult.path };
   } finally {
     store.close();
   }
+}
 
-  return { fact, event_id: eventResult.event_id, event_path: eventResult.path };
+/** Record a new L3 fact (ADD-only): append a `fact_added` event, then project one row. */
+export async function addFact(opts: AddFactOptions): Promise<AddFactResult> {
+  return recordFact(opts);
 }
