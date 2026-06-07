@@ -2,7 +2,11 @@
  * Structured errors for the memory-kernel projection store. Callers branch on `code`.
  */
 
-export type MemoryKernelErrorCode = "unsafe_path" | "open_failed" | "migration_failed";
+export type MemoryKernelErrorCode =
+  | "unsafe_path"
+  | "open_failed"
+  | "migration_failed"
+  | "invalid_projection_event";
 
 export class MemoryKernelError extends Error {
   readonly code: MemoryKernelErrorCode;

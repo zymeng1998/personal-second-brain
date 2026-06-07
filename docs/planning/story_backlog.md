@@ -88,7 +88,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 |---|---|---|---|---|---|---|---|
 | SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | In Review | 2 | SB-009, SB-010 |
 | SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | In Review | 3 | SB-020 |
-| SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-034 |
+| SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | In Review | 3 | SB-034 |
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035 |
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
@@ -744,8 +744,8 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-023 — Replay projector core (pure event→state fold)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-034
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-034 (`Done`)
 - **Scope:** A **pure, deterministic** `apply(state, event) → state'` projector in `@sb/memory-kernel`
   that folds memory events (`fact_added`/`fact_superseded`/`entity_merged`/`note_created`/`note_updated`)
   into in-memory projection state, plus a `project(events) → state` reducer. No I/O — this is the shared

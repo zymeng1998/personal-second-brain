@@ -4,12 +4,40 @@
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
 **Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020 `Done`**
-(`f772ad1`); **SB-034 (SQLite projection store bootstrap) `In Review`**. Driver = `node:sqlite` (built-in);
-ULID centralized in `@sb/interfaces` (tech-debt retired). **Next: SB-023** (pure replay projector core).
-(Task-store source decision still open — blocks SB-022 only.)
+(`f772ad1`), **SB-034 `Done`** (`a8ff719`); **SB-023 (pure replay projector core) `In Review`**.
+**Next: SB-035** (fact-store `addFact`). (Task-store source decision still open — blocks SB-022 only.)
 **Last updated:** 2026-06-05
 
-## SB-034 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-023 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-023 — replay projector core. Status:** `In Review` (atomic; awaiting human review → commit).
+  **Dep:** SB-034 `Done`. **Next story:** SB-035 (fact-store `addFact`, which folds via this projector).
+- **Scope delivered:**
+  - New `packages/memory-kernel/src/projector.ts` — a **pure, deterministic** fold of memory events into
+    in-memory `ProjectionState` (`facts`/`entities`/`edges`/`tasks`). `applyEvent(state,event)→state'`
+    (copy-on-write; input never mutated) + `projectEvents(events)→state` reducer. **No I/O** (SQLite
+    persistence is SB-038). Implements the **fact** fold (`fact_added`/`fact_superseded`, ADD-only) — what
+    SB-035 builds on; `currentFacts(state)` derives the non-superseded view (resolves chains A←B←C → C).
+    Non-memory streams + unhandled memory kinds (note_created/updated, entity_merged) are no-ops
+    (forward-compatible) — entity/task folding is added by SB-021/SB-037/SB-022. Malformed fact payloads
+    throw `MemoryKernelError("invalid_projection_event")`.
+  - `errors.ts` — added `invalid_projection_event` code. `index.ts` — exports `applyEvent`,
+    `projectEvents`, `emptyState`, `currentFacts`, `ProjectionState`.
+- **No new dependency, no schema change.** (Fact payload convention: a fact event's `payload` carries the
+  Fact fields minus id; `subject_id` = fact id — the contract SB-035 will satisfy.)
+- **Out of scope (SB-023):** SQLite persistence (SB-038); entity/task projection (SB-021/037/022); reading
+  the event log from disk.
+- **Files changed (SB-023):** `packages/memory-kernel/src/{projector.ts(new),errors.ts,index.ts}`,
+  `packages/memory-kernel/test/projector.test.ts(new)`, `packages/memory-kernel/package.json` (test wiring),
+  `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/memory-kernel` test **13/13** (4 store + 9 projector: empty stream,
+  fact_added, ADD-only supersede keeps old + supersedes, supersede chain → latest, deterministic re-run,
+  applyEvent purity, non-memory ignored, unhandled kind no-op, malformed payload throws); build `tsc
+  --noEmit` exit 0; root `pnpm test` exit 0 (event-log 11, memory-kernel 13, note-vault 33, cli 24,
+  scripts 12 = 93); domain-leakage grep clean.
+- **Next recommended action:** human reviews the projector; on approval, commit SB-023 atomically
+  (`feat: replay projector core (SB-023)`) + push. Then SB-035 (fact-store `addFact`).
+
+## SB-034 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`a8ff719`)
 - **SB-034 — projection store bootstrap (SQLite). Status:** `In Review` (atomic; awaiting human review →
   commit). **Dep:** SB-020 `Done`. **Next story:** SB-023 (pure event→state projector core).
 - **Scope delivered:**

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/store.test.ts"
+    "test": "node --import tsx --test test/store.test.ts test/projector.test.ts"
   },
   "dependencies": {
     "@sb/interfaces": "workspace:*"
