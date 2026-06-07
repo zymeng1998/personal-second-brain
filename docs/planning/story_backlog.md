@@ -91,7 +91,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | In Review | 3 | SB-034 |
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | In Review | 3 | SB-035 |
-| SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | Backlog | 3 | SB-023 |
+| SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | Backlog | 3 | SB-021 |
 | SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-023 |
 | SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035, SB-021 |
@@ -791,8 +791,10 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-021 — entity-graph nodes projection
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-023
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-023 (`Done`)
+- **Note (impl):** reads entity notes via the `@sb/note-vault` API and parses frontmatter with the `yaml`
+  lib (added as an `@sb/entity-graph` dep) rather than adding a 4th hand-rolled frontmatter parser.
 - **Scope:** `@sb/entity-graph`: project **entity nodes** from `50_Entities/` notes (+ `entities` refs on
   other notes) into SQLite, keyed by ULID. Rebuildable from notes + events.
 - **Acceptance Criteria:** each entity note yields one node (id/title/aliases); re-projection is

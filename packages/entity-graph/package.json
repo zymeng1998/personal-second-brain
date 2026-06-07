@@ -1,0 +1,24 @@
+{
+  "name": "@sb/entity-graph",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Domain-neutral entity graph as a rebuildable SQLite projection. SB-021: entity nodes from L2 entity notes. Domain-neutral.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/project-entities.test.ts"
+  },
+  "dependencies": {
+    "@sb/interfaces": "workspace:*",
+    "@sb/memory-kernel": "workspace:*",
+    "@sb/note-vault": "workspace:*",
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

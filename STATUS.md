@@ -3,12 +3,39 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** — **SB-020/034/023/035
-`Done`** (`f772ad1`/`a8ff719`/`b160f71`/`95be41e`); **SB-036 (`supersedeFact` + current-facts query)
-`In Review`**. **Next: SB-021** (entity-graph nodes). (Task-store source decision still open — blocks SB-022 only.)
+**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
+**SB-020/034/023/035/036 `Done`** (`f772ad1`/`a8ff719`/`b160f71`/`95be41e`/`11b3506`); **SB-021 (entity-graph
+nodes projection) `In Review`**. **Next: SB-037** (entity edges + manual `entity_merged`). (Task-store source
+decision still open — blocks SB-022 only.)
 **Last updated:** 2026-06-05
 
-## SB-036 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-021 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-021 — entity-graph nodes projection. Status:** `In Review` (atomic; awaiting human review → commit).
+  **Dep:** SB-023 `Done`. **Next story:** SB-037 (entity edges + manual-confirm `entity_merged`).
+- **Scope delivered:**
+  - New `@sb/entity-graph` package — `projectEntities(workspace)` re-derives L3 entity nodes from L2 entity
+    notes (`vault/50_Entities/`, `type: entity`) read via the `@sb/note-vault` API (no direct fs), and
+    **upserts** them into the SQLite `entity_nodes` projection (`@sb/memory-kernel`). Idempotent (INSERT OR
+    REPLACE by id); each node carries `source_ref` provenance to its note. `listEntityNodes(workspace)`
+    reads nodes back; `insertEntityNode(store,node)` shared for the future rebuild (SB-038).
+    `EntityGraphError("invalid_entity_note")` if an entity note lacks a title.
+  - Frontmatter parsed with the `yaml` lib (added as an `@sb/entity-graph` dependency) — avoids a 4th
+    hand-rolled frontmatter parser (review DRY finding).
+- **Dependency note:** `@sb/entity-graph` deps `@sb/interfaces`/`@sb/note-vault`/`@sb/memory-kernel` +
+  `yaml`. `pnpm-lock.yaml` updated for the new importer (`yaml` already in the lockfile). `node:sqlite`
+  built-in (no new external native dep).
+- **Out of scope (SB-021):** edges + merges (SB-037); task-store (SB-022); replay rebuild (SB-038).
+- **Files changed (SB-021):** `packages/entity-graph/{package.json,tsconfig.json,README.md,src/{index,project-entities,errors}.ts,test/project-entities.test.ts}` (new),
+  `pnpm-lock.yaml`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/entity-graph` test **5/5** (projects nodes w/ id/title/aliases +
+  provenance; idempotent re-projection; non-entity notes ignored; missing-title rejected; empty workspace →
+  0) + build exit 0; root `pnpm test` exit 0 (event-log 11, memory-kernel 13, note-vault 33, cli 24,
+  fact-store 15, entity-graph 5, scripts 12 = **113**); domain-leakage grep clean (entity graph is
+  domain-neutral).
+- **Next recommended action:** human reviews the entity-node projection; on approval, commit SB-021
+  atomically (`feat: entity-graph nodes projection (SB-021)`) + push. Then SB-037.
+
+## SB-036 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`11b3506`)
 - **SB-036 — fact-store `supersedeFact` + current-facts query. Status:** `In Review` (atomic; awaiting human
   review → commit). **Dep:** SB-035 `Done`. **Next story:** SB-021 (entity-graph nodes projection).
 - **Scope delivered:**

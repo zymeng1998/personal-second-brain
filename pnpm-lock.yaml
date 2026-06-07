@@ -46,6 +46,28 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  packages/entity-graph:
+    dependencies:
+      '@sb/interfaces':
+        specifier: workspace:*
+        version: link:../interfaces
+      '@sb/memory-kernel':
+        specifier: workspace:*
+        version: link:../memory-kernel
+      '@sb/note-vault':
+        specifier: workspace:*
+        version: link:../note-vault
+      yaml:
+        specifier: ^2.5.0
+        version: 2.9.0
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.22.4
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/event-log:
     dependencies:
       '@sb/interfaces':
