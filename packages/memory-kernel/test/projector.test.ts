@@ -12,6 +12,7 @@ import {
   emptyState,
   MemoryKernelError,
   projectEvents,
+  resolveEntity,
 } from "../src/index.js";
 
 const E1 = "01KT6S3G408VV6NHJDH0ZND8DK" as Ulid;
@@ -121,6 +122,43 @@ test("unhandled memory kinds leave state unchanged (no crash)", () => {
   assert.equal(s.facts.size, 0);
   assert.equal(s.entities.size, 0);
   assert.equal(s.tasks.size, 0);
+});
+
+test("entity_merged builds the merge map; resolveEntity follows chains", () => {
+  const CANON = "01KTE7BBBB0000000000000000" as Ulid;
+  const DUP1 = "01KTE7CCCC0000000000000000" as Ulid;
+  const DUP2 = "01KTE7DDDD0000000000000000" as Ulid;
+  const merge = (eventId: Ulid, canonical: Ulid, dup: Ulid): MemoryEvent => ({
+    event_id: eventId,
+    stream: "memory",
+    kind: "entity_merged",
+    occurred_at: "2026-06-05T10:00:00Z",
+    actor: "human",
+    subject_id: canonical,
+    payload: { merged: [dup] },
+  });
+  // DUP2 -> DUP1 -> CANON (chain)
+  const s = projectEvents([merge(E1, CANON, DUP1), merge(E2, DUP1, DUP2)]);
+  assert.equal(resolveEntity(s, DUP1), CANON);
+  assert.equal(resolveEntity(s, DUP2), CANON);
+  assert.equal(resolveEntity(s, CANON), CANON);
+  assert.equal(resolveEntity(s, F1), F1); // unmerged id resolves to itself
+});
+
+test("malformed entity_merged payload throws invalid_projection_event", () => {
+  const bad: MemoryEvent = {
+    event_id: E1,
+    stream: "memory",
+    kind: "entity_merged",
+    occurred_at: "2026-06-05T10:00:00Z",
+    actor: "human",
+    subject_id: F1,
+    payload: { merged: "not-an-array" },
+  };
+  assert.throws(
+    () => projectEvents([bad]),
+    (err: unknown) => err instanceof MemoryKernelError && err.code === "invalid_projection_event",
+  );
 });
 
 test("malformed fact payload throws invalid_projection_event", () => {

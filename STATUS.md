@@ -4,12 +4,48 @@
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
 **Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
-**SB-020/034/023/035/036 `Done`** (`f772ad1`/`a8ff719`/`b160f71`/`95be41e`/`11b3506`); **SB-021 (entity-graph
-nodes projection) `In Review`**. **Next: SB-037** (entity edges + manual `entity_merged`). (Task-store source
-decision still open — blocks SB-022 only.)
+**SB-020/034/023/035/036/021 `Done`** (`f772ad1`/`a8ff719`/`b160f71`/`95be41e`/`11b3506`/`329e0e6`);
+**SB-037 (entity edges + manual `entity_merged`) `In Review`**. **Next: SB-022** (task-store) — but its
+source decision is still open; or skip to **SB-038** (rebuild command). (Task-store source decision open.)
 **Last updated:** 2026-06-05
 
-## SB-021 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-037 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-037 — entity-graph edges + manual-confirm `entity_merged`. Status:** `In Review` (atomic; awaiting
+  human review → commit). **Dep:** SB-021 `Done`. **Next story:** SB-022 (task-store) or SB-038 (rebuild).
+- **Scope delivered:**
+  - `@sb/entity-graph` `projectEdges(workspace)` — derives directed entity→entity edges from the `entities`
+    frontmatter refs of L2 entity notes, resolves each endpoint through the merge map, and full-rebuilds the
+    SQLite `entity_edges` table (idempotent; dedup; skips self-edges). `listEntityEdges` reads them;
+    `insertEntityEdge` shared for rebuild (SB-038).
+  - `mergeEntities(workspace,{canonical,duplicate})` — **manual-confirm** merge: validates both are ULIDs,
+    distinct, and exist as nodes (`invalid_merge`/`merge_target_not_found`), then appends an `entity_merged`
+    event (`actor:"human"`, payload `{merged:[duplicate]}`). Never auto-inferred. Edges repoint to the
+    canonical on the next `projectEdges`.
+  - **Enabling changes:** extended the SB-023 projector to fold `entity_merged` → `entityMerges` map +
+    `resolveEntity(state,id)` (chain-following, cycle-guarded); added `readMemoryEvents()` + `read_failed`
+    code + the `entity_merged` appendable kind to `@sb/event-log`; added `@sb/event-log` as an
+    `@sb/entity-graph` dep.
+- **Design:** edges from `entities` ULID refs (deterministic graph seed); title-based `[[wikilink]]`
+  resolution intentionally deferred. `entity_merged` is the only merge trigger (OQ #7).
+- **No new external dependency.** `pnpm-lock.yaml` updated for the new entity-graph→event-log importer.
+- **Out of scope (SB-037):** auto-merge heuristics; retrieval/graph indexes (Phase 3); removing duplicate
+  nodes (only edges repoint for now).
+- **Files changed (SB-037):** `packages/memory-kernel/src/{projector.ts,index.ts}` + `test/projector.test.ts`;
+  `packages/event-log/src/{memory-event.ts,read-events.ts(new),errors.ts,index.ts}`;
+  `packages/entity-graph/src/{project-edges.ts(new),merge-entities.ts(new),errors.ts,index.ts}` +
+  `test/project-edges.test.ts(new)` + `{package.json,README.md}`; `pnpm-lock.yaml`,
+  `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/entity-graph` **11/11** (5 nodes + 6 edges/merge: edges from refs +
+  provenance; self-ref skipped; idempotent; merge repoints A→C to A→B on re-project; merge non-existent
+  rejected; invalid merge rejected); `@sb/memory-kernel` **15/15** (incl. `entity_merged` map +
+  `resolveEntity` chain + malformed-payload throw); `@sb/event-log` 11/11; all builds exit 0; root `pnpm
+  test` exit 0 (event-log 11, memory-kernel 15, note-vault 33, cli 24, fact-store 15, entity-graph 11,
+  scripts 12 = **121**); domain-leakage grep clean (graph stays domain-neutral).
+- **Next recommended action:** human reviews edges + merge; on approval, commit SB-037 atomically
+  (`feat: entity-graph edges + manual entity_merged (SB-037)`) + push. Then resolve the task-store source
+  decision for SB-022, or proceed to SB-038 (replay rebuild command).
+
+## SB-021 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`329e0e6`)
 - **SB-021 — entity-graph nodes projection. Status:** `In Review` (atomic; awaiting human review → commit).
   **Dep:** SB-023 `Done`. **Next story:** SB-037 (entity edges + manual-confirm `entity_merged`).
 - **Scope delivered:**

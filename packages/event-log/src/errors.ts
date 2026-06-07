@@ -1,8 +1,8 @@
 /**
- * Structured errors for the event-log append path. Callers branch on `code`.
+ * Structured errors for the event-log append/read paths. Callers branch on `code`.
  */
 
-export type EventLogErrorCode = "unsafe_path" | "invalid_event" | "append_failed";
+export type EventLogErrorCode = "unsafe_path" | "invalid_event" | "append_failed" | "read_failed";
 
 export class EventLogError extends Error {
   readonly code: EventLogErrorCode;

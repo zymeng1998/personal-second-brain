@@ -9,9 +9,10 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/project-entities.test.ts"
+    "test": "node --import tsx --test test/project-entities.test.ts test/project-edges.test.ts"
   },
   "dependencies": {
+    "@sb/event-log": "workspace:*",
     "@sb/interfaces": "workspace:*",
     "@sb/memory-kernel": "workspace:*",
     "@sb/note-vault": "workspace:*",

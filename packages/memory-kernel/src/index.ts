@@ -9,7 +9,7 @@ export {
   SCHEMA_VERSION,
 } from "./store.js";
 export type { ProjectionStore } from "./store.js";
-export { applyEvent, projectEvents, emptyState, currentFacts } from "./projector.js";
+export { applyEvent, projectEvents, emptyState, currentFacts, resolveEntity } from "./projector.js";
 export type { ProjectionState } from "./projector.js";
 export { MemoryKernelError } from "./errors.js";
 export type { MemoryKernelErrorCode } from "./errors.js";

@@ -10,6 +10,7 @@ export type {
   AppendMemoryEventResult,
   AppendableMemoryKind,
 } from "./memory-event.js";
+export { readMemoryEvents } from "./read-events.js";
 export { validateCaptureEvent, validateMemoryEvent } from "./validate-event.js";
 export { EventLogError } from "./errors.js";
 export type { EventLogErrorCode } from "./errors.js";

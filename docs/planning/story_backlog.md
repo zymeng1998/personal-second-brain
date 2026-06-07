@@ -92,7 +92,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | In Review | 3 | SB-035 |
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
-| SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | Backlog | 3 | SB-021 |
+| SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | In Review | 3 | SB-021 |
 | SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-023 |
 | SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035, SB-021 |
 | SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-038 |
@@ -806,8 +806,12 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-037 — entity-graph edges + manual-confirm `entity_merged`
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-021
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-021 (`Done`)
+- **Note (impl):** extended the SB-023 projector to fold `entity_merged` → a merge map (+ `resolveEntity`);
+  added `readMemoryEvents` + the `entity_merged` kind + a `read_failed` code to `@sb/event-log`; added
+  `@sb/event-log` as an `@sb/entity-graph` dep. Edges derived from the `entities` frontmatter refs
+  (title-based `[[wikilink]]` resolution intentionally deferred).
 - **Scope:** Project **edges** (from `[[wikilinks]]`/`entities` relations) and handle **manual-confirm
   merges** via an explicit `entity_merged` event (OQ #7 — never auto-merge). Merged entities resolve to a
   canonical node; edges repoint.

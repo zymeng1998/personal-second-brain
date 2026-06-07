@@ -25,7 +25,8 @@ export type AppendableMemoryKind =
   | "note_created"
   | "distillation_accepted"
   | "fact_added"
-  | "fact_superseded";
+  | "fact_superseded"
+  | "entity_merged";
 
 export interface AppendMemoryEventInput {
   /** Absolute workspace root. */

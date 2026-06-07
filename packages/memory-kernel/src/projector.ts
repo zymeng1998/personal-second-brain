@@ -23,11 +23,13 @@ export interface ProjectionState {
   readonly entities: ReadonlyMap<Ulid, EntityNode>;
   readonly edges: readonly EntityEdge[];
   readonly tasks: ReadonlyMap<Ulid, Task>;
+  /** Entity merge map: duplicate id → canonical id (from `entity_merged` events). */
+  readonly entityMerges: ReadonlyMap<Ulid, Ulid>;
 }
 
 /** A fresh, empty projection state. */
 export function emptyState(): ProjectionState {
-  return { facts: new Map(), entities: new Map(), edges: [], tasks: new Map() };
+  return { facts: new Map(), entities: new Map(), edges: [], tasks: new Map(), entityMerges: new Map() };
 }
 
 interface FactPayload {
@@ -88,11 +90,46 @@ export function applyEvent(state: ProjectionState, event: Event): ProjectionStat
       facts.set(fact.id, fact);
       return { ...state, facts };
     }
-    // SB-021 (entity nodes from note_created/updated), SB-037 (entity_merged),
-    // SB-022 (tasks) extend this switch. Until then they are no-ops:
+    case "entity_merged": {
+      // Manual-confirm merge (OQ #7): map each merged duplicate id → the canonical
+      // (subject) id. Never inferred — only an explicit event causes a merge.
+      const canonical = event.subject_id;
+      const entityMerges = new Map(state.entityMerges);
+      for (const dup of mergedIdsFromEvent(event)) entityMerges.set(dup, canonical);
+      return { ...state, entityMerges };
+    }
+    // SB-021 projects entity nodes from the vault (not events); SB-022 (tasks)
+    // extends this switch later. Until then those kinds are no-ops:
     default:
       return state;
   }
+}
+
+/** Extract the merged (duplicate) entity ids from an `entity_merged` event payload. */
+function mergedIdsFromEvent(event: MemoryEvent): Ulid[] {
+  const merged = (event.payload as { merged?: unknown } | undefined)?.merged;
+  if (!Array.isArray(merged) || !merged.every((m) => typeof m === "string" && m.length > 0)) {
+    throw new MemoryKernelError(
+      "invalid_projection_event",
+      `entity_merged event ${event.event_id}: payload.merged must be a non-empty array of entity ids`,
+      { event_id: event.event_id },
+    );
+  }
+  return merged as Ulid[];
+}
+
+/**
+ * Resolve an entity id to its canonical id by following the merge map
+ * (duplicate → canonical), with a cycle guard. Returns the input if unmerged.
+ */
+export function resolveEntity(state: ProjectionState, id: Ulid): Ulid {
+  let current = id;
+  const seen = new Set<Ulid>();
+  while (state.entityMerges.has(current) && !seen.has(current)) {
+    seen.add(current);
+    current = state.entityMerges.get(current) as Ulid;
+  }
+  return current;
 }
 
 /** Fold an ordered event stream into projection state. Deterministic + pure. */

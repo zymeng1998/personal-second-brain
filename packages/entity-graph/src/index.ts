@@ -4,5 +4,9 @@
  */
 export { projectEntities, listEntityNodes, insertEntityNode } from "./project-entities.js";
 export type { ProjectEntitiesResult } from "./project-entities.js";
+export { projectEdges, listEntityEdges, insertEntityEdge } from "./project-edges.js";
+export type { ProjectEdgesResult } from "./project-edges.js";
+export { mergeEntities } from "./merge-entities.js";
+export type { MergeEntitiesOptions, MergeEntitiesResult } from "./merge-entities.js";
 export { EntityGraphError } from "./errors.js";
 export type { EntityGraphErrorCode } from "./errors.js";

@@ -48,6 +48,9 @@ importers:
 
   packages/entity-graph:
     dependencies:
+      '@sb/event-log':
+        specifier: workspace:*
+        version: link:../event-log
       '@sb/interfaces':
         specifier: workspace:*
         version: link:../interfaces

@@ -2,7 +2,11 @@
  * Structured errors for the entity-graph projection. Callers branch on `code`.
  */
 
-export type EntityGraphErrorCode = "invalid_entity_note" | "projection_write_failed";
+export type EntityGraphErrorCode =
+  | "invalid_entity_note"
+  | "invalid_merge"
+  | "merge_target_not_found"
+  | "projection_write_failed";
 
 export class EntityGraphError extends Error {
   readonly code: EntityGraphErrorCode;
