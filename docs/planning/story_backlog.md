@@ -25,7 +25,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-004 | CLI Capture MVP | 1E | P0 | Done | Minimal CLI capture + read-only list/get. |
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
-| EPIC-CORE-008 | Structured Projections | 2 | P1 | Refined | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). Decomposed into ≤3-pt stories (SB-020/034/023/035/036/021/037/022/038/039); see [`phase_2_story_map.md`](phase_2_story_map.md). |
+| EPIC-CORE-008 | Structured Projections | 2 | P1 | Done | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). All 10 stories (SB-020/034/023/035/036/021/037/022/038/039) `Done`. Drop-`db/`-and-replay reproduces identical projections (SB-039 gate). |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Backlog | secure_refs, permission scopes, secret handling. |
@@ -94,8 +94,8 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | In Review | 3 | SB-021 |
 | SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | In Review | 3 | SB-023 |
-| SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | In Review | 3 | SB-035, SB-021 |
-| SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-038 |
+| SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Done | 3 | SB-035, SB-021 |
+| SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | In Review | 2 | SB-038 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -840,7 +840,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-038 — Replay rebuild command (drop `db/` → rebuild + events)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-035 (`Done`), SB-021 (`Done`)
 - **Note (impl):** added `appendProjectionEvent` + `validateProjectionEvent` to `@sb/event-log`; the CLI
   `rebuild` command orchestrates fact/entity/edge/task rebuild (cli now deps the projection packages).
@@ -856,8 +856,11 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-039 — Replay reproducibility gate (drop+replay identical)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
-- **Dependencies:** SB-038
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
+- **Dependencies:** SB-038 (`Done`)
+- **Note (impl):** `apps/cli/test/reproducibility.test.ts` — populates a rich workspace (capture + facts incl.
+  a supersede + entities incl. a merge + a task), snapshots all 4 projection tables, **deletes `db/`**,
+  re-runs `rebuild`, and asserts row-identical projections. Wired into `pnpm test`. Closes the epic gate.
 - **Scope:** The epic **"Done when"** gate as an automated test: populate a workspace, snapshot
   projections, **drop `db/` and replay**, and assert the rebuilt projections are **row/byte-identical**.
   Wired into `pnpm test`.

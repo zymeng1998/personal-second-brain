@@ -2,8 +2,12 @@
 
 Refinement of the Phase 2 backlog (the `5→split` stories SB-020/021/023 decomposed into ≤3-pt atomic
 stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md) (cards) and
-[`phase_1_story_map.md`](phase_1_story_map.md) (prior phase). **Status: refined, `Backlog` — not yet
-`Ready`.** Promote to `Ready` only after the open decisions below are confirmed at the refinement review.
+[`phase_1_story_map.md`](phase_1_story_map.md) (prior phase).
+
+**Status (2026-06-05): ✅ PHASE 2 COMPLETE** — all 10 stories `Done`
+(SB-020/034/023/035/036/021/037/022/038/039); EPIC-CORE-008 `Done`. The epic gate holds: dropping `db/`
+and replaying the event log (+ re-deriving from L0–L2) reproduces row-identical projections (SB-039). The
+four open decisions below were resolved during implementation.
 
 ## Objective
 

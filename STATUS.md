@@ -3,13 +3,27 @@
 **Project:** personal-second-brain (Second Brain Core)
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
-**Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
-**SB-020/034/023/035/036/021/037/022 `Done`**
-(`…`/`0be2dd7`/`914606c`); **SB-038 (replay rebuild command) `In Review`**; **SB-039 (reproducibility gate)
-implemented** (test ready, committed right after SB-038). After SB-039: **Phase 2 COMPLETE**.
+**Phase 1 final review: PASS (ship-ready)**. **✅ PHASE 2 (EPIC-CORE-008) COMPLETE** — all 10 stories
+`Done` (SB-020/034/023/035/036/021/037/022/038 + **SB-039 `In Review`**, committing now). L3 projections
+(facts/entities/edges/tasks) build in SQLite and are fully rebuildable: **drop `db/` + replay → identical
+projections** (SB-039 gate). **Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009, the compute-heavy part;
+refine/split SB-030..032 first) — or revisit the P2 review follow-ups (SB-028/029/033).
 **Last updated:** 2026-06-05
 
-## SB-038 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-039 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated; committing now (closes Phase 2)
+- **SB-039 — replay reproducibility gate. Status:** `In Review` (atomic; committing now). **Dep:** SB-038
+  `Done`. **Closes EPIC-CORE-008 / Phase 2.**
+- **Scope delivered:** `apps/cli/test/reproducibility.test.ts` — populates a rich workspace (capture +
+  facts incl. a supersede + 3 entities incl. a merge + a task), snapshots all four projection tables,
+  **deletes `db/`**, re-runs `rebuild`, and asserts the rebuilt projections are **row-identical**. Wired
+  into `pnpm test`. This is the epic "Done when" guarantee.
+- **Files changed (SB-039):** `apps/cli/test/reproducibility.test.ts(new)`, `apps/cli/package.json` (test
+  wiring), `docs/planning/{story_backlog.md,phase_2_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `@sb/cli` **28/28** (incl. drop-db+replay row-identical gate); root `pnpm
+  test` exit 0 (event-log 11, memory-kernel 15, note-vault 33, fact-store 15, task-store 5, entity-graph 11,
+  cli 28, scripts 12 = **130**); leakage clean.
+
+## SB-038 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`a60d36f`)
 - **SB-038 — replay rebuild command. Status:** `In Review` (atomic; awaiting human review → commit).
   **Deps:** SB-035 `Done`, SB-021 `Done`. **Next story:** SB-039 (reproducibility gate).
 - **Scope delivered:**
