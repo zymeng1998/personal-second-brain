@@ -4,12 +4,36 @@
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
 **Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
-**SB-020/034/023/035/036/021 `Done`** (`f772ad1`/`a8ff719`/`b160f71`/`95be41e`/`11b3506`/`329e0e6`);
-**SB-037 (entity edges + manual `entity_merged`) `In Review`**. **Next: SB-022** (task-store) — but its
-source decision is still open; or skip to **SB-038** (rebuild command). (Task-store source decision open.)
+**SB-020/034/023/035/036/021/037 `Done`**
+(`f772ad1`/`a8ff719`/`b160f71`/`95be41e`/`11b3506`/`329e0e6`/`0be2dd7`); **SB-022 (task-store projection)
+`In Review`** (OQ #4 resolved: tasks from note `status`). **Next: SB-038** (replay rebuild command), then
+SB-039 (reproducibility gate) — the last two Phase 2 stories.
 **Last updated:** 2026-06-05
 
-## SB-037 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-022 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-022 — task-store projection. Status:** `In Review` (atomic; awaiting human review → commit).
+  **Dep:** SB-023 `Done`. **Next story:** SB-038 (replay rebuild command).
+- **Decision (OQ #4 resolved):** tasks are derived from **note frontmatter `status`** (a note with
+  non-empty `status` + `title` → a task); vault-derived/rebuildable; **no new task event kind**.
+- **Scope delivered:**
+  - New `@sb/task-store` package — `projectTasks(workspace)` scans the vault via the `@sb/note-vault` API,
+    projects every note with a non-empty `status` + `title` into the SQLite `tasks` projection
+    (`@sb/memory-kernel`). **Full-rebuild** per run (DELETE + insert) so a note losing its `status` drops
+    its task; idempotent + deterministic; each task carries `source_ref` provenance + optional `updated_at`.
+    `listTasks(workspace)` reads them; `insertTask` shared for the rebuild (SB-038).
+- **No new external dependency** (`yaml` for frontmatter, already in the lockfile). `pnpm-lock.yaml` updated
+  for the new `@sb/task-store` importer.
+- **Out of scope (SB-022):** task scheduling/reminders; UI; a dedicated task event kind.
+- **Files changed (SB-022):** `packages/task-store/{package.json,tsconfig.json,README.md,src/{index,project-tasks}.ts,test/project-tasks.test.ts}` (new),
+  `pnpm-lock.yaml`, `docs/planning/{story_backlog.md,phase_2_story_map.md}`, `STATUS.md`.
+- **Validation run (green):** `@sb/task-store` test **5/5** (status+title → task w/ provenance + updated_at;
+  no-status / status-without-title excluded; idempotent; status removal drops the task; empty → 0) + build
+  exit 0; root `pnpm test` exit 0 (event-log 11, memory-kernel 15, note-vault 33, fact-store 15, cli 24,
+  task-store 5, entity-graph 11, scripts 12 = **126**); domain-leakage grep clean.
+- **Next recommended action:** human reviews task projection; on approval, commit SB-022 atomically
+  (`feat: task-store projection (SB-022)`) + push. Then SB-038 (replay rebuild) → SB-039 (reproducibility gate).
+
+## SB-037 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`0be2dd7`)
 - **SB-037 — entity-graph edges + manual-confirm `entity_merged`. Status:** `In Review` (atomic; awaiting
   human review → commit). **Dep:** SB-021 `Done`. **Next story:** SB-022 (task-store) or SB-038 (rebuild).
 - **Scope delivered:**

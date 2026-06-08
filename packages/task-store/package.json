@@ -1,0 +1,24 @@
+{
+  "name": "@sb/task-store",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tasks as a rebuildable SQLite projection. SB-022: derived from note frontmatter status. Domain-neutral.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/project-tasks.test.ts"
+  },
+  "dependencies": {
+    "@sb/interfaces": "workspace:*",
+    "@sb/memory-kernel": "workspace:*",
+    "@sb/note-vault": "workspace:*",
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

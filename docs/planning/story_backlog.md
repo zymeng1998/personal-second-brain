@@ -93,7 +93,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | In Review | 3 | SB-035 |
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | In Review | 3 | SB-021 |
-| SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Backlog | 3 | SB-023 |
+| SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | In Review | 3 | SB-023 |
 | SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035, SB-021 |
 | SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-038 |
 
@@ -824,8 +824,10 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-022 — task-store projection
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-023
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-023 (`Done`)
+- **Decision (OQ #4, RESOLVED 2026-06-05):** tasks are derived from **note frontmatter `status`** (a note
+  with non-empty `status` + `title` → a task), vault-derived/rebuildable; **no new task event kind**.
 - **Scope:** `@sb/task-store`: project tasks into SQLite. **Source = open decision #4** (lean: derive from
   note frontmatter `status` + `note_created/updated` events; no new event kind). Rebuildable.
 - **Acceptance Criteria:** tasks are derived deterministically from the chosen source; re-projection is

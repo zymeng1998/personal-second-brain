@@ -40,9 +40,9 @@ stays the single source of truth; `db/` is disposable.
 3. **Fact creation surface — CONFIRMED (default):** Phase 2 = the **projection + replay machinery** + a
    programmatic `addFact`/`supersedeFact` (append event → project). **AI/LLM fact extraction is OUT** (the
    `@sb/ai` package, later).
-4. **task-store source — STILL OPEN** (affects SB-022 only, not the critical path to SB-034). Lean: derive
-   from note frontmatter (`status`) + `note_created/updated` events; no new event kind. Confirm before
-   SB-022 → `Ready`.
+4. **task-store source — RESOLVED (2026-06-05): note frontmatter `status`.** A note with a non-empty
+   `status` + `title` projects to a task (vault-derived/rebuildable); no new task event kind. Implemented in
+   SB-022.
 
 ## Sub-phases & sequencing (all stories ≤3 pts)
 
