@@ -10,7 +10,13 @@ export type {
   AppendMemoryEventResult,
   AppendableMemoryKind,
 } from "./memory-event.js";
+export { appendProjectionEvent, PROJECTION_EVENTS_RELATIVE_PATH } from "./projection-event.js";
+export type {
+  AppendProjectionEventInput,
+  AppendProjectionEventResult,
+  AppendableProjectionKind,
+} from "./projection-event.js";
 export { readMemoryEvents } from "./read-events.js";
-export { validateCaptureEvent, validateMemoryEvent } from "./validate-event.js";
+export { validateCaptureEvent, validateMemoryEvent, validateProjectionEvent } from "./validate-event.js";
 export { EventLogError } from "./errors.js";
 export type { EventLogErrorCode } from "./errors.js";

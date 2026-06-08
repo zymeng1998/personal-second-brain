@@ -29,15 +29,27 @@ importers:
 
   apps/cli:
     dependencies:
+      '@sb/entity-graph':
+        specifier: workspace:*
+        version: link:../../packages/entity-graph
       '@sb/event-log':
         specifier: workspace:*
         version: link:../../packages/event-log
+      '@sb/fact-store':
+        specifier: workspace:*
+        version: link:../../packages/fact-store
       '@sb/interfaces':
         specifier: workspace:*
         version: link:../../packages/interfaces
+      '@sb/memory-kernel':
+        specifier: workspace:*
+        version: link:../../packages/memory-kernel
       '@sb/note-vault':
         specifier: workspace:*
         version: link:../../packages/note-vault
+      '@sb/task-store':
+        specifier: workspace:*
+        version: link:../../packages/task-store
     devDependencies:
       tsx:
         specifier: ^4.0.0

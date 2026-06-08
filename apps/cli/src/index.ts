@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { CaptureCliError, runCapture } from "./capture-command.js";
 import { runNoteGet, runNoteList } from "./note-command.js";
 import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-command.js";
+import { runRebuild } from "./rebuild-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -42,6 +43,9 @@ Distillation (human-confirmed L1 → L2):
   sb distill propose [--limit <n>] [--workspace <path>]        # READ-ONLY: list L1 candidates + scaffold
   sb distill accept --file <proposal.json> [--workspace <path>]
   cat proposal.json | sb distill accept [--workspace <path>]   # accept is the only writing step
+
+Projections (L3, rebuildable):
+  sb rebuild [--workspace <path>]                              # rebuild facts/entities/edges/tasks from the event log + vault
 `;
 
 interface ParsedCaptureArgs {
@@ -143,6 +147,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "distill") {
     return handleDistill(argv.slice(1), out, err, stdin);
+  }
+  if (command === "rebuild") {
+    return handleRebuild(argv.slice(1), out, err);
   }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
@@ -362,6 +369,36 @@ async function handleDistill(
     }
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown distill subcommand: ${sub}`)))}\n`);
     return 1;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+async function handleRebuild(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  if (args[0] === "--help" || args[0] === "-h") {
+    out(USAGE);
+    return 0;
+  }
+  let workspace: string | undefined;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i] as string;
+    if (arg === "--workspace") {
+      workspace = requireValue(args, ++i, arg);
+      continue;
+    }
+    err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown argument: ${arg}`)))}\n`);
+    return 1;
+  }
+  try {
+    const result = await runRebuild(workspace !== undefined ? { workspace } : {});
+    out(`${JSON.stringify(result)}\n`);
+    return 0;
   } catch (e) {
     err(`${JSON.stringify(errorEnvelope(e))}\n`);
     return 1;

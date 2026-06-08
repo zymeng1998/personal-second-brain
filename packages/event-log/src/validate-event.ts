@@ -5,7 +5,7 @@
  * must pass the matching validator before it is appended to the log.
  */
 import { isUlid } from "@sb/interfaces";
-import type { CaptureEvent, MemoryEvent, MemoryKind } from "@sb/interfaces";
+import type { CaptureEvent, MemoryEvent, MemoryKind, ProjectionEvent, ProjectionKind } from "@sb/interfaces";
 import { EventLogError } from "./errors.js";
 
 /**
@@ -33,6 +33,13 @@ const MEMORY_KINDS: readonly MemoryKind[] = [
   "fact_superseded",
   "entity_merged",
   "distillation_accepted",
+];
+
+/** The projection-stream `kind` enum, mirroring the schema's projection branch. */
+const PROJECTION_KINDS: readonly ProjectionKind[] = [
+  "indexed",
+  "projection_rebuilt",
+  "projection_reset",
 ];
 
 function isIsoDateTime(value: unknown): value is string {
@@ -109,6 +116,30 @@ export function validateMemoryEvent(event: unknown): asserts event is MemoryEven
   }
   if (typeof e["subject_id"] !== "string" || !isUlid(e["subject_id"])) {
     fail("subject_id", "must be a ULID (required for memory events)");
+  }
+
+  validateOptionalEnvelope(e);
+}
+
+/** Assert that `event` is a valid v1 projection event. Throws EventLogError("invalid_event") otherwise. */
+export function validateProjectionEvent(event: unknown): asserts event is ProjectionEvent {
+  if (typeof event !== "object" || event === null) {
+    fail("event", "must be an object");
+  }
+  const e = event as Record<string, unknown>;
+
+  if (typeof e["event_id"] !== "string" || !isUlid(e["event_id"])) fail("event_id", "must be a ULID");
+  if (e["stream"] !== "projection") fail("stream", 'must be "projection"');
+  if (typeof e["kind"] !== "string" || !PROJECTION_KINDS.includes(e["kind"] as ProjectionKind)) {
+    fail("kind", `must be one of: ${PROJECTION_KINDS.join(", ")}`);
+  }
+  if (!isIsoDateTime(e["occurred_at"])) fail("occurred_at", "must be an ISO-8601 date-time");
+  if (typeof e["actor"] !== "string" || !ACTOR_PATTERN.test(e["actor"])) {
+    fail("actor", "must be human | cli | skill:<name> | sidecar:<name>");
+  }
+  // subject_id is OPTIONAL for projection events (may be vault-wide); a ULID when present.
+  if (e["subject_id"] !== undefined && (typeof e["subject_id"] !== "string" || !isUlid(e["subject_id"]))) {
+    fail("subject_id", "must be a ULID when present");
   }
 
   validateOptionalEnvelope(e);

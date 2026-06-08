@@ -94,7 +94,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
 | SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | In Review | 3 | SB-021 |
 | SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | In Review | 3 | SB-023 |
-| SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Backlog | 3 | SB-035, SB-021 |
+| SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | In Review | 3 | SB-035, SB-021 |
 | SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | Backlog | 2 | SB-038 |
 
 ### Later phases (coarse; refine before implementation)
@@ -840,8 +840,10 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-038 — Replay rebuild command (drop `db/` → rebuild + events)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
-- **Dependencies:** SB-035, SB-021
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Dependencies:** SB-035 (`Done`), SB-021 (`Done`)
+- **Note (impl):** added `appendProjectionEvent` + `validateProjectionEvent` to `@sb/event-log`; the CLI
+  `rebuild` command orchestrates fact/entity/edge/task rebuild (cli now deps the projection packages).
 - **Scope:** A command/script (`@sb/cli` or `scripts/`) that reads the event log (+ L0–L2), runs the
   SB-023 projector, and **rebuilds** all SQLite projections from scratch; emits `projection_rebuilt` /
   `projection_reset` projection events. Safe to drop `db/` first.

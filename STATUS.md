@@ -4,13 +4,34 @@
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
 **Phase 1 final review: PASS (ship-ready)**. **Phase 2 (EPIC-CORE-008) in progress** —
-**SB-020/034/023/035/036/021/037 `Done`**
-(`f772ad1`/`a8ff719`/`b160f71`/`95be41e`/`11b3506`/`329e0e6`/`0be2dd7`); **SB-022 (task-store projection)
-`In Review`** (OQ #4 resolved: tasks from note `status`). **Next: SB-038** (replay rebuild command), then
-SB-039 (reproducibility gate) — the last two Phase 2 stories.
+**SB-020/034/023/035/036/021/037/022 `Done`**
+(`…`/`0be2dd7`/`914606c`); **SB-038 (replay rebuild command) `In Review`**; **SB-039 (reproducibility gate)
+implemented** (test ready, committed right after SB-038). After SB-039: **Phase 2 COMPLETE**.
 **Last updated:** 2026-06-05
 
-## SB-022 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+## SB-038 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated, NOT yet committed
+- **SB-038 — replay rebuild command. Status:** `In Review` (atomic; awaiting human review → commit).
+  **Deps:** SB-035 `Done`, SB-021 `Done`. **Next story:** SB-039 (reproducibility gate).
+- **Scope delivered:**
+  - `@sb/event-log` — new `appendProjectionEvent` (projection stream) + `validateProjectionEvent`
+    (projection branch; `subject_id` optional). `PROJECTION_EVENTS_RELATIVE_PATH` constant.
+  - `@sb/cli` `rebuild` command (`runRebuild`) — resets the L3 tables + emits `projection_reset`, rebuilds
+    **facts from the memory event log** (ADD-only, via the SB-023 projector + `insertFact`), re-derives
+    **entities/edges/tasks from the vault** (`projectEntities`/`projectEdges`/`projectTasks`), then emits
+    `projection_rebuilt` with counts. Read-only over inputs: never writes `00_Raw/`, never modifies the
+    capture/memory event streams (only appends to the projection stream). cli now deps the projection
+    packages (`@sb/fact-store`/`@sb/entity-graph`/`@sb/task-store`/`@sb/memory-kernel`).
+- **No new external dependency.** `pnpm-lock.yaml` updated for the new cli importers.
+- **Out of scope (SB-038):** the reproducibility assertion (SB-039).
+- **Files changed (SB-038):** `packages/event-log/src/{projection-event.ts(new),validate-event.ts,index.ts}`;
+  `apps/cli/src/{rebuild-command.ts(new),index.ts}` + `test/rebuild-command.test.ts(new)` +
+  `{package.json,README?}`; `pnpm-lock.yaml`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Validation run (green):** `@sb/cli` **27/27** for SB-038 scope (rebuild reconstructs
+  facts/entities/edges/tasks + emits reset/rebuilt; never modifies raw/capture/memory; idempotent); event-log
+  + cli builds exit 0; full suite green. (SB-039 adds the reproducibility test → 28.)
+- **Next recommended action:** commit SB-038, then SB-039.
+
+## SB-022 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`914606c`)
 - **SB-022 — task-store projection. Status:** `In Review` (atomic; awaiting human review → commit).
   **Dep:** SB-023 `Done`. **Next story:** SB-038 (replay rebuild command).
 - **Decision (OQ #4 resolved):** tasks are derived from **note frontmatter `status`** (a note with
