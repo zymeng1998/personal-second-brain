@@ -72,9 +72,15 @@ When picking up work: confirm the story is `Ready` + deps `Done` → re-read its
 
 ## Current phase
 
-**Phase 1A — Workspace Initialization (in progress).** Phase 0 scaffold committed (`3990af3`); JIRA
-workflow committed (`0cb6b00`). **SB-001 (initializer entry + skeleton) is `Done`** and committed —
-`scripts/init_workspace.ts` is now a safe skeleton (arg parsing, logging, ordered step descriptions; no
-filesystem writes). The next story is **SB-002 — environment loading & path-safety checks** (start only on
-human approval). Do not implement DB code, retrieval, AI extraction, connectors, or domain workflows ahead
-of the backlog/story map.
+**Phase 1 (MVP core), Phase 1H (distillation), and Phase 2 (projections) are COMPLETE** — see
+[`STATUS.md`](STATUS.md) for the latest. Shipped: workspace init/verify, capture (L0 raw + capture event),
+read-only `note list`/`get`, frontmatter validation, raw-immutability guard (test-locked), the
+human-confirmed `distill` workflow (L1→L2 + memory event + skill), and the **L3 projections** —
+`@sb/fact-store` (ADD-only + supersede), `@sb/entity-graph` (nodes + edges + manual `entity_merged`),
+`@sb/task-store`, all in rebuildable SQLite (`@sb/memory-kernel`, `node:sqlite`) via the `sb rebuild`
+command, with a drop-`db/`-and-replay reproducibility gate. **130 tests passing.**
+
+**Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009, the compute-heavy part: Python sidecar + DuckDB +
+BGE-M3 over stdio JSONL). Its stories (SB-030..032) are still coarse `5→split` and **must be refined/split
+before implementation**. Open P2 review follow-ups remain in the backlog (SB-028/029/033). Always follow the
+backlog workflow above: confirm the story is `Ready`, implement in-scope only, validate, stop at `In Review`.

@@ -6,12 +6,14 @@ It captures messy information, organizes it (PARA + Tiago Forte's CODE), distill
 reusable notes, projects queryable facts, and generates outputs — all over plain Markdown,
 YAML frontmatter, an append-only JSON event log, and rebuildable SQLite/DuckDB projections.
 
-> **Status:** **Phase 1 (MVP core) complete.** CLI capture writes immutable L0 raw notes + an
-> append-only capture event; the vault read API (`note list` / `note get`) and frontmatter validation
-> work; raw immutability is enforced and test-locked. **Next: Phase 2 — projections** (fact-store /
-> entity-graph / task-store + replay). One MVP item — the human-confirmed distillation skill — is
-> intentionally **deferred** (see [`docs/planning/phase_1_story_map.md`](docs/planning/phase_1_story_map.md)
-> Phase 1H). See [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md).
+> **Status:** **Phase 1 (MVP core), Phase 1H (distillation), and Phase 2 (projections) all complete.**
+> CLI `capture` writes immutable L0 raw notes + an append-only capture event; the vault read API
+> (`note list` / `note get`) and frontmatter validation work; raw immutability is enforced and test-locked.
+> The human-confirmed **`distill`** workflow (L1→L2 note + memory event) ships, and **L3 projections**
+> (fact-store ADD-only, entity-graph + manual merges, task-store) build in rebuildable SQLite via
+> `sb rebuild` — dropping `db/` and replaying the event log reproduces row-identical projections.
+> **130 tests passing.** **Next: Phase 3 — retrieval** (DuckDB + BGE-M3 over a Python sidecar).
+> See [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md).
 
 ## Core principle: domain independence
 
@@ -50,8 +52,8 @@ The event log (`workspace/events/*.jsonl`) is also **source of truth** (audit + 
 ```
 docs/         product, research, architecture, methodology, workflows, decisions, planning, prompts
 apps/         cli (MVP), dashboard, obsidian-helper (post-MVP)
-packages/     memory-kernel, note-vault, event-log, entity-graph, fact-store,
-              task-store, retrieval, interfaces, adapters, surfaces, ai
+packages/     interfaces ✅, note-vault ✅, event-log ✅, memory-kernel ✅, fact-store ✅,
+              entity-graph ✅, task-store ✅, retrieval, adapters, surfaces, ai
 sidecars/     retrieval, ai  (Python — boundary docs only in Phase 0)
 domain-apps/  broker (docs-only)
 schemas/      markdown, json, sql
@@ -65,9 +67,10 @@ Real notes, captures, events, indexes, and attachments live in a separate **work
 (`PersonalSecondBrainWorkspace/`), referenced via `.env`. **No real personal/client data is
 ever committed.** See [`docs/architecture/privacy_and_security.md`](docs/architecture/privacy_and_security.md).
 
-## Getting started (Phase 1 MVP)
+## Getting started
 
-These commands are implemented and verified end-to-end. The workspace lives **outside** this repo;
+These commands are implemented and verified end-to-end (capture → read → validate → distill → project).
+The workspace lives **outside** this repo;
 point `SECOND_BRAIN_WORKSPACE` at a path that is not the repo, your home dir, or `/`.
 
 ```bash
@@ -90,7 +93,14 @@ pnpm --filter @sb/cli note -- get <ULID>       # verbatim markdown for one note
 # 4. Validate frontmatter across the vault (read-only; exit 0 valid / 1 invalid / 2 operational)
 pnpm validate:notes
 
-# 5. Run the test suite (immutability checks included)
+# 5. Distill L1 → L2 (human-confirmed). propose is read-only; accept is the only write.
+pnpm --filter @sb/cli distill -- propose
+cat proposal.json | pnpm --filter @sb/cli distill -- accept
+
+# 6. Build the L3 projections (facts/entities/edges/tasks) — rebuildable from the event log + vault
+pnpm --filter @sb/cli rebuild
+
+# 7. Run the test suite (immutability + reproducibility gate included)
 pnpm test
 ```
 

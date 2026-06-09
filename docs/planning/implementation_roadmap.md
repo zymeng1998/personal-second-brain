@@ -9,25 +9,33 @@ Docs, repo tree, READMEs, schema skeletons, `.gitignore`/`.env.example`/`AGENTS.
 scripts. **No application logic. Sidecars: boundary docs only. Broker: docs-only.**
 - **Done when:** structure + docs exist and pass human review.
 
-## Phase 1 — MVP core ✅ (distillation deferred)
+## Phase 1 — MVP core ✅
 
 CLI capture → L0 raw + append-only event log; `note-vault` read/write with **raw-immutability guard**;
 typed YAML frontmatter validation; `interfaces` v0 (capture/getNote/listNotes/appendEvent);
-`init_workspace` + `validate_notes` implemented; one minimal human-confirmed distillation skill.
-- **Status:** **Complete (SB-001..018)** except the distillation skill (SB-019), which is **deferred**
-  to Phase 1H / Phase 2 pending a scope decision — see [`phase_1_story_map.md`](phase_1_story_map.md)
-  Phase 1H. Everything else shipped with atomic commits and green validation.
+`init_workspace` + `validate_notes` implemented.
+- **Status:** **Complete (SB-001..018).** Shipped with atomic commits and green validation.
 - **Done when:** capture is loss-free, raw is provably immutable, all notes validate, and a second
-  tool can read vault+events via documented contracts. No domain concepts in core. — **met** for the
-  capture+validate+read core (distillation excluded).
+  tool can read vault+events via documented contracts. No domain concepts in core. — **met**.
 - **Decided:** frontmatter schema v1 (SB-008), event schema v1 (SB-009), ULID id scheme (open questions
   #1–#3 resolved).
 
-## Phase 2 — Projections
+## Phase 1H — Human-confirmed distillation ✅
 
-`fact-store` + `entity-graph` + `task-store` (SQLite) with provenance/confidence/temporal; ADD-only
-facts; `memory-kernel` coordination; full **replay** from the event log.
-- **Done when:** dropping `db/` and replaying events + re-extracting reproduces projections.
+The minimal human-confirmed L1→L2 distillation workflow (originally carved out of the MVP).
+- **Status:** **Complete (SB-019/024/025/026/027).** Distillation proposal contract → `writeDistilledNote`
+  (L2, never under `00_Raw/`) → `appendMemoryEvent('distillation_accepted')` → CLI `distill propose`/`accept`
+  → `skills/distill/` + an end-to-end L0/L1-never-mutated safety check. Closes MVP acceptance criterion #5.
+
+## Phase 2 — Projections ✅
+
+`fact-store` + `entity-graph` + `task-store` (SQLite via `node:sqlite`) with provenance/confidence/temporal;
+ADD-only facts; `memory-kernel` projector + store; full **replay** from the event log via `sb rebuild`.
+- **Status:** **Complete (SB-020/034/023/035/036/021/037/022/038/039).** Facts (ADD-only + supersede +
+  query), entity nodes + edges + manual `entity_merged`, tasks (from note `status`); the pure projector is
+  shared by live writes and replay.
+- **Done when:** dropping `db/` and replaying events + re-deriving from L0–L2 reproduces projections —
+  **met** (SB-039 row-identical reproducibility gate, wired into `pnpm test`).
 
 ## Phase 3 — Retrieval sidecar (Python)
 
