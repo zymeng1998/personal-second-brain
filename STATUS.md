@@ -4,14 +4,38 @@
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
 **Phase 1 final review: PASS (ship-ready)**. **✅ PHASE 2 (EPIC-CORE-008) COMPLETE** — all 10 stories
-`Done` (SB-020/034/023/035/036/021/037/022/038 + **SB-039 `In Review`**, committing now). L3 projections
+`Done` and pushed (SB-020/034/023/035/036/021/037/022/038/039; SB-039 @ `2fcb46f`). L3 projections
 (facts/entities/edges/tasks) build in SQLite and are fully rebuildable: **drop `db/` + replay → identical
-projections** (SB-039 gate). **Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009, the compute-heavy part;
-refine/split SB-030..032 first) — or revisit the P2 review follow-ups (SB-028/029/033).
-**Last updated:** 2026-06-05
+projections** (SB-039 gate). **Phase 2 review: PASS (ship-quality, no CRITICAL/HIGH)** — MEDIUM/LOW
+findings filed as **SB-042..046** (quality band). **Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009,
+the compute-heavy part; refine/split SB-030..032 first) — or pick up the quality band (SB-042/043 P2) or
+the older P2 follow-ups (SB-028/029/033).
+**Last updated:** 2026-06-09
 
-## SB-039 `In Review` (Phase 2, EPIC-CORE-008) — implemented + validated; committing now (closes Phase 2)
-- **SB-039 — replay reproducibility gate. Status:** `In Review` (atomic; committing now). **Dep:** SB-038
+## Phase 2 review follow-ups FILED (2026-06-09) — SB-042..046 (quality band)
+- **Context:** Phase 2 code review of `origin/main` @ `22b02b2` (memory-kernel, fact-store, entity-graph,
+  task-store, event-log projection additions, CLI `rebuild`; ~1,030 new production lines). **Verdict:
+  ship-quality — no CRITICAL or HIGH.** All SQL parameterized; live==replay by construction; ADD-only
+  facts; manual-confirm merges; zero domain leakage.
+- **Filed as backlog stories** (cards in `story_backlog.md`, "Phase 2 review follow-up cards"):
+  - **SB-042** (P2, 1) — pin + document the **`node:sqlite` experimental** runtime requirement
+    (`engines.node` floor + README caveat + driver fallback note). [MEDIUM #1]
+  - **SB-043** (P2, 3) — **atomic single-connection `rebuild`**: thread one open `ProjectionStore` through
+    the rebuild + wrap reset+rebuild in one transaction (failed rebuild rolls back). [MEDIUM #2+#3]
+  - **SB-044** (P3, 2) — shared frontmatter helper in `@sb/note-vault`; migrate entity-graph/task-store/
+    validate_notes call sites (parser now duplicated ~4×). [LOW #4]
+  - **SB-045** (P3, 2) — projection consistency hardening: standalone `projectEntities` full-rebuild
+    (stale-node gap) + `UNIQUE` on `entity_edges` (schema v2). [LOW #6+#7]
+  - **SB-046** (P3, 2) — single-pass note reads in projections (currently O(n) double reads). [LOW #5]
+  - **LOW #8** (no coverage measurement) folded into existing **SB-033** (card updated — now spans Phase 2).
+- **Also fixed (docs consistency):** the 9 stale `In Review` statuses for the committed Phase 2 stories in
+  `story_backlog.md` (table rows + cards) flipped to `Done`, matching the epic row + git history.
+- **No code change** — docs/backlog only.
+- **Next recommended action:** Phase 3 refinement (split SB-030..032), or schedule SB-042/043 (P2 quality)
+  first.
+
+## SB-039 `Done` (Phase 2, EPIC-CORE-008) — committed + pushed (`2fcb46f`; closes Phase 2)
+- **SB-039 — replay reproducibility gate. Status:** `Done` (atomic commit `2fcb46f`). **Dep:** SB-038
   `Done`. **Closes EPIC-CORE-008 / Phase 2.**
 - **Scope delivered:** `apps/cli/test/reproducibility.test.ts` — populates a rich workspace (capture +
   facts incl. a supersede + 3 entities incl. a merge + a task), snapshots all four projection tables,

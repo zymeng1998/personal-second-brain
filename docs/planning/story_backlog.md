@@ -86,16 +86,28 @@ promote after the open decisions in the story map are confirmed at review. Cards
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | In Review | 2 | SB-009, SB-010 |
-| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | In Review | 3 | SB-020 |
-| SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | In Review | 3 | SB-034 |
-| SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
-| SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | In Review | 3 | SB-035 |
-| SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | In Review | 3 | SB-023 |
-| SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | In Review | 3 | SB-021 |
-| SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | In Review | 3 | SB-023 |
+| SB-020 | Story | Fact + projection contracts (interfaces) | EPIC-CORE-008 | P1 | Done | 2 | SB-009, SB-010 |
+| SB-034 | Story | Projection store bootstrap (SQLite `db/memory.sqlite`) | EPIC-CORE-008 | P1 | Done | 3 | SB-020 |
+| SB-023 | Story | Replay projector core (pure event→state fold) | EPIC-CORE-008 | P1 | Done | 3 | SB-034 |
+| SB-035 | Story | fact-store table + `addFact` (ADD-only) | EPIC-CORE-008 | P1 | Done | 3 | SB-023 |
+| SB-036 | Story | fact-store `supersedeFact` + current-facts query | EPIC-CORE-008 | P1 | Done | 3 | SB-035 |
+| SB-021 | Story | entity-graph nodes projection | EPIC-CORE-008 | P1 | Done | 3 | SB-023 |
+| SB-037 | Story | entity-graph edges + manual-confirm `entity_merged` | EPIC-CORE-008 | P1 | Done | 3 | SB-021 |
+| SB-022 | Story | task-store projection | EPIC-CORE-008 | P2 | Done | 3 | SB-023 |
 | SB-038 | Story | Replay rebuild command (drop `db/` → rebuild + events) | EPIC-CORE-008 | P1 | Done | 3 | SB-035, SB-021 |
-| SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | In Review | 2 | SB-038 |
+| SB-039 | Story | Replay reproducibility gate (drop+replay identical) | EPIC-CORE-008 | P1 | Done | 2 | SB-038 |
+
+### Phase 2 review follow-ups (backlog quality band; from the 2026-06-09 review)
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-042 | Story | Pin + document the `node:sqlite` runtime requirement | EPIC-CORE-008 | P2 | Backlog | 1 | SB-034 |
+| SB-043 | Story | Atomic single-connection `rebuild` (one store, one transaction) | EPIC-CORE-008 | P2 | Backlog | 3 | SB-038 |
+| SB-044 | Story | Shared frontmatter helper in `@sb/note-vault` (DRY) | EPIC-CORE-003 | P3 | Backlog | 2 | SB-011 |
+| SB-045 | Story | Projection-table consistency hardening (entity reset + edge UNIQUE) | EPIC-CORE-008 | P3 | Backlog | 2 | SB-037, SB-038 |
+| SB-046 | Story | Single-pass note reads in projections | EPIC-CORE-008 | P3 | Backlog | 2 | SB-022 |
+
+(Review finding #8 — still no coverage measurement — is already tracked as SB-033, which now spans Phase 2.)
 
 ### Later phases (coarse; refine before implementation)
 
@@ -685,6 +697,8 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 - **Context (review finding, MEDIUM):** the suite is broad (80 tests) but there is **no coverage
   measurement** (global rule targets ≥80%), and `scripts/init_workspace.ts` has **no automated test** (only
   manual + the ad-hoc E2E). A regression in the initializer would not be caught by `pnpm test`.
+  **2026-06-09 Phase 2 review (finding #8):** still open and now spans the Phase 2 packages too (130 tests,
+  still no coverage measurement).
 - **Scope:** Wire coverage reporting into `pnpm test` (Node's built-in `--experimental-test-coverage` or
   `c8`), with a documented threshold; add `scripts/init_workspace.test.ts` covering dry-run, verify
   (pass/fail), idempotent re-init, and the append-only event-file invariant (existing file not truncated).
@@ -708,7 +722,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-020 — Fact + projection contracts (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-009 (`Done`), SB-010 (`Done`)
 - **Scope:** Add **types + operation descriptors only** (no impl) to `@sb/interfaces`: a `Fact`
   (`{ id, statement, source_ref, captured_at, observed_at, confidence, supersedes? }`), minimal
@@ -724,7 +738,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-034 — Projection store bootstrap (SQLite `db/memory.sqlite`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-020 (`Done`)
 - **Decisions (RESOLVED 2026-06-05):** SQLite driver = **`node:sqlite`** (built-in, zero-dep); **centralize
   ULID** generation in this story (shared util; retire `apps/cli/src/ulid.ts`).
@@ -744,7 +758,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-023 — Replay projector core (pure event→state fold)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-034 (`Done`)
 - **Scope:** A **pure, deterministic** `apply(state, event) → state'` projector in `@sb/memory-kernel`
   that folds memory events (`fact_added`/`fact_superseded`/`entity_merged`/`note_created`/`note_updated`)
@@ -760,7 +774,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-035 — fact-store table + `addFact` (ADD-only)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-023 (`Done`)
 - **Note (impl):** required a one-token enabling change in `@sb/event-log` — widened
   `AppendableMemoryKind` to include `fact_added` (the validator already accepted the full memory enum).
@@ -776,7 +790,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-036 — fact-store `supersedeFact` + current-facts query
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-035 (`Done`)
 - **Note (impl):** widened `@sb/event-log` `AppendableMemoryKind` to include `fact_superseded` (one token).
 - **Scope:** `supersedeFact(oldId, newFact)`: append a `fact_superseded` event + add the new fact
@@ -791,7 +805,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-021 — entity-graph nodes projection
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-023 (`Done`)
 - **Note (impl):** reads entity notes via the `@sb/note-vault` API and parses frontmatter with the `yaml`
   lib (added as an `@sb/entity-graph` dep) rather than adding a 4th hand-rolled frontmatter parser.
@@ -806,7 +820,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-037 — entity-graph edges + manual-confirm `entity_merged`
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-021 (`Done`)
 - **Note (impl):** extended the SB-023 projector to fold `entity_merged` → a merge map (+ `resolveEntity`);
   added `readMemoryEvents` + the `entity_merged` kind + a `read_failed` code to `@sb/event-log`; added
@@ -824,7 +838,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-022 — task-store projection
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 3 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-023 (`Done`)
 - **Decision (OQ #4, RESOLVED 2026-06-05):** tasks are derived from **note frontmatter `status`** (a note
   with non-empty `status` + `title` → a task), vault-derived/rebuildable; **no new task event kind**.
@@ -856,7 +870,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-039 — Replay reproducibility gate (drop+replay identical)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** In Review
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-038 (`Done`)
 - **Note (impl):** `apps/cli/test/reproducibility.test.ts` — populates a rich workspace (capture + facts incl.
   a supersede + entities incl. a merge + a task), snapshots all 4 projection tables, **deletes `db/`**,
@@ -870,6 +884,123 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 - **Validation:** `pnpm test` includes the reproducibility gate (green).
 - **Files Expected to Change:** a test under `packages/memory-kernel/test/` or `apps/cli/test/`, test wiring, `docs/planning/*`, `STATUS.md`.
 - **Out of Scope:** performance tuning; L4 indexes.
+
+---
+
+# Phase 2 review follow-up cards (from the 2026-06-09 review; backlog quality band)
+
+> Source: Phase 2 code review of `origin/main` @ `22b02b2` (2026-06-09). Verdict: ship-quality, no
+> CRITICAL/HIGH. The MEDIUM findings are SB-042/043 (P2); the LOW findings are SB-044/045/046 (P3).
+> Finding #8 (no coverage measurement) is already tracked as SB-033.
+
+## SB-042 — Pin + document the `node:sqlite` runtime requirement
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 1 · **Status:** Backlog
+- **Dependencies:** SB-034 (`Done`)
+- **Context (review finding, MEDIUM):** the entire L3 layer depends on the built-in `node:sqlite`, which is
+  **experimental** in Node 22 (emits an `ExperimentalWarning`; API may change before stabilizing). Nothing
+  pins a known-good Node version — there is no `engines.node` floor in any `package.json`, and the README
+  does not state the requirement.
+- **Scope:** Add an `engines.node` constraint at the workspace root (and `@sb/memory-kernel` if useful)
+  pinning the known-good floor (Node ≥22.5, the version validated in SB-034); document the requirement +
+  the experimental status in the root README and `packages/memory-kernel/README.md`; note the fallback plan
+  (swap to `better-sqlite3` behind `openProjectionStore`) if the built-in API breaks.
+- **Acceptance Criteria:**
+  - `engines.node` is present and `pnpm install` + `pnpm test` pass on the pinned floor.
+  - README(s) state the Node requirement and the experimental caveat.
+- **Definition of Done:** docs + manifests updated; full suite green; no production-code change.
+- **Validation:** `pnpm install` warning-free w.r.t. engines; root `pnpm test` exit 0.
+- **Files Expected to Change:** `package.json`, `packages/memory-kernel/{package.json,README.md}`,
+  `README.md`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** actually swapping the SQLite driver; supporting older Node.
+
+## SB-043 — Atomic single-connection `rebuild` (one store, one transaction)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-038 (`Done`)
+- **Context (review findings, MEDIUM ×2):** (a) `rebuild` is **not atomic** — it resets all tables (+
+  emits `projection_reset`), then rebuilds facts→entities→edges→tasks, then emits `projection_rebuilt`; a
+  crash mid-rebuild leaves projections empty/partial (a `reset` event with no `rebuilt`). Not data loss
+  (`db/` is rebuildable — re-run), but the tables are transiently wrong and nothing wraps the run in a
+  transaction. (b) `runRebuild` opens/closes the projection store **~5×** (reset, facts, then each
+  `projectX` opens its own), which blocks a single wrapping transaction and is mild overhead.
+- **Scope:** Thread **one open `ProjectionStore`** through the whole rebuild (extend
+  `projectEntities`/`projectEdges`/`projectTasks` and the fact-replay path to accept an injected store,
+  keeping their standalone open-a-store behavior as the default), and wrap the reset+rebuild in a **single
+  SQLite transaction** so a failed rebuild rolls back to the pre-rebuild projections. Event emission order
+  unchanged (`projection_reset` … `projection_rebuilt`).
+- **Acceptance Criteria:**
+  - A rebuild that fails mid-way (fault-injected in a test) leaves the projection tables exactly as they
+    were before the rebuild (rolled back), and no `projection_rebuilt` event is emitted.
+  - A successful rebuild opens the store once and produces the same row-identical result (SB-039 gate
+    still green).
+- **Definition of Done:** tests green incl. the fault-injection case; `tsc --noEmit` exit 0; SB-039
+  reproducibility gate unchanged + green; leakage clean.
+- **Validation:** new fault-injection test in `apps/cli/test/`; root `pnpm test` exit 0 (incl.
+  reproducibility gate).
+- **Files Expected to Change:** `apps/cli/src/rebuild-command.ts`,
+  `packages/{fact-store,entity-graph,task-store}/src/*` (store-injection params),
+  `packages/memory-kernel/src/store.ts` (transaction helper), tests, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** incremental (non-full) rebuilds; concurrency/locking across processes; performance
+  tuning beyond the single connection.
+
+## SB-044 — Shared frontmatter helper in `@sb/note-vault` (DRY)
+
+- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-011 (`Done`)
+- **Context (review finding, LOW; flagged in the Phase 1 review and grown since):** frontmatter
+  parse/build logic now exists ~4× — `@sb/entity-graph` (×2: nodes + edges), `@sb/task-store`, and the
+  note-vault read path / `scripts/validate_notes.ts`. Drift risk grows with every new projection.
+- **Scope:** Export one shared frontmatter parse helper from `@sb/note-vault` (thin wrapper over the
+  `yaml` lib, returning `{frontmatter, body}`), and migrate the entity-graph/task-store/validate_notes
+  call sites to it. Behavior-preserving refactor.
+- **Acceptance Criteria:** one shared helper; all migrated call sites pass their existing tests unchanged.
+- **Definition of Done:** full suite green (130+); `tsc --noEmit` exit 0 across packages; leakage clean.
+- **Validation:** root `pnpm test` exit 0; grep shows no remaining hand-rolled frontmatter parsing outside
+  the helper.
+- **Files Expected to Change:** `packages/note-vault/src/{frontmatter.ts(new),index.ts}`,
+  `packages/{entity-graph,task-store}/src/*`, `scripts/validate_notes.ts`, `pnpm-lock.yaml` (dep moves),
+  `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** schema changes; new parsing features; touching the capture/distill writers' build path.
+
+## SB-045 — Projection-table consistency hardening (entity reset + edge UNIQUE)
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-037 (`Done`), SB-038 (`Done`)
+- **Context (review findings, LOW ×2):** (a) `projectEntities` **upserts without a table reset** while
+  edges/tasks full-rebuild — a standalone `projectEntities` run can leave a stale node from a deleted
+  entity note (masked today by the `rebuild` command's reset). (b) `entity_edges` has **no `UNIQUE`
+  constraint** — dedup happens in-memory per full-rebuild run; safe today, fragile if an incremental
+  writer is ever added.
+- **Scope:** Make standalone `projectEntities` full-rebuild (DELETE + insert) like edges/tasks, and add a
+  `UNIQUE` constraint on `entity_edges(src, dst)` (schema migration v2 in `@sb/memory-kernel`, idempotent).
+- **Acceptance Criteria:**
+  - Deleting an entity note then re-running `projectEntities` alone drops the stale node (new test).
+  - The UNIQUE constraint exists; duplicate edge insertion is rejected/ignored deterministically; SB-039
+    gate still green.
+- **Definition of Done:** tests green; migration idempotent (re-open applies cleanly); leakage clean.
+- **Validation:** new entity-reset + duplicate-edge tests; root `pnpm test` exit 0.
+- **Files Expected to Change:** `packages/entity-graph/src/project-entities.ts`,
+  `packages/memory-kernel/src/store.ts` (schema v2), tests, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** incremental projection writers; removing merged-duplicate nodes (separate concern).
+
+## SB-046 — Single-pass note reads in projections
+
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-022 (`Done`)
+- **Context (review finding, LOW; performance):** each projection run reads every note **twice** —
+  `listNotes()` opens each file to summarize, then the projector calls `getNote()` per note again (O(n)
+  double reads). Fine at KB scale; wasteful as the vault grows.
+- **Scope:** Let projections obtain full note content in one pass — e.g. a `listNotes({includeContent})`
+  option or an iterator on the note-vault read API — and migrate
+  `projectEntities`/`projectEdges`/`projectTasks` to it. Behavior-preserving.
+- **Acceptance Criteria:** projections read each note file exactly once per run (asserted via an
+  fs-spy/counter test or equivalent); outputs unchanged (existing tests green).
+- **Definition of Done:** full suite green; `tsc --noEmit` exit 0; SB-039 gate unchanged; leakage clean.
+- **Validation:** root `pnpm test` exit 0; the single-read assertion test.
+- **Files Expected to Change:** `packages/note-vault/src/{read-notes.ts,index.ts}`,
+  `packages/{entity-graph,task-store}/src/*`, tests, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** caching layers; watch/incremental modes; L4 indexes.
 
 ---
 
