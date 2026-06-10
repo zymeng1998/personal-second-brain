@@ -15,6 +15,20 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-028 `Done` (P2 follow-up, EPIC-CORE-007) — multi-source provenance on the L2 note
+- **Human asked to check + implement the old P2 follow-ups** (SB-028/029/033 — all were still
+  `Backlog`). This is the first of the three.
+- **Carrier decision:** the non-primary `source_ids` are written to frontmatter **`links`**
+  (schema-existing additive field, "note ids or titles"; deduped, order kept) — `source_ref` stays
+  the single primary origin, no schema change. `writeDistilledNote` gains an optional validated
+  `links` input (`invalid_links` error code added); the CLI accept path threads
+  `source_ids.slice(1)` into it. The `distillation_accepted` event payload is unchanged.
+- **Validation (green):** note-vault **37/37** (3 new: links written + deduped + schema-valid via
+  Ajv; empty links → no key; invalid links rejected with nothing written); cli **40/40** (2 new:
+  3-source accept → `source_ref` primary + both secondaries in `links` + full list still in the
+  event; single-source → no links key); builds exit 0; root `pnpm test` **165/165**.
+- **Next:** SB-029 (L1 working-note creation).
+
 ## SB-055 `Done` (Phase 3 stretch) — graph + temporal indexes — ✅ ALL 9 PHASE 3 STORIES COMPLETE
 - **Human approved starting the stretch** after the SB-054 gate ("approved, start 055").
 - **Scope delivered:** `notes.py` now extracts frontmatter `entities:` ULID refs (block form),

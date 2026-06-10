@@ -46,6 +46,13 @@ export interface WriteDistilledNoteInput {
   createdAt?: string;
   /** Optional tags. */
   tags?: string[];
+  /**
+   * Optional outgoing link targets (note ids or titles) written as frontmatter
+   * `links`. SB-028: the distillation accept path records the non-primary
+   * source ids here, so multi-source provenance is reconstructable from the
+   * note itself (the schema's single `source_ref` stays the primary origin).
+   */
+  links?: string[];
   /** Optional human-readable, NON-canonical filename slug. The id never changes. */
   slug?: string;
   /**
@@ -80,6 +87,11 @@ function buildFrontmatter(input: WriteDistilledNoteInput, created: string): stri
   if (input.tags !== undefined && input.tags.length > 0) {
     lines.push("tags:");
     for (const tag of input.tags) lines.push(`  - ${yamlScalar(tag)}`);
+  }
+  const links = input.links !== undefined ? [...new Set(input.links)] : [];
+  if (links.length > 0) {
+    lines.push("links:");
+    for (const link of links) lines.push(`  - ${yamlScalar(link)}`);
   }
   lines.push("---");
   return lines.join("\n");
@@ -126,6 +138,16 @@ export async function writeDistilledNote(
   }
   if (slug !== undefined && (slug.length > SLUG_MAX_LENGTH || !SLUG_PATTERN.test(slug))) {
     throw new DistilledNoteWriteError("unsafe_path", `slug is not filename-safe: ${String(slug)}`, { slug });
+  }
+  if (
+    input.links !== undefined &&
+    (!Array.isArray(input.links) || !input.links.every((l) => typeof l === "string" && l.length > 0))
+  ) {
+    throw new DistilledNoteWriteError(
+      "invalid_links",
+      "links must be an array of non-empty strings (note ids or titles)",
+      { links: input.links },
+    );
   }
 
   const dirRelative = input.dirRelative ?? DISTILLED_RELATIVE_DIR;

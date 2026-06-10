@@ -151,6 +151,10 @@ export async function runDistillAccept(opts: AcceptOptions): Promise<AcceptResul
   const sourceIds = [...proposal.source_ids] as unknown as string[];
   const primarySourceRef = sourceIds[0] as string;
 
+  // SB-028: non-primary sources are recorded on the note itself (frontmatter
+  // `links`), so multi-source provenance survives without the event log.
+  const secondarySourceIds = sourceIds.slice(1);
+
   const noteResult = await writeDistilledNote({
     workspace,
     id: noteId,
@@ -159,6 +163,7 @@ export async function runDistillAccept(opts: AcceptOptions): Promise<AcceptResul
     source_ref: primarySourceRef,
     createdAt,
     ...(proposal.tags !== undefined && proposal.tags.length > 0 ? { tags: proposal.tags } : {}),
+    ...(secondarySourceIds.length > 0 ? { links: secondarySourceIds } : {}),
   });
 
   const noteRelPath = relative(workspace, noteResult.path);

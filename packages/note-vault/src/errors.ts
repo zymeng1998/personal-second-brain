@@ -30,6 +30,7 @@ export type DistilledNoteWriteErrorCode =
   | "unsafe_path"
   | "missing_title"
   | "missing_source_ref"
+  | "invalid_links"
   | "already_exists"
   | "write_failed";
 

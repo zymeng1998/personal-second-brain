@@ -75,7 +75,7 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-028 | Story | Record multi-source provenance on the L2 note | EPIC-CORE-007 | P2 | Backlog | 2 | SB-024, SB-026 |
+| SB-028 | Story | Record multi-source provenance on the L2 note | EPIC-CORE-007 | P2 | Done | 2 | SB-024, SB-026 |
 | SB-029 | Story | L1 working-note creation so `distill propose` has candidates | EPIC-CORE-007 | P2 | Backlog | 3 | SB-026 |
 | SB-033 | Story | Test-coverage measurement + `init_workspace` automated test | EPIC-CORE-001 | P2 | Backlog | 3 | — |
 
@@ -660,7 +660,9 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-028 — Record multi-source provenance on the L2 note
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P2 · **Points:** 2 · **Status:** Done
+- **Carrier decision (2026-06-10):** frontmatter `links` (schema: "note ids or titles", additive,
+  uniqueItems) carries the non-primary `source_ids`; `source_ref` stays the primary origin.
 - **Dependencies:** SB-024 (`Done`), SB-026 (`Done`)
 - **Context (review finding, MEDIUM):** a `DistillationProposal` carries `source_ids[]`, but
   `writeDistilledNote` records only `source_ids[0]` as the note's single `source_ref`; secondary sources

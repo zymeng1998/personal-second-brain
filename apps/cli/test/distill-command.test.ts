@@ -212,3 +212,42 @@ test("unknown distill subcommand errors (exit 1)", async () => {
   assert.equal(code, 1);
   assert.equal(JSON.parse(stderr).error.code, "bad_arguments");
 });
+
+test("SB-028: multi-source accept records secondary sources as note links", async () => {
+  const SOURCE_C = "01KT6D5N163GSHGECNCA88NYPF";
+  const ws = await makeWorkspace();
+  const result = await runDistillAccept({
+    workspace: ws,
+    now: "2026-06-10T10:00:00Z",
+    proposal: {
+      source_ids: [SOURCE_A, SOURCE_B, SOURCE_C],
+      title: "Three-source insight",
+      body: "Synthesized from three notes.",
+      rationale: "r",
+    },
+  });
+
+  const noteText = await readFile(result.note_path, "utf8");
+  // primary stays the single schema source_ref
+  assert.match(noteText, new RegExp(`^source_ref: ${SOURCE_A}$`, "m"));
+  // the remaining origin ids live on the note itself
+  assert.match(noteText, /^links:$/m);
+  assert.match(noteText, new RegExp(`^  - "${SOURCE_B}"$`, "m"));
+  assert.match(noteText, new RegExp(`^  - "${SOURCE_C}"$`, "m"));
+
+  // event payload still carries the full list (unchanged contract)
+  const lines = await memoryLines(ws);
+  const event = JSON.parse(lines[0]!);
+  assert.deepEqual(event.payload.source_ids, [SOURCE_A, SOURCE_B, SOURCE_C]);
+});
+
+test("SB-028: single-source accept emits no links key", async () => {
+  const ws = await makeWorkspace();
+  const result = await runDistillAccept({
+    workspace: ws,
+    now: "2026-06-10T10:00:00Z",
+    proposal: { source_ids: [SOURCE_A], title: "One source", body: "b", rationale: "r" },
+  });
+  const noteText = await readFile(result.note_path, "utf8");
+  assert.doesNotMatch(noteText, /^links:$/m);
+});

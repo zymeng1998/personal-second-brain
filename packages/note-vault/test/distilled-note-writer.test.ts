@@ -179,3 +179,34 @@ test("never reads or mutates the L1 source note it references", async () => {
   const after = await readFile(workingPath);
   assert.ok(before.equals(after), "the L1 source file must be byte-identical after distillation");
 });
+
+test("SB-028: links record secondary sources and validate against the schema", async () => {
+  const ws = await makeWorkspace();
+  const second = "01KT6C7GH0PM1K6XQH3K6ZG8EF";
+  const third = "01KT6C7GH0PM1K6XQH3K6ZG8FG";
+  await writeDistilledNote({ ...baseInput(ws), links: [second, third, second] });
+
+  const text = await readFile(join(ws, "vault", "80_Wiki", `${ID}.md`), "utf8");
+  const fm = frontmatterOf(text);
+  assert.equal(fm["source_ref"], SOURCE_REF);
+  assert.deepEqual(fm["links"], [second, third]); // deduped, order kept
+
+  const validate = await loadValidator();
+  assert.equal(validate(fm), true, JSON.stringify(validate.errors));
+});
+
+test("SB-028: omitted/empty links emit no links key", async () => {
+  const ws = await makeWorkspace();
+  await writeDistilledNote({ ...baseInput(ws), links: [] });
+  const text = await readFile(join(ws, "vault", "80_Wiki", `${ID}.md`), "utf8");
+  assert.ok(!("links" in frontmatterOf(text)));
+});
+
+test("SB-028: invalid links rejected and nothing written", async () => {
+  const ws = await makeWorkspace();
+  await assert.rejects(
+    writeDistilledNote({ ...baseInput(ws), links: ["ok", ""] }),
+    (e: unknown) => e instanceof DistilledNoteWriteError && e.code === "invalid_links",
+  );
+  assert.equal(existsSync(join(ws, "vault", "80_Wiki", `${ID}.md`)), false);
+});
