@@ -2,6 +2,15 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
+- **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +
+  `sidecars/ai` deferred [roadmap deviation approved]; #22 shared proposal envelope schema;
+  #23 no auto-dedupe, skill surfaces duplicates; #24 note-id source resolution; #25 deterministic
+  review candidates). Recorded RESOLVED in `open_questions.md` + story map.
+- **Session authorization:** autonomous Phase 4 advance in dependency order
+  SB-056 → 057 → 058 → 059 → 062 → 063 → 064 → 065 → 066; one atomic commit + push per story;
+  blockers recorded instead of stopping. **SB-056 → `In Progress`.**
+
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
   (**SB-056..059 + SB-062..066**, 22 pts; ids skip SB-060/061 = EPIC-CORE-012 and SB-070–072 =

@@ -39,9 +39,11 @@ refinement review. Recorded here; full context in [`phase_3_story_map.md`](phase
 ## Decide before Phase 4 implementation (AI workflows)
 
 Raised at the 2026-06-10 Phase 4 refinement ([`phase_4_story_map.md`](phase_4_story_map.md)).
-**None resolved yet — stories stay `Backlog` until the human confirms these.**
+**ALL FIVE RESOLVED (2026-06-10): human approved every decision exactly as leaned** ("all five
+positions are approved"), including the OQ #21 roadmap deviation (skills-first; `sidecars/ai`
+stays boundary-docs until a batch/non-interactive need appears).
 
-| # | Question | Lean |
+| # | Question | Decision (2026-06-10, approved as leaned) |
 |---|---|---|
 | 21 | **AI engine:** Claude-Code skills (agent drafts; CLI validates + writes) vs implementing `sidecars/ai` (local LLM / API) now | **Skills-first**; `sidecars/ai` stays boundary-docs until a batch/non-interactive workflow needs it. **Deviates from the roadmap's `sidecars/ai` wording — needs explicit approval.** |
 | 22 | Proposal artifact format for accept steps | Shared versioned `schemas/json/proposal.schema.json` envelope (`workflow`/`version`/`proposed_at`/`items[]`) with per-workflow item payloads; accept commands validate against it (mirrors `distill accept --file`). |
