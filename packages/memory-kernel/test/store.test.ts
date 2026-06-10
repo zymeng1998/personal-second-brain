@@ -130,3 +130,20 @@ test("a store with a NEWER schema version refuses to open (forward guard)", asyn
   sqlite.close();
   assert.equal(Number(row.version), SCHEMA_VERSION + 1);
 });
+
+test("a store with a CORRUPT (non-integer) schema version refuses to open", async () => {
+  // Re-review follow-up: NaN passes neither < nor > SCHEMA_VERSION, so without
+  // an integer check a corrupt version row silently passed as current.
+  const ws = await makeWorkspace();
+  const current = openProjectionStore(ws);
+  current.db.prepare("UPDATE schema_version SET version = ?").run("banana");
+  current.close();
+
+  assert.throws(
+    () => openProjectionStore(ws),
+    (e: unknown) =>
+      e instanceof MemoryKernelError &&
+      e.code === "migration_failed" &&
+      /or invalid/.test(e.message),
+  );
+});

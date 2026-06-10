@@ -102,8 +102,10 @@ def _rebuild(
     except BaseException:
         _delete_index_files(tmp_path)
         raise
-    # success: the stale WAL (if any) must go before the rename, never after
-    _delete_index_files(db_path)
+    # success: drop the previous index's stale WAL (if any) BEFORE the swap so
+    # it can never be applied to the new file; replace() itself overwrites the
+    # old index atomically — no unlink first, so there is no index-less window
+    db_path.with_name(db_path.name + ".wal").unlink(missing_ok=True)
     tmp_path.replace(db_path)
 
 

@@ -33,7 +33,9 @@ def model_name() -> str:
 def query_prefix(name: str) -> str:
     """The instruction prefix this model family expects on queries ("" if none).
     Only bge v1/v1.5 models use one; a custom SB_EMBED_MODEL with its own
-    instruction convention needs explicit support here."""
+    instruction convention needs explicit support here. Known limitation
+    (consistent with the OQ #9 English-only note): bge-*-zh models would want
+    the Chinese instruction, not this English one."""
     lowered = name.lower()
     if "bge" in lowered and "-m3" not in lowered:
         return QUERY_PREFIX

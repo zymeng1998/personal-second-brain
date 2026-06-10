@@ -121,13 +121,15 @@ export function openProjectionStore(workspace: string): ProjectionStore {
       | undefined;
     if (row === undefined) {
       db.prepare("INSERT INTO schema_version (version) VALUES (?)").run(SCHEMA_VERSION);
-    } else if (Number(row.version) > SCHEMA_VERSION) {
-      // Forward guard: a db written by NEWER code is not silently downgraded.
-      // db/ is disposable — delete it and `sb rebuild` (or upgrade this code).
+    } else if (!Number.isInteger(Number(row.version)) || Number(row.version) > SCHEMA_VERSION) {
+      // Forward guard: a db written by NEWER code (or holding a corrupt
+      // version) is not silently downgraded. A NaN passes neither < nor >, so
+      // the integer check is load-bearing. db/ is disposable — delete it and
+      // `sb rebuild` (or upgrade this code).
       throw new MemoryKernelError(
         "migration_failed",
-        `projection store schema v${Number(row.version)} is newer than this code (v${SCHEMA_VERSION}): ${path}`,
-        { path, found: Number(row.version), supported: SCHEMA_VERSION },
+        `projection store schema version '${String(row.version)}' is newer than this code supports (v${SCHEMA_VERSION}) or invalid: ${path}`,
+        { path, found: row.version, supported: SCHEMA_VERSION },
       );
     } else if (Number(row.version) < SCHEMA_VERSION) {
       db.prepare("UPDATE schema_version SET version = ?").run(SCHEMA_VERSION);
