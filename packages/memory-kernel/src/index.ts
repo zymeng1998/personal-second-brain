@@ -5,6 +5,7 @@
 export {
   openProjectionStore,
   projectionDbPath,
+  withTransaction,
   DB_RELATIVE_PATH,
   SCHEMA_VERSION,
 } from "./store.js";

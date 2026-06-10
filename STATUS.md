@@ -2,6 +2,18 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## SB-043 `Done` (quality band) — atomic single-connection rebuild
+- **Scope delivered:** `@sb/memory-kernel` `withTransaction(store, fn)` (BEGIN IMMEDIATE / COMMIT /
+  ROLLBACK; rollback-failure swallowed so the original error wins); `projectEntities`/`projectEdges`/
+  `projectTasks` accept an optional injected open `ProjectionStore` (caller owns lifecycle; standalone
+  open-per-call behavior unchanged); `runRebuild` now does ALL table work (reset + facts + entities/edges/
+  tasks) on **one store in one transaction**, and appends `projection_reset` + `projection_rebuilt` only
+  **after commit** — a failed rebuild rolls back to the pre-rebuild projections and appends **no** events.
+- **Validation (green):** 4 package builds exit 0; full suite **131/131** (cli 28→29: new fault-injection
+  test — title-less entity note thrown mid-rebuild → projections + projection stream byte-identical to
+  baseline); SB-039 reproducibility gate still green; leakage clean.
+- **Next:** SB-044 (shared frontmatter helper).
+
 ## SB-042 `Done` (quality band) — engines pin + node:sqlite docs
 - **Scope delivered:** root + `@sb/memory-kernel` `engines.node: ">=22.5.0"` (node:sqlite/`DatabaseSync`
   floor; was a wrong `>=20` at root); README getting-started + memory-kernel README document the

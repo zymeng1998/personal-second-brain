@@ -62,11 +62,17 @@ export interface ProjectEntitiesResult {
 /**
  * Project every L2 entity note into the `entity_nodes` table. Idempotent (upsert
  * by id). Throws `EntityGraphError("invalid_entity_note")` if an entity note has
- * no title (the schema requires one).
+ * no title (the schema requires one). An injected open `store` (SB-043) is used
+ * as-is and left open — the caller owns its lifecycle/transaction; otherwise a
+ * store is opened and closed per call.
  */
-export async function projectEntities(workspace: string): Promise<ProjectEntitiesResult> {
+export async function projectEntities(
+  workspace: string,
+  injectedStore?: ProjectionStore,
+): Promise<ProjectEntitiesResult> {
   const summaries = await listNotes(workspace, { type: "entity" });
-  const store = openProjectionStore(workspace);
+  const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
+  const store = injectedStore ?? ownStore!;
   try {
     let count = 0;
     for (const summary of summaries) {
@@ -91,7 +97,7 @@ export async function projectEntities(workspace: string): Promise<ProjectEntitie
     }
     return { count };
   } finally {
-    store.close();
+    ownStore?.close();
   }
 }
 

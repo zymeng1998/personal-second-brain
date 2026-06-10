@@ -60,12 +60,18 @@ export interface ProjectEdgesResult {
 /**
  * Rebuild the `entity_edges` table from current entity notes, resolving endpoints
  * through the merge map. Idempotent; deterministic. Self-edges (after resolution)
- * and duplicate (from,to,kind) edges are skipped.
+ * and duplicate (from,to,kind) edges are skipped. An injected open `store`
+ * (SB-043) is used as-is and left open — the caller owns its
+ * lifecycle/transaction; otherwise a store is opened and closed per call.
  */
-export async function projectEdges(workspace: string): Promise<ProjectEdgesResult> {
+export async function projectEdges(
+  workspace: string,
+  injectedStore?: ProjectionStore,
+): Promise<ProjectEdgesResult> {
   const summaries = await listNotes(workspace, { type: "entity" });
   const mergeState = projectEvents(await readMemoryEvents(workspace));
-  const store = openProjectionStore(workspace);
+  const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
+  const store = injectedStore ?? ownStore!;
   try {
     store.db.exec("DELETE FROM entity_edges");
     const seen = new Set<string>();
@@ -85,7 +91,7 @@ export async function projectEdges(workspace: string): Promise<ProjectEdgesResul
     }
     return { count };
   } finally {
-    store.close();
+    ownStore?.close();
   }
 }
 

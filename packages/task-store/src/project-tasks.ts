@@ -52,10 +52,16 @@ export interface ProjectTasksResult {
  * Rebuild the `tasks` table from the current vault. A note is a task iff its
  * frontmatter has a non-empty `status` AND a `title`. Full-rebuild (DELETE +
  * insert) so dropped/changed statuses are reflected. Idempotent + deterministic.
+ * An injected open `store` (SB-043) is used as-is and left open — the caller owns
+ * its lifecycle/transaction; otherwise a store is opened and closed per call.
  */
-export async function projectTasks(workspace: string): Promise<ProjectTasksResult> {
+export async function projectTasks(
+  workspace: string,
+  injectedStore?: ProjectionStore,
+): Promise<ProjectTasksResult> {
   const summaries = await listNotes(workspace);
-  const store = openProjectionStore(workspace);
+  const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
+  const store = injectedStore ?? ownStore!;
   try {
     store.db.exec("DELETE FROM tasks");
     let count = 0;
@@ -79,7 +85,7 @@ export async function projectTasks(workspace: string): Promise<ProjectTasksResul
     }
     return { count };
   } finally {
-    store.close();
+    ownStore?.close();
   }
 }
 

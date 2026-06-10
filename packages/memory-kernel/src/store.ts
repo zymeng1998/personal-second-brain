@@ -128,3 +128,26 @@ export function openProjectionStore(workspace: string): ProjectionStore {
     close: () => db.close(),
   };
 }
+
+/**
+ * Run `fn` inside a single SQLite transaction on an open store (SB-043). Commits
+ * on success; rolls back on any throw, leaving the projection tables exactly as
+ * they were before. The async body is safe on `DatabaseSync` because the whole
+ * process shares one connection and nothing else issues statements between the
+ * awaits of a single CLI run.
+ */
+export async function withTransaction<T>(store: ProjectionStore, fn: () => Promise<T> | T): Promise<T> {
+  store.db.exec("BEGIN IMMEDIATE");
+  try {
+    const result = await fn();
+    store.db.exec("COMMIT");
+    return result;
+  } catch (err) {
+    try {
+      store.db.exec("ROLLBACK");
+    } catch {
+      // the connection may already be unusable; the original error wins
+    }
+    throw err;
+  }
+}

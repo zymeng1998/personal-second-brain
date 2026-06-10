@@ -96,6 +96,34 @@ test("rebuild never modifies 00_Raw or the capture/memory event streams", async 
   assert.equal(await readMaybe(join(ws, "events", "memory_events.jsonl")), memoryBefore);
 });
 
+test("a failed rebuild rolls back: projections and events exactly as before (SB-043)", async () => {
+  const BAD_ENT = "01KTF8BADC0000000000000000";
+  const ws = await makeWorkspace();
+  await populate(ws);
+
+  // Baseline: one good rebuild, then snapshot projections + the projection stream.
+  await runRebuild({ workspace: ws, now: "2026-06-09T12:00:00Z" });
+  const factsBefore = listCurrentFacts({ workspace: ws });
+  const nodesBefore = listEntityNodes(ws);
+  const edgesBefore = listEntityEdges(ws);
+  const tasksBefore = listTasks(ws);
+  const eventsPath = join(ws, "events", "projection_events.jsonl");
+  const eventsBefore = await readFile(eventsPath, "utf8");
+
+  // Fault injection: a title-less entity note makes projectEntities throw
+  // mid-rebuild — after the table reset and the fact re-inserts.
+  await seedNote(ws, "50_Entities", BAD_ENT, `id: ${BAD_ENT}\ntype: entity\nlayer: 2\ncreated: "2026-06-09T08:00:00Z"`);
+  await assert.rejects(runRebuild({ workspace: ws, now: "2026-06-09T13:00:00Z" }), /has no title/);
+
+  // Rolled back: every projection table is row-identical to the baseline …
+  assert.deepEqual(listCurrentFacts({ workspace: ws }), factsBefore);
+  assert.deepEqual(listEntityNodes(ws), nodesBefore);
+  assert.deepEqual(listEntityEdges(ws), edgesBefore);
+  assert.deepEqual(listTasks(ws), tasksBefore);
+  // … and the failed run appended no projection events (no reset, no rebuilt).
+  assert.equal(await readFile(eventsPath, "utf8"), eventsBefore);
+});
+
 test("rebuild is idempotent (same projection rows on a second run)", async () => {
   const ws = await makeWorkspace();
   await populate(ws);
