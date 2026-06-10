@@ -15,6 +15,20 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-030 `Done` (Phase 3, EPIC-CORE-009) — Python sidecar skeleton (stdio JSONL)
+- **Scope delivered:** `sidecars/retrieval` is now a real uv project — `pyproject.toml`
+  (`requires-python >=3.11`, hatchling, pytest dev group), `.python-version` 3.11 (uv resolved 3.11.15),
+  `uv.lock`. `src/retrieval_sidecar/`: `protocol.py` (pure `handle_line`/`handle_request`; ops registry
+  `ping` → `{pong:true}`, `health` → `{version,python}`; structured errors `malformed_request`/
+  `unknown_op`/`internal_error`; unrecoverable `req_id` → `""`; blank lines skipped), `server.py`
+  (JSONL loop, stdout = envelopes only + flush per line, logs → stderr, clean EOF exit), `__main__.py`
+  (`python -m retrieval_sidecar`). README rewritten (one-command `uv sync` setup + protocol reference).
+  No vault/index/event access of any kind (card requirement).
+- **Validation (green):** `uv run pytest` **11/11** (8 protocol unit + 3 subprocess: ping/health
+  round-trip + EOF exit 0, stdout purity under garbage, stderr-only logs); manual echo-pipe smoke
+  (`ping` + `health` → correct envelopes; Python 3.11.15).
+- **Next:** SB-048 (`Ready`) — TS transport client `@sb/retrieval`.
+
 ## SB-047 `Done` (Phase 3, EPIC-CORE-009) — retrieval + index contracts
 - **Scope delivered (contracts only, mirrors SB-010/019/020):** new
   `packages/interfaces/src/retrieval.ts` — `IndexType`/`QueryMode`/`ChunkId`,

@@ -1,0 +1,16 @@
+[project]
+name = "retrieval-sidecar"
+version = "0.1.0"
+description = "Second Brain retrieval sidecar: stdio JSONL server. Reads the vault read-only; writes only under indexes/."
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

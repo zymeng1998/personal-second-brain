@@ -119,8 +119,8 @@ Cards below.
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | Done | 2 | SB-010 |
-| SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Ready | 3 | SB-047 |
-| SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-030, SB-047 |
+| SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Done | 3 | SB-047 |
+| SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Ready | 3 | SB-030, SB-047 |
 | SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-048 |
 | SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Backlog | 2 | SB-031 |
 | SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Backlog | 2 | SB-053 |
@@ -1051,7 +1051,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-047 — Retrieval + index contracts (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Done (`2fca71f`)
 - **Dependencies:** SB-010 (`Done`)
 - **Scope (contracts only, mirrors SB-010/019/020):** new `packages/interfaces/src/retrieval.ts` —
   `IndexVaultInput`/`IndexVaultResult` (counts per index type), `QueryMemoryInput`
@@ -1070,7 +1070,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-030 — Python sidecar skeleton (stdio JSONL, ping/health)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-047; OQ #17 (toolchain) confirmed
 - **Scope:** `sidecars/retrieval` becomes a real uv project (`pyproject.toml` + `uv.lock`, Python ≥3.11
   pinned; no DuckDB/model deps yet). Entrypoint reads JSONL requests on stdin, writes one JSONL response

@@ -1,20 +1,66 @@
-# sidecars/retrieval (Python) — boundary docs only
+# sidecars/retrieval (Python) — stdio JSONL retrieval sidecar
 
-Future Python service for embeddings, vector/FTS/graph indexing, and RAG query. **No code in Phase 0.**
+The Phase 3 retrieval sidecar: indexes the vault into disposable L4 indexes and answers queries.
+Driven by the TS facade (`@sb/retrieval`) over **stdio JSONL**. See
+[`docs/architecture/sidecar_contract.md`](../../docs/architecture/sidecar_contract.md) and
+[`docs/planning/phase_3_story_map.md`](../../docs/planning/phase_3_story_map.md).
 
-## Boundary (decided)
+## Boundary (non-negotiable)
 
-- **Reads & indexes** the vault; **never owns or mutates** it; never writes raw (L0).
-- Output goes only to `indexes/` (L4 — disposable / rebuildable).
-- Transport: **stdio JSON/JSONL** (Phase 0/1); optional local HTTP (Phase 3); optional MCP later.
-- Validates I/O against `schemas/json/` (same schemas as TS).
+- **Reads the vault read-only**; never owns or mutates it; never writes raw (L0).
+- Writes go **only** under `<workspace>/indexes/` (L4 — disposable; delete + rebuild is lossless).
+- **Never writes events.** The event log is TS-owned; the CLI appends the `indexed` projection event.
+- Model caches (when embeddings land, SB-049) live **outside** the workspace (default HF cache).
 
-## Planned design (Phase 3)
+## Setup (one command)
 
-DuckDB + VSS (HNSW) + BGE-M3 (1024-d) + wikilink graph + FTS — **design ported, not copied** from
-sspaeti/obsidian-note-taking-assistant (license unspecified → reference only).
+Requires [uv](https://docs.astral.sh/uv/) (`brew install uv`). uv installs the pinned
+Python (≥3.11, see `.python-version`) — no system-Python dependency.
 
-## Not in Phase 0
+```sh
+cd sidecars/retrieval
+uv sync
+```
 
-No Python code, `requirements`/`pyproject`, retrieval/embedding logic. See
-[`docs/architecture/sidecar_contract.md`](../../docs/architecture/sidecar_contract.md).
+## Run
+
+```sh
+uv run python -m retrieval_sidecar
+```
+
+The process reads one JSON request per stdin line, writes one JSON response per stdout line
+(stdout carries envelopes ONLY; logs go to stderr), and exits cleanly on stdin EOF.
+
+Smoke test:
+
+```sh
+printf '{"op":"ping","req_id":"r1"}\n' | uv run python -m retrieval_sidecar
+# {"req_id":"r1","ok":true,"data":{"pong":true}}
+```
+
+## Protocol (mirrors `@sb/interfaces` `retrieval.ts`)
+
+Request: `{"op": string, "req_id": string, "args"?: object}` — `req_id` is echoed verbatim.
+
+Response: `{"req_id", "ok": true, "data": {…}}` or
+`{"req_id", "ok": false, "error": {"code", "message"}}`. Errors are always structured —
+never an exception across the boundary, never a non-JSON stdout line. A line whose `req_id`
+cannot be recovered (malformed JSON, missing `req_id`) is answered with `req_id: ""`.
+
+| op | args | data | errors |
+|---|---|---|---|
+| `ping` | — | `{"pong": true}` | — |
+| `health` | — | `{"version", "python"}` | — |
+| (any other) | — | — | `unknown_op` |
+
+Error codes so far: `malformed_request`, `unknown_op`, `internal_error`.
+Indexing/query ops (`index_vault`, `query`) arrive with SB-031+.
+
+## Tests
+
+```sh
+uv run pytest
+```
+
+Covers: ping/health round-trip, unknown op, malformed lines, `req_id` correlation, stdout
+purity under garbage input, stderr-only logging, clean EOF exit.
