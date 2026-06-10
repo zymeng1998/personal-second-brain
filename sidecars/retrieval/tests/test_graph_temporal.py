@@ -152,3 +152,16 @@ def test_filtered_rebuild_is_lossless(linked_workspace: Path) -> None:
     baseline = op_query(query)
     op_index_vault({"workspace": str(linked_workspace)})
     assert op_query(query) == baseline
+
+
+def test_filter_clause_stays_bounded_for_large_allowed_sets():
+    """Review MEDIUM #5: the filter must bind ONE list parameter, not one
+    placeholder per allowed note id (unbounded SQL growth)."""
+    from retrieval_sidecar.querying import _in_clause
+
+    allowed = {f"01ARZ3NDEKTSV4RRFFQ69G5{i:03d}" for i in range(5000)}
+    clause, params = _in_clause("note_id", allowed)
+    assert clause.count("?") == 1
+    assert len(params) == 1
+    assert params[0] == sorted(allowed)
+    assert _in_clause("note_id", None) == ("", [])

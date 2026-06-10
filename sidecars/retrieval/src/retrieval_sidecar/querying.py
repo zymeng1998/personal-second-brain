@@ -114,11 +114,13 @@ def _check_model_matches(connection: duckdb.DuckDBPyConnection) -> None:
         )
 
 
-def _in_clause(column: str, allowed: set[str] | None) -> tuple[str, list[str]]:
+def _in_clause(column: str, allowed: set[str] | None) -> tuple[str, list[list[str]]]:
+    """Bounded filter clause: ONE list parameter regardless of the allowed-set
+    size (review MEDIUM #5 — a wide temporal range used to expand into one `?`
+    per note id, growing the SQL statement without bound)."""
     if allowed is None:
         return "", []
-    placeholders = ", ".join("?" for _ in allowed)
-    return f" AND {column} IN ({placeholders})", sorted(allowed)
+    return f" AND list_contains(?, {column})", [sorted(allowed)]
 
 
 def _lexical_rows(
