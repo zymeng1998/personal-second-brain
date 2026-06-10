@@ -108,7 +108,17 @@ pnpm --filter @sb/cli rebuild
 
 # 7. Run the test suite (immutability + reproducibility gate included)
 pnpm test
+
+# 7b. Same suite with coverage reporting (c8, SB-033)
+pnpm run test:coverage
 ```
+
+**Coverage policy (SB-033):** target is **≥80% line coverage** (project rule). Reporting is
+**non-blocking** — `test:coverage` reports but never fails the build on a threshold. Baseline at
+adoption (2026-06-10, 180 tests): **90.15% lines / 78.27% branches**. Test files, Node stub
+sidecars (`*.mjs`), and `node_modules` are excluded (see the `c8` key in `package.json`).
+Python sidecar tests are separate (`uv run pytest` in `sidecars/retrieval`; env-gated TS↔Python
+E2E via `pnpm run test:sidecar`).
 
 `init_workspace` and `validate_notes` also accept `--workspace <path>` (and `--dry-run` /
 `--help` where applicable) instead of the environment variable.

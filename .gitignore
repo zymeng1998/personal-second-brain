@@ -62,3 +62,5 @@ Thumbs.db
 # Logs (technical/debug only; event logs live in the workspace, never here)
 logs/
 *.log
+coverage/
+.c8_output/

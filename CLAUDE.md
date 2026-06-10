@@ -94,6 +94,10 @@ delete-`indexes/`-rebuild lossless gate is green. **Root suite 159 tests (Node-o
 temporal from frontmatter dates + event timestamps, composable query `filters:{near,from,to}`) —
 **all 9 Phase 3 stories complete; root suite 160 tests, sidecar pytest 42.**
 
-**Next:** Phase 4 (AI workflows) after review. Older P2 review follow-ups remain (SB-028/029/033).
-Always follow the backlog workflow above: confirm the story is `Ready`, implement in-scope only,
-validate, stop at `In Review`.
+**The P2 review follow-ups are also cleared (2026-06-10):** SB-028 (multi-source provenance via
+`links`), SB-029 (`sb note promote` → L1 working notes in `00_Inbox`, giving `distill propose`
+real candidates), SB-033 (`test:coverage` via c8 — baseline 90% lines — + `init_workspace`
+subprocess tests). **Root suite 180 tests.**
+
+**Next:** Phase 4 (AI workflows) after review. Always follow the backlog workflow above: confirm
+the story is `Ready`, implement in-scope only, validate, stop at `In Review`.

@@ -15,6 +15,22 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-033 `Done` (P2 follow-up) — coverage measurement + init_workspace test — ✅ ALL P2 FOLLOW-UPS CLEARED
+- **Scope delivered:** (a) root **`test:coverage`** target — `c8` wraps `pnpm test`, merging
+  subprocess V8 coverage across every workspace package + scripts; excludes test files, Node stub
+  sidecars (`*.mjs`), `node_modules` (config in the root `package.json` `c8` key; `coverage/`
+  gitignored). **Non-blocking by design** (card note: measure first). Threshold documented in the
+  README: target ≥80% lines; **baseline 90.15% lines / 78.27% branches** (2026-06-10, 180 tests).
+  (b) **`scripts/init_workspace.test.ts`** — 6 subprocess tests against the real CLI surface:
+  dry-run writes nothing; real init creates tree + event files then `--verify` passes; `--verify`
+  fails uninitialized; re-init byte-identical (idempotent); **append-only invariant** (an existing
+  event file with content is not truncated by re-init); unknown flag hard-errors. Wired into
+  `test:scripts` (runs under root `pnpm test`).
+- **Validation (green):** `test:scripts` **18/18**; root `pnpm test` **180/180**; `test:coverage`
+  exit 0 with the summary above. No production-code change.
+- **This clears the last open review follow-up (SB-028/029/033 all `Done`).** Next: Phase 4
+  (AI workflows) refinement.
+
 ## SB-029 `Done` (P2 follow-up, EPIC-CORE-007) — L1 working-note creation (`note promote`)
 - **Surface decisions:** command = **`sb note promote <rawId> [--title]`**; target folder =
   **`vault/00_Inbox/`** (documented L1 queue, `memory_layers.md`); body seeded from the raw
@@ -297,8 +313,9 @@ autonomous session (SB-047→030→048→031→053→032→049→054): Python si
 FTS+VSS in one disposable `indexes/retrieval.duckdb`, bge-small embeddings (OQ #9 fallback — BGE-M3
 unloadable on this hardware), hybrid-default `sb index`/`sb query` with TS-emitted `indexed` events,
 and the **SB-054 delete-`indexes/`-rebuild lossless gate (green)**. Root suite **159/159** Node-only;
-sidecar pytest **33/33**; `test:sidecar` 3/3 vs the real sidecar. SB-055 (graph/temporal) is the
-optional P2 stretch. Older P2 follow-ups remain (SB-028/029/033).
+sidecar pytest **33/33**; `test:sidecar` 3/3 vs the real sidecar. **The SB-055 stretch and the
+P2 follow-ups (SB-028/029/033) are now also `Done`** — root suite **180 tests** + coverage
+reporting (90.15% lines baseline), sidecar pytest **42**. No open review follow-ups.
 **Last updated:** 2026-06-10
 
 ## Phase 2 review follow-ups FILED (2026-06-09) — SB-042..046 (quality band)

@@ -15,9 +15,10 @@
     "index:vault": "tsx scripts/index_vault.ts",
     "query:memory": "tsx scripts/query_memory.ts",
     "test": "pnpm -r run test && pnpm run test:scripts",
-    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts",
+    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts scripts/init_workspace.test.ts",
     "test:sidecar": "pnpm --filter @sb/retrieval run test:sidecar && pnpm --filter @sb/cli run test:sidecar",
-    "typecheck:scripts": "tsc -p scripts/tsconfig.json"
+    "typecheck:scripts": "tsc -p scripts/tsconfig.json",
+    "test:coverage": "c8 --reporter=text-summary --reporter=text pnpm test"
   },
   "devDependencies": {
     "@sb/note-vault": "workspace:*",
@@ -26,7 +27,20 @@
     "ajv-formats": "^3.0.1",
     "tsx": "^4.0.0",
     "typescript": "^5.4.0",
-    "yaml": "^2.5.0"
+    "yaml": "^2.5.0",
+    "c8": "^10.1.0"
   },
-  "comment": "Phases 1-2 complete: capture, validate, distill, L3 projections + rebuild. index:vault / query:memory are stubs until Phase 3 (retrieval sidecar)."
+  "comment": "Phases 1-2 complete: capture, validate, distill, L3 projections + rebuild. index:vault / query:memory are stubs until Phase 3 (retrieval sidecar).",
+  "c8": {
+    "all": false,
+    "exclude": [
+      "**/test/**",
+      "**/*.test.ts",
+      "**/node_modules/**",
+      "**/*.mjs",
+      "coverage/**"
+    ],
+    "reports-dir": "coverage",
+    "exclude-after-remap": true
+  }
 }

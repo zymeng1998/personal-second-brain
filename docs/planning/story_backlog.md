@@ -77,7 +77,7 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 |---|---|---|---|---|---|---|---|
 | SB-028 | Story | Record multi-source provenance on the L2 note | EPIC-CORE-007 | P2 | Done | 2 | SB-024, SB-026 |
 | SB-029 | Story | L1 working-note creation so `distill propose` has candidates | EPIC-CORE-007 | P2 | Done | 3 | SB-026 |
-| SB-033 | Story | Test-coverage measurement + `init_workspace` automated test | EPIC-CORE-001 | P2 | Backlog | 3 | — |
+| SB-033 | Story | Test-coverage measurement + `init_workspace` automated test | EPIC-CORE-001 | P2 | Done | 3 | — |
 
 ### Phase 2 — Structured Projections (EPIC-CORE-008, refined; see [`phase_2_story_map.md`](phase_2_story_map.md))
 
@@ -713,7 +713,11 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-033 — Test-coverage measurement + `init_workspace` automated test
 
-- **Type:** Story · **Epic:** EPIC-CORE-001 (cross-cutting quality) · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-001 (cross-cutting quality) · **Priority:** P2 · **Points:** 3 · **Status:** Done
+- **Resolution (2026-06-10):** root `test:coverage` = `c8` wrapping `pnpm test` (subprocess V8
+  coverage merged across all packages); non-blocking, ≥80%-line target documented in the README;
+  baseline **90.15% lines / 78.27% branches** over 180 tests. `scripts/init_workspace.test.ts`
+  (6 subprocess cases) wired into `test:scripts`.
 - **Dependencies:** —
 - **Context (review finding, MEDIUM):** the suite is broad (80 tests) but there is **no coverage
   measurement** (global rule targets ≥80%), and `scripts/init_workspace.ts` has **no automated test** (only
