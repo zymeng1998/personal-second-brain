@@ -15,6 +15,26 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-031 `Done` (Phase 3, EPIC-CORE-009) — FTS index build + lexical query (sidecar, DuckDB)
+- **Scope delivered:** sidecar gains `duckdb>=1.1` (uv dep; resolved 1.5.3) + two ops.
+  `index_vault {workspace}` — read-only scan of `vault/**/*.md` (path-sorted, deterministic;
+  frontmatter `id:` with `<ULID>--slug.md` filename fallback; unreadable/id-less notes skipped to
+  stderr), heading-aware ~512-token chunking (`chunking.py`, pure; chunk id `<ULID>#<seq>`; title
+  prepended to chunk 0; oversize sections → paragraph packing → hard split), **full rebuild** of
+  `indexes/retrieval.duckdb` (file deleted + recreated each run — disposable by contract) with a
+  DuckDB FTS (BM25) index → `{notes,chunks,built:["fts"]}`. `query {workspace,q,k?,mode}` — lexical
+  BM25, score desc + deterministic id tie-break, 200-char snippet, `source_ref` provenance; read-only
+  connection. New `errors.py` `OpError` → structured envelope errors (`invalid_args`/
+  `unsupported_mode`/`index_missing`/`index_build_failed`/`query_failed`); `vector`/`hybrid` modes
+  rejected as `unsupported_mode` until SB-049. Writes ONLY under `indexes/`; never touches `vault/`,
+  `events/`, `db/` (snapshot-asserted).
+- **Validation (green):** `uv run pytest` **28/28** (6 chunking + 11 index/query incl. idempotent
+  re-index, provenance, ranking order, k-limit, empty vault, vault-bytes-unchanged + only-`indexes/`
+  -written, query-before-index, invalid args, filename-id fallback + 11 prior); manual JSONL smoke on
+  a throwaway workspace (index → 1 note/1 chunk; query "espresso" → correct hit with snippet +
+  provenance). DuckDB `fts` extension caches in `~/.duckdb` (outside the workspace).
+- **Next:** SB-053 (`Ready`) — `sb index` CLI + TS-emitted `indexed` projection event.
+
 ## SB-048 `Done` (Phase 3, EPIC-CORE-009) — TS sidecar transport client (`@sb/retrieval`)
 - **Scope delivered:** `packages/retrieval` is now a real package. `SidecarClient` —
   spawn (`uv run --quiet python -m retrieval_sidecar`, cwd `sidecars/retrieval`; command/args/cwd

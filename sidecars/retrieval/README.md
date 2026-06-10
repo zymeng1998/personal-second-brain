@@ -51,10 +51,19 @@ cannot be recovered (malformed JSON, missing `req_id`) is answered with `req_id:
 |---|---|---|---|
 | `ping` | — | `{"pong": true}` | — |
 | `health` | — | `{"version", "python"}` | — |
+| `index_vault` | `{workspace}` | `{"notes", "chunks", "built"}` | `invalid_args`, `index_build_failed` |
+| `query` | `{workspace, q, k?, mode?}` | `{"hits": [{id, score, snippet, source_ref}]}` | `invalid_args`, `unsupported_mode`, `index_missing`, `query_failed` |
 | (any other) | — | — | `unknown_op` |
 
-Error codes so far: `malformed_request`, `unknown_op`, `internal_error`.
-Indexing/query ops (`index_vault`, `query`) arrive with SB-031+.
+Error codes so far: `malformed_request`, `unknown_op`, `internal_error`, `invalid_args`,
+`unsupported_mode`, `index_missing`, `index_build_failed`, `query_failed`.
+
+`index_vault` scans `vault/**/*.md` read-only, chunks heading-aware (~512 tokens, chunk id
+`<note ULID>#<seq>`, `source_ref` = note id), and full-rebuilds the DuckDB FTS index in
+`indexes/retrieval.duckdb` (the file is deleted + rebuilt — disposable by contract).
+`query` is lexical BM25 (modes `vector`/`hybrid` land with SB-049), ordered score desc with a
+deterministic id tie-break. DuckDB's `fts` extension is cached in `~/.duckdb` (outside the
+workspace) on first use.
 
 ## Tests
 

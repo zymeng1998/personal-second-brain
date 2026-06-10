@@ -17,6 +17,9 @@ import sys
 from typing import Any, Callable
 
 from . import __version__
+from .errors import OpError
+from .indexer import op_index_vault
+from .querying import op_query
 
 
 def ok_response(req_id: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -41,6 +44,8 @@ def _op_health(args: dict[str, Any]) -> dict[str, Any]:
 OPS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     "ping": _op_ping,
     "health": _op_health,
+    "index_vault": op_index_vault,
+    "query": op_query,
 }
 
 
@@ -62,6 +67,8 @@ def handle_request(request: dict[str, Any]) -> dict[str, Any]:
         return error_response(req_id, "malformed_request", "args must be an object")
     try:
         return ok_response(req_id, handler(args))
+    except OpError as exc:
+        return error_response(req_id, exc.code, exc.message)
     except Exception as exc:  # never let an op crash the loop or leak a traceback to stdout
         return error_response(req_id, "internal_error", f"{type(exc).__name__}: {exc}")
 

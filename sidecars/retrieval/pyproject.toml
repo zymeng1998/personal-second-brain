@@ -3,7 +3,7 @@ name = "retrieval-sidecar"
 version = "0.1.0"
 description = "Second Brain retrieval sidecar: stdio JSONL server. Reads the vault read-only; writes only under indexes/."
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["duckdb>=1.1"]
 
 [dependency-groups]
 dev = ["pytest>=8.0"]
