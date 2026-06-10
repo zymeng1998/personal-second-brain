@@ -2,6 +2,16 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## SB-046 `Done` (quality band) — single-pass note reads in projections — **QUALITY BAND COMPLETE**
+- **Scope delivered:** `listNotes(workspace, { includeContent: true })` attaches the verbatim content the
+  lister already read (absent by default; `NoteSummary.content?`); all three projections
+  (`projectEntities`/`projectEdges`/`projectTasks`) consume it and **no longer call `getNote` per note** —
+  each note file is read exactly once per projection run.
+- **Validation (green):** all builds exit 0; full suite **135/135** (note-vault 34: +includeContent test);
+  grep: zero `getNote` call sites left in entity-graph/task-store src; SB-039 gate green.
+- **This closes the 2026-06-09 Phase 2 review quality band: SB-042..046 all `Done`.** Remaining review
+  follow-up: SB-033 (coverage measurement, P2) from the Phase 1 review.
+
 ## SB-045 `Done` (quality band) — projection consistency hardening
 - **Scope delivered:** (a) standalone `projectEntities` is now a **full rebuild** (DELETE + insert) like
   edges/tasks — a deleted entity note drops its stale node without needing the `rebuild` command;
@@ -50,11 +60,12 @@ Distillation chain shipped: contract → L2 writer → memory event → CLI `dis
 **Phase 1 final review: PASS (ship-ready)**. **✅ PHASE 2 (EPIC-CORE-008) COMPLETE** — all 10 stories
 `Done` and pushed (SB-020/034/023/035/036/021/037/022/038/039; SB-039 @ `2fcb46f`). L3 projections
 (facts/entities/edges/tasks) build in SQLite and are fully rebuildable: **drop `db/` + replay → identical
-projections** (SB-039 gate). **Phase 2 review: PASS (ship-quality, no CRITICAL/HIGH)** — MEDIUM/LOW
-findings filed as **SB-042..046** (quality band). **Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009,
-the compute-heavy part; refine/split SB-030..032 first) — or pick up the quality band (SB-042/043 P2) or
-the older P2 follow-ups (SB-028/029/033).
-**Last updated:** 2026-06-09
+projections** (SB-039 gate). **Phase 2 review: PASS (ship-quality, no CRITICAL/HIGH)** — and the
+**quality band SB-042..046 is now `Done`** (engines pin, atomic rebuild, shared frontmatter, schema-v2
+consistency, single-pass reads; suite at **135 tests**). **Next: Phase 3 — Retrieval Sidecar**
+(EPIC-CORE-009, the compute-heavy part; refine/split SB-030..032 first) — or the older P2 follow-ups
+(SB-028/029/033).
+**Last updated:** 2026-06-10
 
 ## Phase 2 review follow-ups FILED (2026-06-09) — SB-042..046 (quality band)
 - **Context:** Phase 2 code review of `origin/main` @ `22b02b2` (memory-kernel, fact-store, entity-graph,

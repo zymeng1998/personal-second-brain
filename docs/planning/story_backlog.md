@@ -105,7 +105,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-043 | Story | Atomic single-connection `rebuild` (one store, one transaction) | EPIC-CORE-008 | P2 | Done | 3 | SB-038 |
 | SB-044 | Story | Shared frontmatter helper in `@sb/note-vault` (DRY) | EPIC-CORE-003 | P3 | Done | 2 | SB-011 |
 | SB-045 | Story | Projection-table consistency hardening (entity reset + edge UNIQUE) | EPIC-CORE-008 | P3 | Done | 2 | SB-037, SB-038 |
-| SB-046 | Story | Single-pass note reads in projections | EPIC-CORE-008 | P3 | Backlog | 2 | SB-022 |
+| SB-046 | Story | Single-pass note reads in projections | EPIC-CORE-008 | P3 | Done | 2 | SB-022 |
 
 (Review finding #8 — still no coverage measurement — is already tracked as SB-033, which now spans Phase 2.)
 
@@ -1001,7 +1001,12 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-046 — Single-pass note reads in projections
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P3 · **Points:** 2 · **Status:** Done
+- **Note (impl):** `listNotes(workspace, { includeContent: true })` attaches the verbatim content that
+  `listNotes` already read to summarize; `projectEntities`/`projectEdges`/`projectTasks` consume it and
+  no longer call `getNote` per note. Single-read AC met structurally ("or equivalent"): grep shows zero
+  `getNote` call sites left in the projection packages (no second read path exists) + a unit test that
+  `includeContent` returns verbatim bytes and is absent by default.
 - **Dependencies:** SB-022 (`Done`)
 - **Context (review finding, LOW; performance):** each projection run reads every note **twice** —
   `listNotes()` opens each file to summarize, then the projector calls `getNote()` per note again (O(n)

@@ -8,7 +8,7 @@
  *
  * Edges + manual `entity_merged` are a later story (SB-037).
  */
-import { frontmatterOf, getNote, listNotes } from "@sb/note-vault";
+import { frontmatterOf, listNotes } from "@sb/note-vault";
 import type { EntityNode, Ulid } from "@sb/interfaces";
 import { openProjectionStore } from "@sb/memory-kernel";
 import type { ProjectionStore } from "@sb/memory-kernel";
@@ -61,15 +61,14 @@ export async function projectEntities(
   workspace: string,
   injectedStore?: ProjectionStore,
 ): Promise<ProjectEntitiesResult> {
-  const summaries = await listNotes(workspace, { type: "entity" });
+  const summaries = await listNotes(workspace, { type: "entity", includeContent: true });
   const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
   const store = injectedStore ?? ownStore!;
   try {
     store.db.exec("DELETE FROM entity_nodes");
     let count = 0;
     for (const summary of summaries) {
-      const note = await getNote(workspace, summary.id);
-      const fm = frontmatterOf(note.content);
+      const fm = frontmatterOf(summary.content ?? "");
       const title =
         typeof fm.title === "string" && fm.title.length > 0 ? fm.title : summary.title;
       if (title === undefined || title.length === 0) {

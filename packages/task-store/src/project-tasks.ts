@@ -10,7 +10,7 @@
  * not a dedicated task event kind. When `note_created/updated` events are emitted
  * (future), they can drive live updates; today tasks are vault-derived (rebuildable).
  */
-import { frontmatterOf, getNote, listNotes } from "@sb/note-vault";
+import { frontmatterOf, listNotes } from "@sb/note-vault";
 import type { Task, Ulid } from "@sb/interfaces";
 import { openProjectionStore } from "@sb/memory-kernel";
 import type { ProjectionStore } from "@sb/memory-kernel";
@@ -48,15 +48,14 @@ export async function projectTasks(
   workspace: string,
   injectedStore?: ProjectionStore,
 ): Promise<ProjectTasksResult> {
-  const summaries = await listNotes(workspace);
+  const summaries = await listNotes(workspace, { includeContent: true });
   const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
   const store = injectedStore ?? ownStore!;
   try {
     store.db.exec("DELETE FROM tasks");
     let count = 0;
     for (const summary of summaries) {
-      const note = await getNote(workspace, summary.id);
-      const fm = frontmatterOf(note.content);
+      const fm = frontmatterOf(summary.content ?? "");
       const status = typeof fm.status === "string" && fm.status.trim().length > 0 ? fm.status : undefined;
       if (status === undefined) continue; // not a task
       const title = typeof fm.title === "string" && fm.title.length > 0 ? fm.title : summary.title;

@@ -22,6 +22,8 @@ export interface NoteSummary {
   layer?: number;
   /** Absolute path of the note file. */
   path: string;
+  /** Verbatim file content; present iff requested via `includeContent` (SB-046). */
+  content?: string;
 }
 
 export interface NoteFile {
@@ -35,6 +37,12 @@ export interface NoteFile {
 export interface ListNotesOptions {
   /** Filter by note type (e.g. "raw"). */
   type?: string;
+  /**
+   * Attach each note's verbatim content to its summary (SB-046). `listNotes`
+   * already reads every file to summarize it; this lets single-pass consumers
+   * (projections) avoid a second `getNote` read per note.
+   */
+  includeContent?: boolean;
 }
 
 function assertWorkspace(workspace: string): void {
@@ -104,6 +112,7 @@ export async function listNotes(workspace: string, options: ListNotesOptions = {
     const content = await readFile(file, "utf8");
     const summary = summarize(file, content);
     if (options.type !== undefined && summary.type !== options.type) continue;
+    if (options.includeContent === true) summary.content = content;
     summaries.push(summary);
   }
   summaries.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

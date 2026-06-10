@@ -45,6 +45,18 @@ test("listNotes filters by type", async () => {
   assert.equal((await listNotes(ws, { type: "working" })).length, 0);
 });
 
+test("listNotes attaches verbatim content iff includeContent is set (SB-046)", async () => {
+  const ws = await makeWorkspace();
+  await writeRawNote({ workspace: ws, id: ID, content: "single-pass body", source: "paste", createdAt: "2026-06-03T09:15:00Z", title: "First" });
+
+  const without = await listNotes(ws);
+  assert.equal(without[0]!.content, undefined, "content must be absent by default");
+
+  const withContent = await listNotes(ws, { includeContent: true });
+  const fileBytes = await readFile(withContent[0]!.path, "utf8");
+  assert.equal(withContent[0]!.content, fileBytes, "content must be the verbatim file bytes");
+});
+
 test("getNote returns verbatim content for an existing id", async () => {
   const ws = await makeWorkspace();
   await writeRawNote({ workspace: ws, id: ID, content: "hello body", source: "paste", createdAt: "2026-06-03T09:15:00Z" });

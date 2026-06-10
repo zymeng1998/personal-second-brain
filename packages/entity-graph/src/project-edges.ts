@@ -8,7 +8,7 @@
  * Edges are derived from the `entities: [<ULID>…]` frontmatter field (the designed
  * graph seed). Title-based `[[wikilink]]` resolution is intentionally out of scope.
  */
-import { frontmatterOf, getNote, listNotes } from "@sb/note-vault";
+import { frontmatterOf, listNotes } from "@sb/note-vault";
 import { readMemoryEvents } from "@sb/event-log";
 import { isUlid } from "@sb/interfaces";
 import type { EntityEdge, Ulid } from "@sb/interfaces";
@@ -57,7 +57,7 @@ export async function projectEdges(
   workspace: string,
   injectedStore?: ProjectionStore,
 ): Promise<ProjectEdgesResult> {
-  const summaries = await listNotes(workspace, { type: "entity" });
+  const summaries = await listNotes(workspace, { type: "entity", includeContent: true });
   const mergeState = projectEvents(await readMemoryEvents(workspace));
   const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
   const store = injectedStore ?? ownStore!;
@@ -66,9 +66,8 @@ export async function projectEdges(
     const seen = new Set<string>();
     let count = 0;
     for (const summary of summaries) {
-      const note = await getNote(workspace, summary.id);
       const from = resolveEntity(mergeState, summary.id as Ulid);
-      for (const ref of entityRefsOf(note.content)) {
+      for (const ref of entityRefsOf(summary.content ?? "")) {
         const to = resolveEntity(mergeState, ref);
         if (from === to) continue; // skip self-references after resolution
         const key = `${from}|${to}|${EDGE_KIND}`;
