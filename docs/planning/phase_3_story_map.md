@@ -4,10 +4,15 @@ Refinement of the Phase 3 backlog (the `5→split` stories SB-030/031/032 decomp
 stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md) (cards) and
 [`phase_2_story_map.md`](phase_2_story_map.md) (prior phase).
 
-**Status (2026-06-10): IN PROGRESS.** The decision review is complete — **all eight open decisions
-(OQ #9–12, #17–20) approved exactly as leaned** (recorded in
-[`open_questions.md`](open_questions.md)). SB-047 moved to `Ready` and implementation started the same
-day. Story statuses live in [`story_backlog.md`](story_backlog.md).
+**Status (2026-06-10): EPIC GATE MET — Phase 3 required scope COMPLETE.** All eight open decisions
+(OQ #9–12, #17–20) were approved exactly as leaned (recorded in
+[`open_questions.md`](open_questions.md)) and all eight required stories
+(SB-047/030/048/031/053/032/049/054) are `Done` — implemented, tested, and pushed the same day. The
+SB-054 disposability gate (delete `indexes/` → lossless rebuild) is green. **OQ #9 note:** BGE-M3
+proved unloadable on this machine (torch ≤2.2.2 on macOS x86_64 vs the CVE-2025-32434 torch ≥2.6
+requirement for `.bin` weights) — the pre-approved fallback `bge-small-en-v1.5` (384-d) is the
+default. SB-055 (graph/temporal) remains the optional P2 stretch. Story statuses live in
+[`story_backlog.md`](story_backlog.md).
 
 ## Objective
 

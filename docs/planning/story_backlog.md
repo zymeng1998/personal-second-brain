@@ -26,7 +26,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Done | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). All 10 stories (SB-020/034/023/035/036/021/037/022/038/039) `Done`. Drop-`db/`-and-replay reproduces identical projections (SB-039 gate). |
-| EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Refined | Python DuckDB+BGE-M3 retrieval over stdio JSONL. Refined 2026-06-10 into SB-047/030/048/031/053/032/049/054 (+SB-055 stretch); see [`phase_3_story_map.md`](phase_3_story_map.md). |
+| EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Done | Python DuckDB FTS+VSS retrieval over stdio JSONL (bge-small embeddings — OQ #9 fallback). **Gate met 2026-06-10** (SB-054): delete-`indexes/`-rebuild lossless. SB-047/030/048/031/053/032/049/054 all `Done`; SB-055 (graph/temporal) remains the optional P2 stretch. |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Backlog | secure_refs, permission scopes, secret handling. |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Backlog | Capability/scope model + generic example-readonly smoke test. |
@@ -125,7 +125,7 @@ Cards below.
 | SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Done | 2 | SB-031 |
 | SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Done | 2 | SB-053 |
 | SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Done | 3 | SB-031 |
-| SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Ready | 2 | SB-032, SB-049 |
+| SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Done | 2 | SB-032, SB-049 |
 | SB-055 | Story | Graph + temporal indexes (stretch) | EPIC-CORE-009 | P2 | Backlog | 3 | SB-054 |
 
 ### Later phases (coarse; refine before implementation)
@@ -1195,7 +1195,9 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-054 — Index disposability gate (delete `indexes/` → lossless rebuild)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  — **the epic gate is MET (2026-06-10)**: `apps/cli/test/disposability-gate.test.ts` (env-gated,
+  in `test:sidecar`).
 - **Dependencies:** SB-032, SB-049
 - **Scope:** the epic **"Done when"** as an automated env-gated test (mirrors SB-039): populate a
   throwaway workspace (capture + entity + task notes), `sb index`, run a fixed query set and snapshot

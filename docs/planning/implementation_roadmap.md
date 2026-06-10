@@ -39,9 +39,12 @@ ADD-only facts; `memory-kernel` projector + store; full **replay** from the even
 
 ## Phase 3 — Retrieval sidecar (Python)
 
-`sidecars/retrieval` (DuckDB VSS + BGE-M3 + graph + FTS), TS `packages/retrieval` facade over **stdio
-JSON/JSONL**; rebuildable indexes; optional local HTTP if a warm process is needed.
-- **Done when:** `index_vault` + `query_memory` work; deleting `indexes/` and rebuilding is lossless.
+`sidecars/retrieval` (DuckDB VSS + FTS + bge-small embeddings — OQ #9 fallback; BGE-M3 unloadable on
+this machine), TS `packages/retrieval` facade over **stdio JSONL**; rebuildable indexes.
+- **Done when:** `index_vault` + `query_memory` work; deleting `indexes/` and rebuilding is lossless —
+  **met 2026-06-10** (SB-054 gate: delete-`indexes/`-rebuild → identical ranked results across
+  lexical/vector/hybrid, L0 + capture/memory streams byte-unchanged; wired into `test:sidecar`).
+  Graph/temporal indexes remain the optional P2 stretch (SB-055).
 
 ## Phase 4 — AI workflows
 

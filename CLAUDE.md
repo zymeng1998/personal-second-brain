@@ -80,12 +80,16 @@ human-confirmed `distill` workflow (L1→L2 + memory event + skill), and the **L
 `@sb/task-store`, all in rebuildable SQLite (`@sb/memory-kernel`, `node:sqlite`) via the `sb rebuild`
 command, with a drop-`db/`-and-replay reproducibility gate. The Phase 2 review quality band
 (SB-042..046: engines pin, atomic rebuild, shared frontmatter, schema-v2 consistency, single-pass reads)
-is also `Done`. **135 tests passing.**
+is also `Done`.
 
-**Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009, the compute-heavy part: Python sidecar + DuckDB +
-BGE-M3 over stdio JSONL). **Refined 2026-06-10** into ≤3-pt stories — SB-047 → SB-030 → SB-048 → SB-031 →
-SB-053 → SB-032 → SB-049 → SB-054 (+SB-055 stretch); see
-[`docs/planning/phase_3_story_map.md`](docs/planning/phase_3_story_map.md). Stories stay `Backlog` until
-the open decisions (OQ #9–12, #17–20) are confirmed; then SB-047 → `Ready`. Older P2 review follow-ups
-remain (SB-028/029/033). Always follow the backlog workflow above: confirm the story is `Ready`,
-implement in-scope only, validate, stop at `In Review`.
+**Phase 3 (EPIC-CORE-009, Retrieval Sidecar) required scope is COMPLETE (2026-06-10)** — Python
+sidecar (`sidecars/retrieval`, uv + Python 3.11, stdio JSONL), DuckDB FTS+VSS in one disposable
+`indexes/retrieval.duckdb`, bge-small-en-v1.5 embeddings (OQ #9 fallback; BGE-M3 unloadable on this
+Intel Mac — see `docs/planning/open_questions.md`), `@sb/retrieval` transport + `queryMemory` facade,
+and hybrid-default `sb index` / `sb query` with TS-emitted `indexed` events. The SB-054
+delete-`indexes/`-rebuild lossless gate is green. **Root suite 159 tests (Node-only); sidecar pytest
+33; env-gated `pnpm run test:sidecar` for the real-sidecar E2E + gate.**
+
+**Next:** SB-055 (graph + temporal indexes — P2 stretch, optional) or Phase 4 (AI workflows) after
+review. Older P2 review follow-ups remain (SB-028/029/033). Always follow the backlog workflow above:
+confirm the story is `Ready`, implement in-scope only, validate, stop at `In Review`.

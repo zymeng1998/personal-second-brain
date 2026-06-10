@@ -15,6 +15,18 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-054 `Done` — ✅ EPIC-CORE-009 GATE MET; PHASE 3 REQUIRED SCOPE COMPLETE (2026-06-10)
+- **Scope delivered:** `apps/cli/test/disposability-gate.test.ts` (env-gated, wired into the cli
+  `test:sidecar` target; mirrors SB-039): populate a throwaway workspace (2 captures + entity +
+  task notes) → `runIndex` → snapshot a **fixed 5-query set across lexical/vector/hybrid** →
+  **delete `indexes/` entirely** → `runIndex` again → assert **deep-equal ranked results** (ids,
+  scores, snippets, provenance), identical build counts, L0 raw + capture/memory streams
+  byte-unchanged throughout, and the projection stream = exactly the two `indexed` events.
+- **Validation (green):** `pnpm run test:sidecar` → retrieval 1/1 + cli **2/2** (E2E + the gate),
+  0 skipped, all against the real Python sidecar + real embeddings; root `pnpm test` **159/159**
+  Python-free. Roadmap "Phase 3 — Done when" marked **met**; EPIC-CORE-009 → `Done`.
+- **Remaining in the epic:** SB-055 (graph + temporal indexes) — P2 stretch, optional, `Backlog`.
+
 ## SB-049 `Done` (Phase 3, EPIC-CORE-009) — embeddings + DuckDB VSS + hybrid ranking
 - **OQ #9 RESOLUTION — fallback adopted:** default embedding model is **`bge-small-en-v1.5`
   (384-d)**, not BGE-M3. BGE-M3 is **unloadable** on this Mac (not merely slow): its HF repo ships
@@ -224,10 +236,14 @@ Distillation chain shipped: contract → L2 writer → memory event → CLI `dis
 (facts/entities/edges/tasks) build in SQLite and are fully rebuildable: **drop `db/` + replay → identical
 projections** (SB-039 gate). **Phase 2 review: PASS (ship-quality, no CRITICAL/HIGH)** — and the
 **quality band SB-042..046 is now `Done`** (engines pin, atomic rebuild, shared frontmatter, schema-v2
-consistency, single-pass reads; suite at **135 tests**). **Phase 3 (EPIC-CORE-009) REFINED 2026-06-10**
-into 9 atomic stories (SB-047→030→048→031→053→032→049→054 +SB-055 stretch; see
-[`phase_3_story_map.md`](docs/planning/phase_3_story_map.md)) — **awaiting decision review (OQ #9–12,
-#17–20) before SB-047 → `Ready`**. Older P2 follow-ups remain (SB-028/029/033).
+consistency, single-pass reads). **✅ PHASE 3 (EPIC-CORE-009) REQUIRED SCOPE COMPLETE 2026-06-10** —
+all 8 open decisions approved + all 8 required stories implemented, tested, and pushed in one
+autonomous session (SB-047→030→048→031→053→032→049→054): Python sidecar (uv, stdio JSONL), DuckDB
+FTS+VSS in one disposable `indexes/retrieval.duckdb`, bge-small embeddings (OQ #9 fallback — BGE-M3
+unloadable on this hardware), hybrid-default `sb index`/`sb query` with TS-emitted `indexed` events,
+and the **SB-054 delete-`indexes/`-rebuild lossless gate (green)**. Root suite **159/159** Node-only;
+sidecar pytest **33/33**; `test:sidecar` 3/3 vs the real sidecar. SB-055 (graph/temporal) is the
+optional P2 stretch. Older P2 follow-ups remain (SB-028/029/033).
 **Last updated:** 2026-06-10
 
 ## Phase 2 review follow-ups FILED (2026-06-09) — SB-042..046 (quality band)
