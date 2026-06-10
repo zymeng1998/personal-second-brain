@@ -34,6 +34,27 @@ export type DistilledNoteWriteErrorCode =
   | "already_exists"
   | "write_failed";
 
+/** Structured errors for the L1 working-note write path (SB-029). */
+export type WorkingNoteWriteErrorCode =
+  | "invalid_ulid"
+  | "unsafe_path"
+  | "missing_source_ref"
+  | "invalid_body"
+  | "already_exists"
+  | "write_failed";
+
+export class WorkingNoteWriteError extends Error {
+  readonly code: WorkingNoteWriteErrorCode;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: WorkingNoteWriteErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "WorkingNoteWriteError";
+    this.code = code;
+    if (details !== undefined) this.details = details;
+  }
+}
+
 export class DistilledNoteWriteError extends Error {
   readonly code: DistilledNoteWriteErrorCode;
   readonly details?: Record<string, unknown>;

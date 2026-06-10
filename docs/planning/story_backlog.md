@@ -76,7 +76,7 @@ Old `5→split` SB-019 decomposed into ≤3-pt stories. L2-only (L3 facts → Ph
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-028 | Story | Record multi-source provenance on the L2 note | EPIC-CORE-007 | P2 | Done | 2 | SB-024, SB-026 |
-| SB-029 | Story | L1 working-note creation so `distill propose` has candidates | EPIC-CORE-007 | P2 | Backlog | 3 | SB-026 |
+| SB-029 | Story | L1 working-note creation so `distill propose` has candidates | EPIC-CORE-007 | P2 | Done | 3 | SB-026 |
 | SB-033 | Story | Test-coverage measurement + `init_workspace` automated test | EPIC-CORE-001 | P2 | Backlog | 3 | — |
 
 ### Phase 2 — Structured Projections (EPIC-CORE-008, refined; see [`phase_2_story_map.md`](phase_2_story_map.md))
@@ -686,7 +686,10 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-029 — L1 working-note creation so `distill propose` has candidates
 
-- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-007 · **Priority:** P2 · **Points:** 3 · **Status:** Done
+- **Surface decision (2026-06-10):** `sb note promote <rawId> [--title]`; target folder
+  `vault/00_Inbox/` (the documented L1 queue per `memory_layers.md`); body seeded from the raw
+  content; no event emitted (vault-derived, rebuild-safe).
 - **Dependencies:** SB-026 (`Done`)
 - **Context (review finding, MEDIUM):** `distill propose` lists L1 `working` notes as candidates, but
   nothing in Phase 1 creates L1 working notes (capture writes only L0 raw). So `propose` always returns

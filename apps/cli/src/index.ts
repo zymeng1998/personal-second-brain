@@ -10,6 +10,7 @@ import type { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { CaptureCliError, runCapture } from "./capture-command.js";
 import { runNoteGet, runNoteList } from "./note-command.js";
+import { runNotePromote } from "./promote-command.js";
 import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-command.js";
 import { runRebuild } from "./rebuild-command.js";
 import { runIndex } from "./index-command.js";
@@ -40,6 +41,9 @@ Flags:
 Read-only:
   sb note list [--type <kind>] [--workspace <path>]
   sb note get <id> [--workspace <path>]
+
+Organize (L0 → L1):
+  sb note promote <rawId> [--title <t>] [--workspace <path>]   # seed an editable L1 working note in 00_Inbox (source never mutated)
 
 Distillation (human-confirmed L1 → L2):
   sb distill propose [--limit <n>] [--workspace <path>]        # READ-ONLY: list L1 candidates + scaffold
@@ -210,6 +214,7 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
 interface ParsedNoteArgs {
   workspace?: string;
   type?: string;
+  title?: string;
   positionals: string[];
 }
 
@@ -225,6 +230,9 @@ function parseNoteArgs(args: string[]): ParsedNoteArgs {
         break;
       case "--type":
         parsed.type = requireValue(args, ++i, arg);
+        break;
+      case "--title":
+        parsed.title = requireValue(args, ++i, arg);
         break;
       default:
         if (arg.startsWith("--")) {
@@ -271,6 +279,16 @@ async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: 
         ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
       });
       out(result.content.endsWith("\n") ? result.content : `${result.content}\n`);
+      return 0;
+    }
+    if (sub === "promote") {
+      const id = parsed.positionals[0];
+      const result = await runNotePromote({
+        id: id ?? "",
+        ...(parsed.title !== undefined ? { title: parsed.title } : {}),
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
       return 0;
     }
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown note subcommand: ${sub}`)))}\n`);

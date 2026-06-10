@@ -38,6 +38,18 @@ event append fails, the raw note is kept and a `event_append_failed` error (with
 **Not in SB-013:** `note get`/`note list`, frontmatter validation, retrieval, AI, distillation, non-paste
 adapters, and the `00_Inbox/` L1 stub (deferred with SB-011; tracked for a later orchestration story).
 
+## `note promote` (SB-029, L0 → L1 organize step)
+
+```bash
+pnpm --filter @sb/cli note -- promote <rawId> [--title <t>] [--workspace <path>]
+```
+
+Promotes one L0 raw note into an editable **L1 working note** under `vault/00_Inbox/` (the
+documented L1 processing queue): body seeded from the raw content, `source_ref` = the L0 origin,
+title defaulting from the raw note (`--title` overrides). The raw source is **never mutated**
+(byte-checked in tests) and promoting a non-raw note is rejected (`not_raw`). This is what gives
+`distill propose` real candidates: capture → promote → propose → accept is now end-to-end.
+
 ## `distill` (SB-026, human-confirmed L1 → L2)
 
 ```bash

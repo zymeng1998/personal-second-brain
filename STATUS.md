@@ -15,6 +15,23 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-029 `Done` (P2 follow-up, EPIC-CORE-007) — L1 working-note creation (`note promote`)
+- **Surface decisions:** command = **`sb note promote <rawId> [--title]`**; target folder =
+  **`vault/00_Inbox/`** (documented L1 queue, `memory_layers.md`); body seeded from the raw
+  content; title defaults from the raw note; no event emitted (working notes are vault-derived).
+- **Scope delivered:** `@sb/note-vault` `writeWorkingNote()` (`working-note-writer.ts` +
+  `WorkingNoteWriteError`; `type:working`/`layer:1`, schema-required `source_ref`, exclusive
+  create, raw-path + workspace-escape refusal, title optional) and `apps/cli`
+  `promote-command.ts` (`runNotePromote`: read raw via `getNote` read-only → reject non-raw
+  (`not_raw`) → write the L1 note) wired as the `note promote` subcommand (`--title` flag added
+  to the note parser). **`distill propose` now surfaces real candidates** — the capture →
+  promote → propose → accept chain is end-to-end.
+- **Validation (green):** note-vault **42/42** (5 new writer cases incl. Ajv schema validity +
+  never-overwrite); cli **44/44** (4 new: E2E capture→promote→propose-lists-candidate with raw
+  bytes unchanged; non-raw rejected; missing/unknown id; `main()` round-trip with `--title`);
+  builds exit 0; root `pnpm test` **174/174**.
+- **Next:** SB-033 (coverage measurement + `init_workspace` test) — the last open P2 follow-up.
+
 ## SB-028 `Done` (P2 follow-up, EPIC-CORE-007) — multi-source provenance on the L2 note
 - **Human asked to check + implement the old P2 follow-ups** (SB-028/029/033 — all were still
   `Backlog`). This is the first of the three.
