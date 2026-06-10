@@ -104,7 +104,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 | SB-042 | Story | Pin + document the `node:sqlite` runtime requirement | EPIC-CORE-008 | P2 | Done | 1 | SB-034 |
 | SB-043 | Story | Atomic single-connection `rebuild` (one store, one transaction) | EPIC-CORE-008 | P2 | Done | 3 | SB-038 |
 | SB-044 | Story | Shared frontmatter helper in `@sb/note-vault` (DRY) | EPIC-CORE-003 | P3 | Done | 2 | SB-011 |
-| SB-045 | Story | Projection-table consistency hardening (entity reset + edge UNIQUE) | EPIC-CORE-008 | P3 | Backlog | 2 | SB-037, SB-038 |
+| SB-045 | Story | Projection-table consistency hardening (entity reset + edge UNIQUE) | EPIC-CORE-008 | P3 | Done | 2 | SB-037, SB-038 |
 | SB-046 | Story | Single-pass note reads in projections | EPIC-CORE-008 | P3 | Backlog | 2 | SB-022 |
 
 (Review finding #8 — still no coverage measurement — is already tracked as SB-033, which now spans Phase 2.)
@@ -975,7 +975,12 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-045 — Projection-table consistency hardening (entity reset + edge UNIQUE)
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P3 · **Points:** 2 · **Status:** Done
+- **Note (impl):** standalone `projectEntities` now full-rebuilds (DELETE + insert; deleted entity note
+  drops its stale node — new test); schema **v2**: `CREATE UNIQUE INDEX entity_edges_unique ON
+  entity_edges(from_id,to_id,kind)` (idempotent; v1 store upgrades on open — new test; duplicate
+  `insertEntityEdge` throws /UNIQUE/ — new test). A v1 db with pre-existing duplicate edges would fail the
+  migration; `db/` is disposable → delete + `rebuild`.
 - **Dependencies:** SB-037 (`Done`), SB-038 (`Done`)
 - **Context (review findings, LOW ×2):** (a) `projectEntities` **upserts without a table reset** while
   edges/tasks full-rebuild — a standalone `projectEntities` run can leave a stale node from a deleted

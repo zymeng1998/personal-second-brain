@@ -88,6 +88,20 @@ test("an entity note without a title is rejected", async () => {
   );
 });
 
+test("a deleted entity note drops its stale node on standalone re-projection (SB-045)", async () => {
+  const ws = await makeWorkspace();
+  await seedEntity(ws, ACME, "Acme Corp");
+  await seedEntity(ws, GLOBEX, "Globex");
+  await projectEntities(ws);
+  assert.equal(listEntityNodes(ws).length, 2);
+
+  await rm(join(ws, "vault", "50_Entities", `${GLOBEX}.md`));
+  const result = await projectEntities(ws);
+
+  assert.equal(result.count, 1);
+  assert.deepEqual(listEntityNodes(ws).map((n) => n.id), [ACME]);
+});
+
 test("an empty / entity-less workspace projects nothing", async () => {
   const ws = await makeWorkspace();
   const result = await projectEntities(ws);

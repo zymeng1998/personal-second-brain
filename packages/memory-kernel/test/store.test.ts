@@ -31,7 +31,7 @@ after(async () => {
   await Promise.all(tmpDirs.map((d) => rm(d, { recursive: true, force: true })));
 });
 
-test("opens a fresh store, creates db/memory.sqlite + all tables at schema v1", async () => {
+test("opens a fresh store, creates db/memory.sqlite + all tables at the current schema", async () => {
   const ws = await makeWorkspace();
   const store = openProjectionStore(ws);
   try {
@@ -83,4 +83,26 @@ test("rejects a relative / non-absolute workspace path", () => {
     () => openProjectionStore("relative/ws"),
     (err: unknown) => err instanceof MemoryKernelError && err.code === "unsafe_path",
   );
+});
+
+test("a v1 store upgrades to v2 on open: version bumped + entity_edges UNIQUE index (SB-045)", async () => {
+  const ws = await makeWorkspace();
+  // Downgrade a fresh store to the v1 shape: version 1, no unique index.
+  const v1 = openProjectionStore(ws);
+  v1.db.exec("DROP INDEX IF EXISTS entity_edges_unique");
+  v1.db.prepare("UPDATE schema_version SET version = 1").run();
+  v1.close();
+
+  const upgraded = openProjectionStore(ws);
+  try {
+    assert.equal(upgraded.schemaVersion, SCHEMA_VERSION);
+    const row = upgraded.db.prepare("SELECT version FROM schema_version LIMIT 1").get() as { version: number };
+    assert.equal(Number(row.version), SCHEMA_VERSION);
+    const index = upgraded.db
+      .prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='entity_edges_unique'")
+      .get();
+    assert.ok(index !== undefined, "entity_edges_unique index must exist after upgrade");
+  } finally {
+    upgraded.close();
+  }
 });

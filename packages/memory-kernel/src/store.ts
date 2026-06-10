@@ -19,7 +19,7 @@ import { MemoryKernelError } from "./errors.js";
 export const DB_RELATIVE_PATH = join("db", "memory.sqlite");
 
 /** Current projection schema version. */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Absolute path of the projection database inside a workspace. */
 export function projectionDbPath(workspace: string): string {
@@ -65,6 +65,17 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 `;
 
+/**
+ * v2 (SB-045): a duplicate entity edge is a constraint violation, not something
+ * each writer must remember to dedupe in memory. Idempotent; upgrading a v1 db
+ * that somehow holds duplicate edges fails the migration — `db/` is disposable,
+ * so the fix is delete + `rebuild`.
+ */
+const SCHEMA_V2 = `
+CREATE UNIQUE INDEX IF NOT EXISTS entity_edges_unique
+  ON entity_edges (from_id, to_id, kind);
+`;
+
 /** An open projection store. `db` is the raw `node:sqlite` handle for later stories. */
 export interface ProjectionStore {
   readonly db: DatabaseSync;
@@ -104,15 +115,16 @@ export function openProjectionStore(workspace: string): ProjectionStore {
   let schemaVersion: number;
   try {
     db.exec(SCHEMA_V1);
+    db.exec(SCHEMA_V2);
     const row = db.prepare("SELECT version FROM schema_version LIMIT 1").get() as
       | { version: number }
       | undefined;
     if (row === undefined) {
       db.prepare("INSERT INTO schema_version (version) VALUES (?)").run(SCHEMA_VERSION);
-      schemaVersion = SCHEMA_VERSION;
-    } else {
-      schemaVersion = Number(row.version);
+    } else if (Number(row.version) < SCHEMA_VERSION) {
+      db.prepare("UPDATE schema_version SET version = ?").run(SCHEMA_VERSION);
     }
+    schemaVersion = SCHEMA_VERSION;
   } catch (err) {
     db.close();
     throw new MemoryKernelError("migration_failed", `failed to migrate projection store: ${path}`, {

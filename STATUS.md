@@ -2,6 +2,16 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## SB-045 `Done` (quality band) — projection consistency hardening
+- **Scope delivered:** (a) standalone `projectEntities` is now a **full rebuild** (DELETE + insert) like
+  edges/tasks — a deleted entity note drops its stale node without needing the `rebuild` command;
+  (b) **schema v2** in `@sb/memory-kernel`: `UNIQUE INDEX entity_edges_unique(from_id,to_id,kind)`
+  (idempotent migration; a v1 store upgrades in place on open; `SCHEMA_VERSION` 1→2); duplicate
+  `insertEntityEdge` now throws (constraint), which the SB-043 transaction would roll back mid-rebuild.
+- **Validation (green):** builds exit 0; full suite **134/134** (memory-kernel 16: +v1→v2 upgrade test;
+  entity-graph 13: +stale-node-drop + duplicate-edge-rejected); SB-039 reproducibility gate green.
+- **Next:** SB-046 (single-pass note reads in projections) — last quality-band story.
+
 ## SB-044 `Done` (quality band) — shared frontmatter helper (DRY)
 - **Scope delivered:** new `@sb/note-vault` `parseFrontmatter(content)` (diagnostic: `{frontmatter, body}`
   or `{reason}` for missing/unterminated/non-mapping/invalid-YAML) + lenient `frontmatterOf` (`{}` on any

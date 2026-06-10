@@ -1,9 +1,10 @@
 /**
  * Entity-node projection (SB-021). Re-derives L3 entity nodes from the L2 entity
- * notes in the vault (`vault/50_Entities/`, `type: entity`) and upserts them into
- * the SQLite `entity_nodes` projection (`@sb/memory-kernel`). Read through the
- * `@sb/note-vault` API (no direct fs). Idempotent: re-projecting yields the same
- * rows. Each node carries provenance (`source_ref`) to its source note.
+ * notes in the vault (`vault/50_Entities/`, `type: entity`) and full-rebuilds the
+ * SQLite `entity_nodes` projection (`@sb/memory-kernel`; DELETE + insert since
+ * SB-045). Read through the `@sb/note-vault` API (no direct fs). Idempotent:
+ * re-projecting yields the same rows, and a deleted entity note drops its node.
+ * Each node carries provenance (`source_ref`) to its source note.
  *
  * Edges + manual `entity_merged` are a later story (SB-037).
  */
@@ -48,11 +49,13 @@ export interface ProjectEntitiesResult {
 }
 
 /**
- * Project every L2 entity note into the `entity_nodes` table. Idempotent (upsert
- * by id). Throws `EntityGraphError("invalid_entity_note")` if an entity note has
- * no title (the schema requires one). An injected open `store` (SB-043) is used
- * as-is and left open — the caller owns its lifecycle/transaction; otherwise a
- * store is opened and closed per call.
+ * Project every L2 entity note into the `entity_nodes` table. Full-rebuild
+ * (DELETE + insert, SB-045) like edges/tasks, so a deleted entity note drops its
+ * stale node even when run standalone; idempotent + deterministic. Throws
+ * `EntityGraphError("invalid_entity_note")` if an entity note has no title (the
+ * schema requires one). An injected open `store` (SB-043) is used as-is and left
+ * open — the caller owns its lifecycle/transaction; otherwise a store is opened
+ * and closed per call.
  */
 export async function projectEntities(
   workspace: string,
@@ -62,6 +65,7 @@ export async function projectEntities(
   const ownStore = injectedStore === undefined ? openProjectionStore(workspace) : undefined;
   const store = injectedStore ?? ownStore!;
   try {
+    store.db.exec("DELETE FROM entity_nodes");
     let count = 0;
     for (const summary of summaries) {
       const note = await getNote(workspace, summary.id);

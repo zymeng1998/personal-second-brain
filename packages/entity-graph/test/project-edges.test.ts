@@ -8,7 +8,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import { projectEntities, projectEdges, listEntityEdges, mergeEntities, EntityGraphError } from "../src/index.js";
+import { openProjectionStore } from "@sb/memory-kernel";
+import type { EntityEdge, Ulid } from "@sb/interfaces";
+import { projectEntities, projectEdges, listEntityEdges, insertEntityEdge, mergeEntities, EntityGraphError } from "../src/index.js";
 
 // Valid ULIDs (Crockford base32, no I/L/O/U).
 const A = "01KTE7AAAA0000000000000000";
@@ -104,4 +106,24 @@ test("rejects an invalid merge (self / non-ULID)", async () => {
     () => mergeEntities({ workspace: ws, canonical: A, duplicate: "nope" }),
     (err: unknown) => err instanceof EntityGraphError && err.code === "invalid_merge",
   );
+});
+
+test("the entity_edges UNIQUE constraint rejects a duplicate edge insert (SB-045)", async () => {
+  const ws = await makeWorkspace();
+  await seedEntity(ws, A, "Acme", [B]);
+  await seedEntity(ws, B, "Beta");
+  await projectEdges(ws);
+
+  const store = openProjectionStore(ws);
+  try {
+    const edge: EntityEdge = { from: A as Ulid, to: B as Ulid, kind: "related", source_ref: A as Ulid };
+    assert.throws(() => insertEntityEdge(store, edge), /UNIQUE/i);
+    // the deterministic outcome: still exactly one (A -> B) edge
+    const count = store.db
+      .prepare("SELECT COUNT(*) AS n FROM entity_edges WHERE from_id = ? AND to_id = ?")
+      .get(A, B) as { n: number };
+    assert.equal(Number(count.n), 1);
+  } finally {
+    store.close();
+  }
 });
