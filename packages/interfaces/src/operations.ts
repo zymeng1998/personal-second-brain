@@ -14,6 +14,12 @@ import type { AddFactInput, Fact, FactFilter, SupersedeFactInput } from "./fact.
 import type { Ulid } from "./ids.js";
 import type { Layer, Note, NoteType } from "./note.js";
 import type { RebuildProjectionsInput, RebuildProjectionsResult } from "./projection.js";
+import type {
+  IndexVaultInput,
+  IndexVaultResult,
+  QueryMemoryInput,
+  QueryMemoryResult,
+} from "./retrieval.js";
 import type { PermissionScope } from "./scope.js";
 
 export interface GetNoteInput {
@@ -93,6 +99,18 @@ export interface CoreOperations {
    * L0–L2). `db/` is disposable; emits a `projection_rebuilt` event. Deterministic.
    */
   rebuildProjections(input?: RebuildProjectionsInput): Promise<RebuildProjectionsResult>;
+  /**
+   * Build the L4 retrieval indexes (`indexes/retrieval.duckdb`) from the vault
+   * via the Python sidecar. The vault is read-only to the sidecar; writes go
+   * only under `indexes/` (disposable/rebuildable). On success the TS caller
+   * appends one `indexed` projection event — the sidecar never writes events.
+   */
+  indexVault(input: IndexVaultInput): Promise<IndexVaultResult>;
+  /**
+   * Query the L4 retrieval indexes (lexical/vector/hybrid). Read-only: returns
+   * ranked references with provenance; writes nothing, emits no events.
+   */
+  queryMemory(input: QueryMemoryInput): Promise<QueryMemoryResult>;
 }
 
 /** Design-level documentation of each operation's required scope + possible errors. */
@@ -152,5 +170,15 @@ export const OPERATION_CONTRACTS: Readonly<Record<keyof CoreOperations, Operatio
     scope: "rebuild:projections",
     errors: ["validation_failed", "io_error"],
     readOnly: false,
+  },
+  indexVault: {
+    scope: "write:index",
+    errors: ["validation_failed", "scope_denied", "io_error"],
+    readOnly: false,
+  },
+  queryMemory: {
+    scope: "read:index",
+    errors: ["validation_failed", "scope_denied", "io_error"],
+    readOnly: true,
   },
 } as const;

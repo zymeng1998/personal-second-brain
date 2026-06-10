@@ -12,6 +12,8 @@ export type PermissionScope =
   | "write:facts"
   | "read:facts"
   | "rebuild:projections"
+  | "write:index"
+  | "read:index"
   | "append:events"
   | "read:notes"
   | `read:notes:${string}`

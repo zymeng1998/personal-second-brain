@@ -15,6 +15,21 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-047 `Done` (Phase 3, EPIC-CORE-009) — retrieval + index contracts
+- **Scope delivered (contracts only, mirrors SB-010/019/020):** new
+  `packages/interfaces/src/retrieval.ts` — `IndexType`/`QueryMode`/`ChunkId`,
+  `IndexVaultInput`/`IndexVaultResult` (notes/chunks counts + built index families), `QueryFilters`
+  (SB-055 stretch shape), `QueryMemoryInput` (`{q,k?,mode?,filters?}`), `RetrievalHit`
+  (`{id: ChunkId, score, snippet?, source_ref: Ulid}`) + `QueryMemoryResult`, and the stdio JSONL
+  envelope (`SidecarRequest {op,req_id,args?}`, `SidecarResponse {req_id,ok,data?|error?}`,
+  `SidecarError {code,message}`). `scope.ts`: +`write:index`/`read:index`. `operations.ts`:
+  `indexVault` (write:index) + `queryMemory` (read:index, readOnly) in `CoreOperations` +
+  `OPERATION_CONTRACTS`. `index.ts` re-exports. No impl, no new dependency.
+- **Validation (green):** `@sb/interfaces` typecheck exit 0; throwaway alignment smoke (typed value per
+  new type + both scopes + both contract entries) compiled `--strict --module nodenext` exit 0 (temp
+  file removed); root `pnpm test` exit 0 — **135/135**; leakage grep clean.
+- **Next:** SB-030 (`Ready`) — Python sidecar skeleton.
+
 ## Phase 3 — REFINEMENT (2026-06-10): done; decision review passed (see above)
 - **What:** decomposed EPIC-CORE-009 (`5→split` SB-030/031/032) into ≤3-pt atomic stories with full cards
   (Scope/AC/DoD/Validation/Files/Deps) and a new [`phase_3_story_map.md`](docs/planning/phase_3_story_map.md)

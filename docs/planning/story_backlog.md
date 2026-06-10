@@ -118,8 +118,8 @@ Cards below.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | In Progress | 2 | SB-010 |
-| SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-047 |
+| SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | Done | 2 | SB-010 |
+| SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Ready | 3 | SB-047 |
 | SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-030, SB-047 |
 | SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-048 |
 | SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Backlog | 2 | SB-031 |
@@ -1051,7 +1051,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-047 — Retrieval + index contracts (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** In Progress
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-010 (`Done`)
 - **Scope (contracts only, mirrors SB-010/019/020):** new `packages/interfaces/src/retrieval.ts` —
   `IndexVaultInput`/`IndexVaultResult` (counts per index type), `QueryMemoryInput`

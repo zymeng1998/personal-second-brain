@@ -58,6 +58,21 @@ export type {
   RebuildProjectionsResult,
 } from "./projection.js";
 
+export type {
+  IndexType,
+  QueryMode,
+  ChunkId,
+  IndexVaultInput,
+  IndexVaultResult,
+  QueryFilters,
+  QueryMemoryInput,
+  RetrievalHit,
+  QueryMemoryResult,
+  SidecarRequest,
+  SidecarError,
+  SidecarResponse,
+} from "./retrieval.js";
+
 export type { PermissionScope, CapabilityGrant } from "./scope.js";
 export { ALWAYS_DENIED_SCOPES } from "./scope.js";
 
