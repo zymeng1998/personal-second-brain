@@ -26,7 +26,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-006 | Note Validation | 1F | P0 | Done | Frontmatter validation + immutability checks. |
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Done | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). All 10 stories (SB-020/034/023/035/036/021/037/022/038/039) `Done`. Drop-`db/`-and-replay reproduces identical projections (SB-039 gate). |
-| EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Backlog | Python DuckDB+BGE-M3 retrieval over stdio JSONL. |
+| EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Refined | Python DuckDB+BGE-M3 retrieval over stdio JSONL. Refined 2026-06-10 into SB-047/030/048/031/053/032/049/054 (+SB-055 stretch); see [`phase_3_story_map.md`](phase_3_story_map.md). |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Backlog | secure_refs, permission scopes, secret handling. |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Backlog | Capability/scope model + generic example-readonly smoke test. |
@@ -109,13 +109,27 @@ promote after the open decisions in the story map are confirmed at review. Cards
 
 (Review finding #8 — still no coverage measurement — is already tracked as SB-033, which now spans Phase 2.)
 
+### Phase 3 — Retrieval Sidecar (EPIC-CORE-009, refined; see [`phase_3_story_map.md`](phase_3_story_map.md))
+
+Decomposed from the old `5→split` SB-030/031/032 (split rule). **`Backlog` — refined, not yet `Ready`**;
+promote after the open decisions in the story map (OQ #9–12, #17–20) are confirmed at review. Cards below.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | Backlog | 2 | SB-010 |
+| SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-047 |
+| SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-030, SB-047 |
+| SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-048 |
+| SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Backlog | 2 | SB-031 |
+| SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Backlog | 2 | SB-053 |
+| SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Backlog | 3 | SB-031 |
+| SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Backlog | 2 | SB-032, SB-049 |
+| SB-055 | Story | Graph + temporal indexes (stretch) | EPIC-CORE-009 | P2 | Backlog | 3 | SB-054 |
+
 ### Later phases (coarse; refine before implementation)
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-030 | Story | Retrieval sidecar skeleton (stdio JSONL contract) | EPIC-CORE-009 | P1 | Backlog | 5→split | SB-009, SB-010 |
-| SB-031 | Story | DuckDB + BGE-M3 index build | EPIC-CORE-009 | P1 | Backlog | 5→split | SB-030 |
-| SB-032 | Story | TS retrieval facade + query command | EPIC-CORE-009 | P1 | Backlog | 5→split | SB-031 |
 | SB-040 | Story | Obsidian helper (optional surface) | EPIC-CORE-010 | P2 | Backlog | 5→split | SB-010 |
 | SB-041 | Story | Web dashboard (capture/review) | EPIC-CORE-010 | P2 | Backlog | 8→split | SB-010 |
 | SB-050 | Story | secure_refs pointer pattern impl | EPIC-CORE-011 | P0 | Backlog | 3 | SB-010 |
@@ -1024,6 +1038,189 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ---
 
+# Phase 3 story cards (EPIC-CORE-009 — refined; `Backlog` until open decisions confirmed)
+
+> Sequencing, dependency graph, and the open decisions (OQ #9–12, #17–20) are in
+> [`phase_3_story_map.md`](phase_3_story_map.md). Project-wide DoD still applies (no domain leakage; no
+> real data committed; raw L0 never overwritten; events append-only TS-owned; `indexes/` is L4 —
+> disposable/rebuildable; the sidecar reads the vault read-only and writes only under `indexes/`; AC +
+> validation green; STATUS/docs updated). Python-dependent validation is env-gated per OQ #18: root
+> `pnpm test` stays Node-only green; sidecar/integration tests run via `pytest` / `test:sidecar`.
+
+## SB-047 — Retrieval + index contracts (interfaces)
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-010 (`Done`)
+- **Scope (contracts only, mirrors SB-010/019/020):** new `packages/interfaces/src/retrieval.ts` —
+  `IndexVaultInput`/`IndexVaultResult` (counts per index type), `QueryMemoryInput`
+  (`{q, k?, mode?: "lexical"|"vector"|"hybrid", filters?}`), `QueryMemoryResult` +
+  `RetrievalHit` (`{id, score, snippet?, source_ref}`), and the sidecar envelope types
+  (`SidecarRequest {op, req_id, args}`, `SidecarResponse {req_id, ok, data?|error?{code,message}}`).
+  `scope.ts`: add `read:index` + `write:index` (least-privilege; query never writes). `operations.ts`:
+  `indexVault` (`write:index`) + `queryMemory` (`read:index`, readOnly) descriptors. `index.ts` re-exports.
+- **Acceptance Criteria:** `tsc --noEmit` exit 0; throwaway alignment smoke (typed values per new type +
+  both scopes + both `OPERATION_CONTRACTS` entries) compiles under `--strict --module nodenext`.
+- **Definition of Done:** contracts only — no impl, no new dependency, no schema change; leakage grep clean.
+- **Validation:** `pnpm --filter @sb/interfaces build`; alignment smoke; leakage grep.
+- **Files Expected to Change:** `packages/interfaces/src/{retrieval.ts(new),scope.ts,operations.ts,index.ts}`,
+  `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** any Python; any transport impl; JSON schema files (SB-030 carries the protocol fixture).
+
+## SB-030 — Python sidecar skeleton (stdio JSONL, ping/health)
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-047; OQ #17 (toolchain) confirmed
+- **Scope:** `sidecars/retrieval` becomes a real uv project (`pyproject.toml` + `uv.lock`, Python ≥3.11
+  pinned; no DuckDB/model deps yet). Entrypoint reads JSONL requests on stdin, writes one JSONL response
+  per request on stdout (stderr = logs only): `ping` → `{ok:true,data:{pong:true}}`; `health` →
+  `{ok:true,data:{version, python}}`; unknown op → structured `{ok:false,error:{code:"unknown_op"}}`;
+  malformed line → structured error response (never a crash, never a non-JSON stdout line). Deterministic
+  `req_id` correlation. README rewritten: one-command setup (`uv sync`) + run + protocol reference.
+- **Acceptance Criteria:**
+  - `uv run pytest` green: ping/health round-trip, unknown op, malformed JSON line, req_id correlation,
+    stdout purity (every stdout line parses as a response envelope).
+  - The process exits cleanly on stdin EOF.
+- **Definition of Done:** pytest green; no vault/index/event access of any kind in this story; README setup
+  verified on this machine (uv installs the pinned interpreter).
+- **Validation:** `uv run pytest` inside `sidecars/retrieval`; manual echo-pipe smoke
+  (`printf '{"op":"ping","req_id":"r1"}\n' | uv run python -m …`).
+- **Files Expected to Change:** `sidecars/retrieval/{pyproject.toml,uv.lock,README.md,src/**,tests/**}` (new),
+  `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** DuckDB, embeddings, vault reading, TS client (SB-048).
+
+## SB-048 — TS sidecar transport client (`@sb/retrieval`)
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-030, SB-047
+- **Scope:** `packages/retrieval` becomes a real package — `SidecarClient`: spawn the sidecar (`uv run …`,
+  cwd `sidecars/retrieval`, overridable command for tests), newline-framed JSONL write/read with
+  per-request `req_id` correlation, configurable timeout, structured `RetrievalError`
+  (`spawn_failed`/`timeout`/`protocol_error`/`sidecar_error`), graceful shutdown (stdin end → wait → kill).
+  Envelope validation against the SB-047 types. Unit tests run against a **stub sidecar script (Node)** so
+  root `pnpm test` stays Python-free; a `ping` round-trip against the real sidecar lands in the env-gated
+  `test:sidecar` target (OQ #18).
+- **Acceptance Criteria:**
+  - Unit (stub-sidecar): request/response correlation incl. out-of-order responses; timeout → `timeout`;
+    sidecar nonsense line → `protocol_error`; sidecar `{ok:false}` → `sidecar_error` with code passthrough;
+    spawn failure → `spawn_failed`; clean shutdown.
+  - Env-gated integration: real `ping` round-trip green when the sidecar env exists, visible SKIP otherwise.
+- **Definition of Done:** `pnpm test` green Python-free; `tsc --noEmit` exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/retrieval test` + build; `pnpm run test:sidecar` (env-gated) green/SKIP.
+- **Files Expected to Change:** `packages/retrieval/{package.json,tsconfig.json,README.md,src/**,test/**}` (new),
+  root `package.json` (`test:sidecar` target), `pnpm-lock.yaml`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** index/query ops (SB-031+); CLI wiring (SB-053/032); long-running daemon mode.
+
+## SB-031 — FTS index build + lexical query (sidecar, DuckDB)
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-048; OQ #10/#19/#20 confirmed
+- **Scope:** sidecar gains DuckDB (uv dep) + two ops. `index_vault {workspace}`: scan `vault/**/*.md`
+  **read-only**, parse frontmatter + body, chunk heading-aware ~512 tokens (chunk id `<ULID>#<seq>`,
+  `source_ref` = note id), build the FTS table/index in **`indexes/retrieval.duckdb`** (full rebuild per
+  run; idempotent; deterministic) → `{ok,data:{notes,chunks}}`. `query {q,k,mode:"lexical"}`: FTS match →
+  `{hits:[{id,score,snippet,source_ref}]}` ordered by score desc, deterministic tie-break by id. Writes
+  **only** under `indexes/`; never touches `vault/`, `events/`, `db/`.
+- **Acceptance Criteria:**
+  - pytest: index a fixture vault → expected note/chunk counts; re-index idempotent; query returns the
+    seeded note for a distinctive term with snippet + provenance; empty vault → 0/empty; vault bytes
+    unchanged after index (snapshot compare); only `indexes/` modified.
+- **Definition of Done:** `uv run pytest` green; protocol unchanged (envelope from SB-030); no model deps yet.
+- **Validation:** `uv run pytest`; manual JSONL smoke against a throwaway workspace.
+- **Files Expected to Change:** `sidecars/retrieval/{pyproject.toml,uv.lock,src/**,tests/**}`,
+  `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** embeddings/vector/hybrid (SB-049); graph/temporal (SB-055); TS/CLI (SB-053/032).
+
+## SB-053 — `sb index` CLI + `indexed` projection event
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-031
+- **Scope:** `apps/cli` `index` command (`runIndex`): resolve safe workspace → `SidecarClient.indexVault`
+  → on success append one **`indexed` projection event** (TS-emitted, `actor:"cli"`, payload = counts;
+  the sidecar never writes events) → print counts. `scripts/index_vault.ts` stub replaced by a thin
+  delegation to the same path. Unit tests against the stub sidecar (Python-free); read-only guarantees
+  test (raw + capture/memory streams byte-unchanged; only `indexes/` + projection stream change) —
+  env-gated where the real sidecar is needed.
+- **Acceptance Criteria:** one successful run = one `indexed` event with counts; sidecar failure = no
+  event + structured error; raw/events byte-unchanged (test).
+- **Definition of Done:** `pnpm test` green Python-free; builds exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/cli test`; env-gated E2E (`pnpm run test:sidecar`).
+- **Files Expected to Change:** `apps/cli/src/{index-command.ts(new),index.ts}` + tests,
+  `apps/cli/{package.json,README.md}`, `scripts/index_vault.ts`, `pnpm-lock.yaml`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** query (SB-032); scheduling/watch mode; incremental indexing.
+
+## SB-032 — `sb query` CLI + facade query
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-053
+- **Scope:** `@sb/retrieval` facade `queryMemory(opts)` (contract types from SB-047) + `apps/cli` `query`
+  command (`sb query "<q>" [--k N] [--mode lexical|hybrid]`; mode default lexical until SB-049 lands, then
+  hybrid) printing ranked `{id, score, snippet, source_ref}`. **Read-only**: never writes events, never
+  touches the workspace beyond reading `indexes/` via the sidecar. `scripts/query_memory.ts` stub replaced
+  by thin delegation.
+- **Acceptance Criteria:** stub-sidecar unit tests (arg validation, result mapping, error passthrough,
+  no writes); env-gated E2E — capture → index → query returns the captured note with provenance.
+- **Definition of Done:** `pnpm test` green Python-free; builds exit 0; leakage clean.
+- **Validation:** `pnpm --filter @sb/retrieval --filter @sb/cli test`; `pnpm run test:sidecar` E2E.
+- **Files Expected to Change:** `packages/retrieval/src/**` + tests, `apps/cli/src/{query-command.ts(new),index.ts}`
+  + tests, `apps/cli/README.md`, `scripts/query_memory.ts`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** hybrid ranking itself (SB-049); answer generation (Phase 4); filters beyond `k`/`mode`.
+
+## SB-049 — BGE-M3 embeddings + DuckDB VSS + hybrid ranking
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-031; OQ #9 confirmed (CPU check is **inside** this story)
+- **Scope:** sidecar `index_vault` additionally embeds chunks (BGE-M3, 1024-d, local/offline after first
+  model fetch; model cache **outside** the workspace) into a DuckDB VSS (HNSW) table in the same
+  `indexes/retrieval.duckdb`; `query` gains `mode:"vector"` and `mode:"hybrid"` (vector+keyword merge
+  ~70/30, weight tunable via arg) and hybrid becomes the sidecar default. **First task: CPU benchmark on
+  this Mac** (index N notes + query latency); if unacceptable, fall back to `bge-small-en-v1.5` (384-d)
+  behind the same ops and record the decision in OQ #9.
+- **Acceptance Criteria:** pytest (model-dependent cases skippable offline): vector query returns a
+  semantically-related seeded note for a paraphrase term that lexical misses; hybrid ≥ lexical on the
+  fixture set; re-index idempotent; benchmark numbers recorded in the story/STATUS.
+- **Definition of Done:** `uv run pytest` green (offline-skips visible); OQ #9 resolution documented;
+  `indexes/` still the only write target.
+- **Validation:** `uv run pytest`; benchmark snippet in STATUS; env-gated E2E query via `sb query --mode hybrid`.
+- **Files Expected to Change:** `sidecars/retrieval/{pyproject.toml,uv.lock,src/**,tests/**}`,
+  `docs/planning/{open_questions.md,*}`, `STATUS.md`.
+- **Out of Scope:** GPU/remote inference; reranker models; contextual retrieval (later per strategy doc).
+
+## SB-054 — Index disposability gate (delete `indexes/` → lossless rebuild)
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-032, SB-049
+- **Scope:** the epic **"Done when"** as an automated env-gated test (mirrors SB-039): populate a
+  throwaway workspace (capture + entity + task notes), `sb index`, run a fixed query set and snapshot
+  results; **delete `indexes/` entirely**; `sb index` again; assert the same query set returns
+  **identical ranked results** (and L0/events byte-unchanged throughout). Wire into `test:sidecar`.
+- **Acceptance Criteria:** the delete-and-rebuild test is green locally; any non-determinism in
+  build/ranking fails it; documented as the epic gate.
+- **Definition of Done:** gate green on this machine; STATUS + roadmap "Phase 3 — Done when" marked met.
+- **Validation:** `pnpm run test:sidecar` (gate included).
+- **Files Expected to Change:** a test under `apps/cli/test/` or `packages/retrieval/test/` (env-gated),
+  root `package.json` (wiring), `docs/planning/{implementation_roadmap.md,*}`, `STATUS.md`.
+- **Out of Scope:** performance regression gates; cross-machine reproducibility.
+
+## SB-055 — Graph + temporal indexes (stretch)
+
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-054
+- **Scope:** sidecar `index_vault` additionally builds (a) a **graph** table from `[[wikilinks]]` +
+  frontmatter `entities` refs (edges with provenance; complements the L3 SQLite entity graph — this is
+  the L4 retrieval view) and (b) a **temporal** bucket table from frontmatter dates + event timestamps;
+  `query` gains graph-neighborhood and time-range **filters** (`filters:{near?, from?, to?}`) composable
+  with lexical/hybrid modes.
+- **Acceptance Criteria:** pytest: wikilink fixture produces expected edges; time-range filter excludes
+  out-of-range notes; filters compose with hybrid mode; rebuild lossless (SB-054 gate extended or
+  re-asserted).
+- **Definition of Done:** pytest green; gate still green; not required for the epic gate (can defer).
+- **Validation:** `uv run pytest`; `pnpm run test:sidecar`.
+- **Files Expected to Change:** `sidecars/retrieval/src/**` + tests, `packages/interfaces/src/retrieval.ts`
+  (filters), `packages/retrieval/src/**`, `docs/planning/*`, `STATUS.md`.
+- **Out of Scope:** graph algorithms beyond 1-hop neighborhood; recurrence/scheduling semantics.
+
+---
+
 # Later-epic notes (coarse)
 
 These remain `Backlog`/`Deferred`. Refine (split to ≤3 points + add AC/validation/files) before any
@@ -1036,8 +1233,10 @@ implementation. Detailed cards will be written when each phase is reached.
 - **EPIC-CORE-008 Projections:** **REFINED** (2026-06-05) into ≤3-pt stories — see the Phase 2 table above
   and detailed cards, plus [`phase_2_story_map.md`](phase_2_story_map.md). SQLite fact-store (ADD-only +
   provenance), entity-graph, task-store, and event-replay rebuild.
-- **EPIC-CORE-009 Retrieval Sidecar (SB-030–032):** Python sidecar skeleton over stdio JSONL, DuckDB+VSS
-  +BGE-M3 index build (design ported, not copied, from sspaeti — reference only), TS facade + query.
+- **EPIC-CORE-009 Retrieval Sidecar:** **REFINED** (2026-06-10) into ≤3-pt stories — see the Phase 3 table
+  above and detailed cards, plus [`phase_3_story_map.md`](phase_3_story_map.md). Python sidecar over stdio
+  JSONL, DuckDB FTS+VSS, BGE-M3 (design ported, not copied, from sspaeti — reference only), TS facade +
+  CLI, delete-`indexes/`-and-rebuild lossless gate.
 - **EPIC-CORE-010 Surfaces (SB-040–041):** optional Obsidian helper, then dashboard. All via interfaces.
 - **EPIC-CORE-011 Security & Privacy (SB-050–052):** secure_refs pointer impl (P0 when sensitive material
   appears), permission/scope model in interfaces, then enforcement at the boundary.

@@ -2,6 +2,29 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## Phase 3 — REFINEMENT (2026-06-10): done; awaiting decision review
+- **What:** decomposed EPIC-CORE-009 (`5→split` SB-030/031/032) into ≤3-pt atomic stories with full cards
+  (Scope/AC/DoD/Validation/Files/Deps) and a new [`phase_3_story_map.md`](docs/planning/phase_3_story_map.md)
+  (objective, "Done when" gate, architecture, open decisions, sub-phases 3A–3D + 3X stretch, dependency
+  graph). Epic → `Refined`. Quality-band work (SB-042..046) approved + the stale root `package.json`
+  comment fixed (`61f52e3`).
+- **Stories (order):** SB-047 (contracts) → SB-030 (Python sidecar skeleton, stdio JSONL ping/health) →
+  SB-048 (TS transport client) → SB-031 (DuckDB FTS build + lexical query) → SB-053 (`sb index` +
+  `indexed` event) → SB-032 (`sb query` + facade) → SB-049 (BGE-M3 + VSS + hybrid; CPU check inside) →
+  SB-054 (delete-`indexes/`-rebuild lossless gate) → SB-055 (graph/temporal, P2 stretch). 23 pts total.
+- **Architecture (fixed):** sidecar reads vault read-only, writes only `indexes/`; events stay TS-emitted
+  (`indexed` projection kind exists since SB-009); stdio JSONL envelope `{op,req_id,args}` /
+  `{req_id,ok,data|error}`; single `indexes/retrieval.duckdb`; root `pnpm test` stays Node-only —
+  Python-dependent tests env-gated behind `test:sidecar` (visible SKIP).
+- **Open decisions to confirm before SB-047 → `Ready` (leans in the story map):** OQ #9 BGE-M3 (CPU check
+  in SB-049, fallback bge-small); #10 DuckDB for FTS+VSS; #11 stdio (no HTTP); #12 mem0/ReMe reference-only;
+  **#17 uv + pinned Python ≥3.11** (machine has only system 3.9.6, no uv); **#18 env-gated sidecar tests**;
+  **#19 single `retrieval.duckdb`, model cache outside the workspace**; **#20 ~512-token heading-aware
+  chunks (`<ULID>#<seq>`)**.
+- **Next recommended action:** human confirms the 8 open decisions → mark SB-047 `Ready` → implement it
+  atomically (interfaces types + descriptors only), then proceed down the chain. **No implementation has
+  started.**
+
 ## SB-046 `Done` (quality band) — single-pass note reads in projections — **QUALITY BAND COMPLETE**
 - **Scope delivered:** `listNotes(workspace, { includeContent: true })` attaches the verbatim content the
   lister already read (absent by default; `NoteSummary.content?`); all three projections
@@ -62,9 +85,10 @@ Distillation chain shipped: contract → L2 writer → memory event → CLI `dis
 (facts/entities/edges/tasks) build in SQLite and are fully rebuildable: **drop `db/` + replay → identical
 projections** (SB-039 gate). **Phase 2 review: PASS (ship-quality, no CRITICAL/HIGH)** — and the
 **quality band SB-042..046 is now `Done`** (engines pin, atomic rebuild, shared frontmatter, schema-v2
-consistency, single-pass reads; suite at **135 tests**). **Next: Phase 3 — Retrieval Sidecar**
-(EPIC-CORE-009, the compute-heavy part; refine/split SB-030..032 first) — or the older P2 follow-ups
-(SB-028/029/033).
+consistency, single-pass reads; suite at **135 tests**). **Phase 3 (EPIC-CORE-009) REFINED 2026-06-10**
+into 9 atomic stories (SB-047→030→048→031→053→032→049→054 +SB-055 stretch; see
+[`phase_3_story_map.md`](docs/planning/phase_3_story_map.md)) — **awaiting decision review (OQ #9–12,
+#17–20) before SB-047 → `Ready`**. Older P2 follow-ups remain (SB-028/029/033).
 **Last updated:** 2026-06-10
 
 ## Phase 2 review follow-ups FILED (2026-06-09) — SB-042..046 (quality band)

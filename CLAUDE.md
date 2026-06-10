@@ -78,9 +78,14 @@ read-only `note list`/`get`, frontmatter validation, raw-immutability guard (tes
 human-confirmed `distill` workflow (L1→L2 + memory event + skill), and the **L3 projections** —
 `@sb/fact-store` (ADD-only + supersede), `@sb/entity-graph` (nodes + edges + manual `entity_merged`),
 `@sb/task-store`, all in rebuildable SQLite (`@sb/memory-kernel`, `node:sqlite`) via the `sb rebuild`
-command, with a drop-`db/`-and-replay reproducibility gate. **130 tests passing.**
+command, with a drop-`db/`-and-replay reproducibility gate. The Phase 2 review quality band
+(SB-042..046: engines pin, atomic rebuild, shared frontmatter, schema-v2 consistency, single-pass reads)
+is also `Done`. **135 tests passing.**
 
 **Next: Phase 3 — Retrieval Sidecar** (EPIC-CORE-009, the compute-heavy part: Python sidecar + DuckDB +
-BGE-M3 over stdio JSONL). Its stories (SB-030..032) are still coarse `5→split` and **must be refined/split
-before implementation**. Open P2 review follow-ups remain in the backlog (SB-028/029/033). Always follow the
-backlog workflow above: confirm the story is `Ready`, implement in-scope only, validate, stop at `In Review`.
+BGE-M3 over stdio JSONL). **Refined 2026-06-10** into ≤3-pt stories — SB-047 → SB-030 → SB-048 → SB-031 →
+SB-053 → SB-032 → SB-049 → SB-054 (+SB-055 stretch); see
+[`docs/planning/phase_3_story_map.md`](docs/planning/phase_3_story_map.md). Stories stay `Backlog` until
+the open decisions (OQ #9–12, #17–20) are confirmed; then SB-047 → `Ready`. Older P2 review follow-ups
+remain (SB-028/029/033). Always follow the backlog workflow above: confirm the story is `Ready`,
+implement in-scope only, validate, stop at `In Review`.
