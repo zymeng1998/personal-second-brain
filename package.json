@@ -27,5 +27,5 @@
     "typescript": "^5.4.0",
     "yaml": "^2.5.0"
   },
-  "comment": "Phase 0 scaffold. Script targets are stubs; no application logic yet."
+  "comment": "Phases 1-2 complete: capture, validate, distill, L3 projections + rebuild. index:vault / query:memory are stubs until Phase 3 (retrieval sidecar)."
 }
