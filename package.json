@@ -16,6 +16,7 @@
     "query:memory": "tsx scripts/query_memory.ts",
     "test": "pnpm -r run test && pnpm run test:scripts",
     "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts",
+    "test:sidecar": "pnpm --filter @sb/retrieval run test:sidecar",
     "typecheck:scripts": "tsc -p scripts/tsconfig.json"
   },
   "devDependencies": {

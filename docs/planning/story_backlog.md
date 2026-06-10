@@ -120,8 +120,8 @@ Cards below.
 |---|---|---|---|---|---|---|---|
 | SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | Done | 2 | SB-010 |
 | SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Done | 3 | SB-047 |
-| SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Ready | 3 | SB-030, SB-047 |
-| SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-048 |
+| SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Done | 3 | SB-030, SB-047 |
+| SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Ready | 3 | SB-048 |
 | SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Backlog | 2 | SB-031 |
 | SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Backlog | 2 | SB-053 |
 | SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Backlog | 3 | SB-031 |
@@ -1070,7 +1070,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-030 — Python sidecar skeleton (stdio JSONL, ping/health)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Done (`efcfdb3`)
 - **Dependencies:** SB-047; OQ #17 (toolchain) confirmed
 - **Scope:** `sidecars/retrieval` becomes a real uv project (`pyproject.toml` + `uv.lock`, Python ≥3.11
   pinned; no DuckDB/model deps yet). Entrypoint reads JSONL requests on stdin, writes one JSONL response
@@ -1092,7 +1092,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-048 — TS sidecar transport client (`@sb/retrieval`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-030, SB-047
 - **Scope:** `packages/retrieval` becomes a real package — `SidecarClient`: spawn the sidecar (`uv run …`,
   cwd `sidecars/retrieval`, overridable command for tests), newline-framed JSONL write/read with

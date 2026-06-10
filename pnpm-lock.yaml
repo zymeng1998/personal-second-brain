@@ -150,6 +150,19 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  packages/retrieval:
+    dependencies:
+      '@sb/interfaces':
+        specifier: workspace:*
+        version: link:../interfaces
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.22.4
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/task-store:
     dependencies:
       '@sb/interfaces':

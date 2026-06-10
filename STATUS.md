@@ -15,6 +15,23 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-048 `Done` (Phase 3, EPIC-CORE-009) — TS sidecar transport client (`@sb/retrieval`)
+- **Scope delivered:** `packages/retrieval` is now a real package. `SidecarClient` —
+  spawn (`uv run --quiet python -m retrieval_sidecar`, cwd `sidecars/retrieval`; command/args/cwd
+  overridable for tests), newline-framed JSONL with per-request `req_id` (`r1,r2,…`) correlation
+  (out-of-order safe), configurable per-request timeout (default 30s), structured `RetrievalError`
+  (`spawn_failed`/`timeout`/`protocol_error`/`sidecar_error` — sidecar code passthrough in
+  `details.sidecarCode`), graceful `close()` (stdin EOF → wait → SIGKILL after 2s grace). Non-envelope
+  stdout line or unexpected exit fails all pending with `protocol_error`; late lines after a timeout
+  are dropped. Unit tests run against a **Node stub sidecar** (`test/stub-sidecar.mjs`) so root
+  `pnpm test` stays Python-free; the real `ping`/`health` round-trip is the env-gated
+  `test:sidecar` (root target added; **visible SKIP** verified by isolating `node` from `uv` on PATH).
+- **Validation (green):** `@sb/retrieval` build exit 0; unit **9/9** (round-trip, args passthrough,
+  out-of-order correlation, timeout, protocol_error on garbage + on exit-with-pending, sidecar_error
+  passthrough, spawn_failed, clean shutdown); root `pnpm test` exit 0 — **144/144** (Python-free);
+  `pnpm run test:sidecar` **1/1 pass** against the real sidecar (and SKIPs visibly without uv).
+- **Next:** SB-031 (`Ready`) — FTS index build + lexical query (sidecar, DuckDB).
+
 ## SB-030 `Done` (Phase 3, EPIC-CORE-009) — Python sidecar skeleton (stdio JSONL)
 - **Scope delivered:** `sidecars/retrieval` is now a real uv project — `pyproject.toml`
   (`requires-python >=3.11`, hatchling, pytest dev group), `.python-version` 3.11 (uv resolved 3.11.15),
