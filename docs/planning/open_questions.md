@@ -36,6 +36,19 @@ refinement review. Recorded here; full context in [`phase_3_story_map.md`](phase
 | 19 | Index artifact layout | **RESOLVED:** single `indexes/retrieval.duckdb` (FTS + vector + later graph/temporal tables, one disposable file); existing `indexes/*` subdirs reserved for aux artifacts; model cache outside the workspace. |
 | 20 | Chunking | **RESOLVED:** ~512-token heading-aware chunks; chunk id `<note ULID>#<seq>`; every chunk carries `source_ref` = note id. |
 
+## Decide before Phase 4 implementation (AI workflows)
+
+Raised at the 2026-06-10 Phase 4 refinement ([`phase_4_story_map.md`](phase_4_story_map.md)).
+**None resolved yet — stories stay `Backlog` until the human confirms these.**
+
+| # | Question | Lean |
+|---|---|---|
+| 21 | **AI engine:** Claude-Code skills (agent drafts; CLI validates + writes) vs implementing `sidecars/ai` (local LLM / API) now | **Skills-first**; `sidecars/ai` stays boundary-docs until a batch/non-interactive workflow needs it. **Deviates from the roadmap's `sidecars/ai` wording — needs explicit approval.** |
+| 22 | Proposal artifact format for accept steps | Shared versioned `schemas/json/proposal.schema.json` envelope (`workflow`/`version`/`proposed_at`/`items[]`) with per-workflow item payloads; accept commands validate against it (mirrors `distill accept --file`). |
+| 23 | Duplicate facts on re-extraction | No auto-dedupe; the extract-facts skill surfaces near-duplicates (`sb fact list` + `sb query`) in the proposal; human picks add / supersede / skip per item. |
+| 24 | L5 `sources` validation depth | `sb output create` resolves note-id sources via `getNote` (missing ⇒ fail, nothing written); non-note ULIDs (fact ids) accepted as-is; schema already enforces non-empty. |
+| 25 | Review-skill scope v1 | Deterministic candidate queries only (inbox working notes older than N days; never-promoted raws; stale-`status` tasks); heuristics live in the skill; no new CLI surface. |
+
 ## Decide later
 
 | # | Question | Lean |

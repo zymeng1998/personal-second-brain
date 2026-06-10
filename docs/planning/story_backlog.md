@@ -30,6 +30,8 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Backlog | secure_refs, permission scopes, secret handling. |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Backlog | Capability/scope model + generic example-readonly smoke test. |
+| EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
+| EPIC-CORE-014 | AI Workflows | 4 | P1 | **Refined** | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H); `sb fact` + L5 `sb output` confirmed write paths. **Refined 2026-06-10 into SB-056..059 + SB-062..066 (22 pts)** — see [`phase_4_story_map.md`](phase_4_story_map.md). `Backlog` until the OQ #21–#25 decision review. |
 | EPIC-DOMAIN-001 | Broker Domain App | 6+ | P3 | **Deferred** | Broker tool, docs-only until core is stable. **Not planned in detail.** |
 
 ---
@@ -127,6 +129,24 @@ Cards below.
 | SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Done | 3 | SB-031 |
 | SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Done | 2 | SB-032, SB-049 |
 | SB-055 | Story | Graph + temporal indexes (stretch) | EPIC-CORE-009 | P2 | Done | 3 | SB-054 |
+
+### Phase 4 — AI Workflows (EPIC-CORE-014, refined; see [`phase_4_story_map.md`](phase_4_story_map.md))
+
+Refined 2026-06-10. **`Backlog` until the open-decision review (OQ #21–#25) passes** — then stories
+promote to `Ready` as their dependencies complete. Ids skip SB-060/061 (EPIC-CORE-012) and
+SB-070–072 (EPIC-CORE-013). Cards below.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-056 | Story | AI-workflow proposal contracts (interfaces + proposal schema) | EPIC-CORE-014 | P1 | Backlog | 2 | SB-010 |
+| SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
+| SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Backlog | 2 | SB-056 |
+| SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Backlog | 2 | SB-058 |
+| SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
+| SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
+| SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
+| SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Backlog | 2 | SB-059 |
+| SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Backlog | 2 | SB-062, SB-063, SB-064, SB-065 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -1238,6 +1258,200 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 - **Files Expected to Change:** `sidecars/retrieval/src/**` + tests, `packages/interfaces/src/retrieval.ts`
   (filters), `packages/retrieval/src/**`, `docs/planning/*`, `STATUS.md`.
 - **Out of Scope:** graph algorithms beyond 1-hop neighborhood; recurrence/scheduling semantics.
+
+---
+
+# Phase 4 story cards (EPIC-CORE-014 — refined; `Backlog` until OQ #21–#25 confirmed)
+
+Refined 2026-06-10 — see [`phase_4_story_map.md`](phase_4_story_map.md) for objective, architecture,
+open decisions, and sequencing. Shared constraints for every card: skills never write directly (CLI
+commands are the only writers, always human-confirmed); all six memory-layer hard rules; events
+TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 lean).
+
+---
+
+## SB-056 — AI-workflow proposal contracts (interfaces + proposal schema)
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-010 (`Done`)
+- **Scope:** contracts only, mirroring SB-010/019/047. (a) `schemas/json/proposal.schema.json` —
+  the shared, versioned proposal envelope (OQ #22): required `workflow`
+  (`extract_facts|braindump|review|compose_output`), `version` (const 1), `proposed_at` (ISO),
+  `items[]` (≥1); per-workflow item shapes via allOf (fact item: `statement`, `source_ref` ULID,
+  `observed_at`, `confidence` 0–1, optional `supersedes`; output item: `title`, `sources[]` ≥1,
+  `body`). (b) `@sb/interfaces` `src/proposals.ts`: matching TS types + `addFact`/`composeOutput`
+  operation descriptors and `write:fact`/`write:note` scope additions in
+  `scope.ts`/`operations.ts`; `index.ts` re-exports. Example proposal files under `examples/`.
+- **Acceptance Criteria:** schema validates the example proposals (Ajv) and rejects an itemless /
+  unknown-workflow / bad-confidence proposal; `@sb/interfaces` typecheck passes; descriptors carry
+  scope + readOnly flags consistent with existing entries; no implementation code.
+- **Definition of Done:** project-wide DoD; alignment smoke (typed value per new type compiles
+  `--strict`); leakage grep clean.
+- **Validation:** `pnpm --filter @sb/interfaces run build`; root `pnpm test`; Ajv check of examples.
+- **Files Expected to Change:** `schemas/json/proposal.schema.json(new)`,
+  `packages/interfaces/src/{proposals.ts(new),scope.ts,operations.ts,index.ts}`,
+  `examples/proposals/*(new)`, `docs/planning/{story_backlog.md,phase_4_story_map.md}`, `STATUS.md`.
+- **Out of Scope:** CLI commands (SB-057/059); any skill; any writer.
+
+## SB-057 — `sb fact` CLI (add / accept-file / list)
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-056
+- **Scope:** the human-confirmed write path for L3 facts. `apps/cli` `fact` command
+  (`fact-command.ts`): (a) `sb fact add --statement <s> --source-ref <ulid> [--confidence <0..1>]
+  [--observed-at <iso>] [--supersedes <ulid>]` — one fact via `@sb/fact-store`
+  `addFact`/`supersedeFact` (which already append `fact_added`/`fact_superseded` events + project the
+  row); (b) `sb fact accept --file <proposal.json>` — validate against `proposal.schema.json`
+  (`workflow: extract_facts`), then write items sequentially with a per-item result report
+  (`{ok,written,failed:[{index,code}]}`); validation failure writes **nothing**; (c) `sb fact list
+  [--source-ref] [--min-confidence] [--limit]` — read-only over `listCurrentFacts`.
+  `FactCliError("bad_arguments"|"invalid_proposal")`.
+- **Acceptance Criteria:** add writes exactly one event + one row (asserted); accept of a 3-item file
+  writes 3 facts each with provenance; an invalid file (schema or per-item) is rejected before any
+  write; list output matches `listCurrentFacts`; supersede path repoints current view; raw/vault
+  untouched (events + db only).
+- **Definition of Done:** project-wide DoD; cli tests cover add/accept/accept-invalid/list/supersede.
+- **Validation:** `pnpm --filter @sb/cli test`; root `pnpm test`.
+- **Files Expected to Change:** `apps/cli/src/{fact-command.ts(new),index.ts}`,
+  `apps/cli/test/fact-command.test.ts(new)`, `apps/cli/package.json(dep @sb/fact-store if absent)`,
+  `pnpm-lock.yaml`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** the extract-facts skill (SB-062); AI drafting; dedupe heuristics (OQ #23 puts
+  them in the skill).
+
+## SB-058 — L5 output writer (`writeOutputNote`)
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-056
+- **Scope:** `@sb/note-vault` `writeOutputNote()` (`output-note-writer.ts` + `OutputNoteWriteError`),
+  mirroring the L1/L2 writers: target `vault/60_Outputs/`, frontmatter `type: output` / `layer: 5`,
+  **required** `title` and **non-empty `sources`** (schema-required for L5), optional tags/slug;
+  exclusive create (`wx`), raw-path + workspace-escape refusal; body verbatim.
+- **Acceptance Criteria:** written note is Ajv-valid against frontmatter schema v1; empty/missing
+  `sources` or `title` rejected writing nothing; never overwrites; refuses `00_Raw/` targets;
+  bytesWritten/path/created returned like sibling writers.
+- **Definition of Done:** project-wide DoD; note-vault tests mirror the working-note writer suite.
+- **Validation:** `pnpm --filter @sb/note-vault test`; root `pnpm test`.
+- **Files Expected to Change:** `packages/note-vault/src/{output-note-writer.ts(new),errors.ts,index.ts}`,
+  `packages/note-vault/test/output-note-writer.test.ts(new)`, `packages/note-vault/README.md`,
+  `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** the CLI (SB-059); source resolution (CLI concern, OQ #24); events.
+
+## SB-059 — `sb output create` CLI + `note_created` memory event
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-058
+- **Scope:** `apps/cli` `output` command (`output-command.ts`): `sb output create --file
+  <proposal.json>` (envelope `workflow: compose_output`, single item v1) → validate → **resolve
+  note-id sources via `getNote`** (missing note id ⇒ `source_not_found`, nothing written; non-note
+  ULIDs accepted — OQ #24) → `writeOutputNote` → append one TS-emitted **`note_created`** memory
+  event (`subject_id` = note id, `actor: "cli"`; widen `AppendableMemoryKind` — kind already in
+  event schema v1). Print `{ok,note_id,note_path,event_id}`.
+- **Acceptance Criteria:** happy path writes exactly one L5 note + one memory event; missing source
+  note ⇒ no note, no event; writer failure ⇒ no event; event append failure after write ⇒
+  structured `event_append_failed` (note kept — mirrors SB-053 semantics); L0/L1 untouched.
+- **Definition of Done:** project-wide DoD; cli tests cover happy/missing-source/no-event-on-failure.
+- **Validation:** `pnpm --filter @sb/cli test`; root `pnpm test`.
+- **Files Expected to Change:** `apps/cli/src/{output-command.ts(new),index.ts}`,
+  `apps/cli/test/output-command.test.ts(new)`, `packages/event-log/src/memory-event.ts`
+  (`AppendableMemoryKind` +`note_created`), `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** the compose-output skill (SB-065); retrieval grounding; fact-id existence checks.
+
+## SB-062 — `skills/extract-facts` + safety check
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-057
+- **Scope:** `skills/extract-facts/SKILL.md` mirroring `skills/distill`: read the target note(s)
+  via read-only commands; draft a `proposal.schema.json` `extract_facts` proposal (statement +
+  `source_ref` = note ULID + `observed_at` + `confidence` per item); **surface near-duplicates**
+  (via `sb fact list` + `sb query`) with an add/supersede/skip recommendation per item (OQ #23);
+  show the exact proposal for explicit confirmation; only then run `sb fact accept --file`. Plus an
+  E2E safety check (`apps/cli/test/extract-safety.test.ts`, mirrors `distill-safety`): a
+  propose-shaped flow without accept writes **zero** facts/events and leaves L0/L1 byte-unchanged;
+  accept writes exactly the proposal's items with provenance.
+- **Acceptance Criteria:** skill doc states the non-negotiable safety rules (no write without
+  confirmation; provenance mandatory; never edit sources); safety test green and wired into
+  `pnpm test`; duplicate-surfacing step documented with the exact commands.
+- **Definition of Done:** project-wide DoD; skill follows the distill SKILL.md structure.
+- **Validation:** root `pnpm test` (safety check included).
+- **Files Expected to Change:** `skills/extract-facts/SKILL.md(new)`,
+  `apps/cli/test/extract-safety.test.ts(new)`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** auto-dedupe; batch/scheduled extraction; `sidecars/ai`.
+
+## SB-063 — `skills/braindump` + safety check
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-056
+- **Scope:** `skills/braindump/SKILL.md`: take a freeform dump → `sb capture` it verbatim as L0
+  (loss-free first, always) → propose a segmentation (titles/tags per segment, task-status
+  suggestions where a segment is actionable) as a `braindump` proposal → human confirms → apply via
+  existing confirmed commands only (`sb note promote --title …` per accepted segment). The L0
+  capture is never altered by segmentation. Safety check: dump → capture → propose without
+  confirmation ⇒ exactly one L0 note + one capture event and nothing else; L0 bytes unchanged after
+  promotes.
+- **Acceptance Criteria:** capture-first is unconditional and documented; every promote is
+  per-segment human-confirmed; no direct vault writes; safety test green in `pnpm test`.
+- **Definition of Done:** project-wide DoD.
+- **Validation:** root `pnpm test` (safety check included).
+- **Files Expected to Change:** `skills/braindump/SKILL.md(new)`,
+  `apps/cli/test/braindump-safety.test.ts(new)`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** new CLI surface; auto-promotion; entity extraction (use extract-facts after).
+
+## SB-064 — `skills/review` + safety check
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-057
+- **Scope:** `skills/review/SKILL.md`: deterministic candidate surfacing only (OQ #25) — working
+  notes in `00_Inbox` older than N days (`sb note list` + frontmatter `created`), raw notes never
+  promoted (no working note carries them as `source_ref`), stale-`status` tasks — then a `review`
+  proposal recommending per-item actions (promote / distill / supersede-fact / leave), each applied
+  **only** via the existing confirmed commands (`note promote`, `distill propose/accept`,
+  `fact add --supersedes`). Safety check: a full review pass without confirmations writes nothing.
+- **Acceptance Criteria:** candidate queries are documented and reproducible (no hidden heuristics
+  in prose); every action maps to an existing human-confirmed command; safety test green.
+- **Definition of Done:** project-wide DoD.
+- **Validation:** root `pnpm test` (safety check included).
+- **Files Expected to Change:** `skills/review/SKILL.md(new)`,
+  `apps/cli/test/review-safety.test.ts(new)`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** scheduling/cadence automation; new CLI; scoring models.
+
+## SB-065 — `skills/compose-output` + safety check
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-059
+- **Scope:** `skills/compose-output/SKILL.md`: retrieval-grounded L5 drafting — gather context via
+  `sb query` (hybrid default) + `note get`; draft the output **with explicit citations** mapping
+  every claim-bearing section to source ids; build a `compose_output` proposal (`title`, `sources[]`
+  = every cited id, `body`); human confirms; `sb output create --file` is the only write. Safety
+  check: draft without confirmation writes nothing; accepted output is schema-valid with non-empty
+  resolvable sources.
+- **Acceptance Criteria:** the skill forbids uncited claims in the body; `sources` must cover every
+  cited id; safety test green in `pnpm test`.
+- **Definition of Done:** project-wide DoD.
+- **Validation:** root `pnpm test`; env-gated retrieval steps documented (skill works with lexical
+  fallback when the sidecar env is absent).
+- **Files Expected to Change:** `skills/compose-output/SKILL.md(new)`,
+  `apps/cli/test/compose-output-safety.test.ts(new)`, `docs/planning/story_backlog.md`, `STATUS.md`.
+- **Out of Scope:** answer-generation service; templates library; multi-output campaigns.
+
+## SB-066 — Phase 4 provenance + confirmation gate
+
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-062, SB-063, SB-064, SB-065
+- **Scope:** the epic **"Done when"** as an automated test (mirrors SB-027/039/054):
+  `apps/cli/test/phase4-gate.test.ts` sweeps every Phase 4 write path on a throwaway workspace —
+  (a) each workflow's propose-without-accept leaves vault + all three event streams + `db/`
+  **byte/row-identical** to baseline; (b) each accepted write carries provenance (facts:
+  `source_ref`+`observed_at`+`confidence`; outputs: non-empty sources, note-ids resolvable);
+  (c) L0/L1 bytes unchanged throughout; (d) every appended event validates against event schema v1.
+  Wire into `pnpm test` (retrieval-dependent steps env-gated per OQ #18 if needed).
+- **Acceptance Criteria:** gate green locally; any unconfirmed write or provenance-less artifact
+  fails it; roadmap "Phase 4 — Done when" marked met on completion.
+- **Definition of Done:** gate green; STATUS + roadmap updated.
+- **Validation:** root `pnpm test` (+ `test:sidecar` if retrieval-grounding is exercised).
+- **Files Expected to Change:** `apps/cli/test/phase4-gate.test.ts(new)`, root `package.json` (wiring
+  if needed), `docs/planning/{implementation_roadmap.md,story_backlog.md,phase_4_story_map.md}`,
+  `STATUS.md`.
+- **Out of Scope:** performance gates; multi-machine reproducibility; sidecar-AI scenarios.
 
 ---
 

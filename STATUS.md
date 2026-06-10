@@ -2,6 +2,28 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
+- **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
+  (**SB-056..059 + SB-062..066**, 22 pts; ids skip SB-060/061 = EPIC-CORE-012 and SB-070–072 =
+  EPIC-CORE-013 media intake — and note EPIC-CORE-013 was missing from the epics table, row added).
+  Full cards (Scope/AC/DoD/Validation/Files/Deps) in `story_backlog.md`; objective, architecture,
+  decisions, and the dependency graph in **`phase_4_story_map.md`** (new).
+- **Shape:** 4A confirmed write paths — proposal contracts + `proposal.schema.json` (SB-056),
+  **`sb fact` CLI** (SB-057), **L5 `writeOutputNote`** (SB-058), **`sb output create` +
+  `note_created` event** (SB-059); 4B skills (AI drafts → human confirms → CLI writes) —
+  extract-facts (SB-062), braindump (SB-063), review (SB-064), compose-output (SB-065), each with
+  an E2E safety check mirroring `distill-safety`; 4C gate — SB-066 automates the roadmap "Done
+  when" (propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable).
+- **Open decisions filed (OQ #21–#25, leans recorded):** #21 **skills-first engine,
+  `sidecars/ai` deferred** (⚠ deviates from the roadmap's `sidecars/ai` wording — needs explicit
+  approval); #22 shared versioned proposal envelope schema; #23 no auto-dedupe, skill surfaces
+  duplicates; #24 `sb output create` resolves note-id sources; #25 review v1 = deterministic
+  candidate queries only.
+- **No implementation started; all 9 stories `Backlog`** per the Ready rule.
+- **Next recommended action:** human reviews OQ #21–#25 (approve as leaned or amend) → SB-056 →
+  `Ready` → implement down the chain 056 → 057 → 058 → 059 → 062 → 063 → 064 → 065 → 066, one
+  atomic commit per story.
+
 ## ✅ LOW NITS CLEARED + RE-REVIEW CLEAN (2026-06-10) — NO OPEN REVIEW FINDINGS
 - **`e8c722a` — all LOW review nits fixed** in one commit: stale mode-default/"stubs" comments;
   `sb query` USAGE + `query_memory.ts` now list `lexical|vector|hybrid`; promote-command uses one
