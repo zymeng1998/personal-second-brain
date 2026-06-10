@@ -128,3 +128,34 @@ def test_notes_without_frontmatter_id_fall_back_to_filename(workspace: Path) -> 
     assert data["notes"] == 1
     hits = op_query({"workspace": str(workspace), "q": "zanzibar"})["hits"]
     assert hits and hits[0]["source_ref"] == ULID_A
+
+
+@requires_model
+def test_failed_rebuild_preserves_previous_index(
+    seeded_workspace: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Review MEDIUM #2: the build lands in a .tmp file swapped in on success —
+    a failing build must leave the previous index intact and queryable."""
+    import duckdb as duckdb_module
+
+    from retrieval_sidecar import indexer
+
+    op_index_vault({"workspace": str(seeded_workspace)})
+    index_file = seeded_workspace / "indexes" / "retrieval.duckdb"
+    before = index_file.read_bytes()
+    baseline = op_query({"workspace": str(seeded_workspace), "q": "espresso", "mode": "lexical"})
+
+    def explode(*_args: object, **_kwargs: object) -> object:
+        raise duckdb_module.Error("injected build failure")
+
+    monkeypatch.setattr(indexer.duckdb, "connect", explode)
+    with pytest.raises(OpError) as failure:
+        op_index_vault({"workspace": str(seeded_workspace)})
+    assert failure.value.code == "index_build_failed"
+    monkeypatch.undo()
+
+    # previous index byte-identical, still queryable, no .tmp leftovers
+    assert index_file.read_bytes() == before
+    assert not list((seeded_workspace / "indexes").glob("*.tmp*"))
+    again = op_query({"workspace": str(seeded_workspace), "q": "espresso", "mode": "lexical"})
+    assert again == baseline

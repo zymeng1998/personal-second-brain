@@ -1,9 +1,11 @@
 """`index_vault` op: vault (read-only) -> DuckDB FTS + vector index (full rebuild).
 
-The previous index file is deleted and rebuilt from scratch each run —
-`indexes/retrieval.duckdb` is disposable by contract, and a full rebuild keeps
-the build idempotent and deterministic (single-threaded build connection so the
-HNSW graph construction order is stable).
+The index is rebuilt from scratch each run — `indexes/retrieval.duckdb` is
+disposable by contract, and a full rebuild keeps the build idempotent and
+deterministic (single-threaded build connection so the HNSW graph construction
+order is stable). The build lands in a `.tmp` file that atomically replaces the
+previous index only on success, so a failed build never leaves the workspace
+index-less.
 """
 
 from __future__ import annotations
@@ -89,9 +91,35 @@ def _rebuild(
     edges: list[tuple[str, str, str, str]],
     temporal: list[tuple[str, str, str]],
 ) -> None:
+    """Build into `<file>.tmp`, then atomically swap it in (review MEDIUM #2):
+    a failed build leaves the previous index untouched instead of an index-less
+    workspace."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    db_path.unlink(missing_ok=True)
-    db_path.with_suffix(db_path.suffix + ".wal").unlink(missing_ok=True)
+    tmp_path = db_path.with_name(db_path.name + ".tmp")
+    _delete_index_files(tmp_path)
+    try:
+        _build_into(tmp_path, chunks, vectors, dim, edges, temporal)
+    except BaseException:
+        _delete_index_files(tmp_path)
+        raise
+    # success: the stale WAL (if any) must go before the rename, never after
+    _delete_index_files(db_path)
+    tmp_path.replace(db_path)
+
+
+def _delete_index_files(path: Path) -> None:
+    path.unlink(missing_ok=True)
+    path.with_name(path.name + ".wal").unlink(missing_ok=True)
+
+
+def _build_into(
+    db_path: Path,
+    chunks: list[Chunk],
+    vectors: list[list[float]],
+    dim: int,
+    edges: list[tuple[str, str, str, str]],
+    temporal: list[tuple[str, str, str]],
+) -> None:
     connection = duckdb.connect(str(db_path))
     try:
         connection.execute("SET threads = 1")  # deterministic HNSW construction
