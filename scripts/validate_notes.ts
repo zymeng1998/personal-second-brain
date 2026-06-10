@@ -18,7 +18,7 @@ import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ErrorObject, ValidateFunction } from "ajv";
-import { parse as parseYaml } from "yaml";
+import { parseFrontmatter } from "@sb/note-vault";
 import { WORKSPACE_ENV_VAR, WorkspaceConfigError, resolveWorkspaceConfig } from "./lib/workspace_env.js";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -113,28 +113,6 @@ function loadValidator(): ValidateFunction {
   return ajv.compile(schema);
 }
 
-type FrontmatterParse = { ok: true; data: unknown } | { ok: false; reason: string };
-
-function extractFrontmatter(content: string): FrontmatterParse {
-  if (!content.startsWith("---\n")) {
-    return { ok: false, reason: "missing frontmatter block (file must start with '---')" };
-  }
-  const end = content.indexOf("\n---", 4);
-  if (end === -1) {
-    return { ok: false, reason: "unterminated frontmatter block (no closing '---')" };
-  }
-  const block = content.slice(4, end);
-  try {
-    const data = parseYaml(block) as unknown;
-    if (data === null || typeof data !== "object" || Array.isArray(data)) {
-      return { ok: false, reason: "frontmatter is empty or not a YAML mapping" };
-    }
-    return { ok: true, data };
-  } catch (err) {
-    return { ok: false, reason: `YAML parse error: ${err instanceof Error ? err.message : String(err)}` };
-  }
-}
-
 async function vaultMarkdownFiles(vault: string): Promise<string[]> {
   let entries: string[];
   try {
@@ -166,12 +144,12 @@ export async function validateWorkspaceNotes(opts: { workspace?: string } = {}):
   for (const file of files) {
     const content = await readFile(file, "utf8");
     const rel = relative(workspace, file);
-    const parsed = extractFrontmatter(content);
+    const parsed = parseFrontmatter(content);
     if (!parsed.ok) {
       results.push({ path: rel, ok: false, errors: [parsed.reason] });
       continue;
     }
-    const valid = validate(parsed.data);
+    const valid = validate(parsed.frontmatter);
     if (valid) {
       results.push({ path: rel, ok: true, errors: [] });
     } else {

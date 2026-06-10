@@ -7,23 +7,11 @@
  *
  * Edges + manual `entity_merged` are a later story (SB-037).
  */
-import { getNote, listNotes } from "@sb/note-vault";
+import { frontmatterOf, getNote, listNotes } from "@sb/note-vault";
 import type { EntityNode, Ulid } from "@sb/interfaces";
 import { openProjectionStore } from "@sb/memory-kernel";
 import type { ProjectionStore } from "@sb/memory-kernel";
-import { parse as parseYaml } from "yaml";
 import { EntityGraphError } from "./errors.js";
-
-/** Parse the YAML frontmatter block of a note into an object (or {} if absent/invalid). */
-function frontmatterOf(content: string): Record<string, unknown> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  const block = match?.[1];
-  if (block === undefined) return {};
-  const parsed = parseYaml(block) as unknown;
-  return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
-    ? (parsed as Record<string, unknown>)
-    : {};
-}
 
 function aliasesOf(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;

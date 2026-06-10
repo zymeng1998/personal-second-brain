@@ -15,8 +15,7 @@
     "@sb/event-log": "workspace:*",
     "@sb/interfaces": "workspace:*",
     "@sb/memory-kernel": "workspace:*",
-    "@sb/note-vault": "workspace:*",
-    "yaml": "^2.5.0"
+    "@sb/note-vault": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.0.0",

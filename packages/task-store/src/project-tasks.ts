@@ -10,21 +10,10 @@
  * not a dedicated task event kind. When `note_created/updated` events are emitted
  * (future), they can drive live updates; today tasks are vault-derived (rebuildable).
  */
-import { getNote, listNotes } from "@sb/note-vault";
+import { frontmatterOf, getNote, listNotes } from "@sb/note-vault";
 import type { Task, Ulid } from "@sb/interfaces";
 import { openProjectionStore } from "@sb/memory-kernel";
 import type { ProjectionStore } from "@sb/memory-kernel";
-import { parse as parseYaml } from "yaml";
-
-function frontmatterOf(content: string): Record<string, unknown> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  const block = match?.[1];
-  if (block === undefined) return {};
-  const parsed = parseYaml(block) as unknown;
-  return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
-    ? (parsed as Record<string, unknown>)
-    : {};
-}
 
 /** Upsert one task row. Shared by live projection + replay rebuild. */
 export function insertTask(store: ProjectionStore, task: Task): void {

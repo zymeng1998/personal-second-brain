@@ -2,6 +2,18 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## SB-044 `Done` (quality band) — shared frontmatter helper (DRY)
+- **Scope delivered:** new `@sb/note-vault` `parseFrontmatter(content)` (diagnostic: `{frontmatter, body}`
+  or `{reason}` for missing/unterminated/non-mapping/invalid-YAML) + lenient `frontmatterOf` (`{}` on any
+  failure). Migrated the 4 duplicated parsers: entity-graph `project-entities` + `project-edges`,
+  task-store `project-tasks`, `scripts/validate_notes.ts` (same reason strings — output unchanged).
+  Dep moves: `yaml` → note-vault dependency; dropped from entity-graph/task-store; root devDeps gains
+  `@sb/note-vault` (script import). `read-notes.ts`'s line-based field extractor deliberately retained
+  (SB-015 design choice, not a frontmatter parser).
+- **Validation (green):** install + all 8 builds + scripts typecheck exit 0; full suite **131/131**;
+  grep: no `yaml` import left outside `frontmatter.ts`.
+- **Next:** SB-045 (projection consistency hardening).
+
 ## SB-043 `Done` (quality band) — atomic single-connection rebuild
 - **Scope delivered:** `@sb/memory-kernel` `withTransaction(store, fn)` (BEGIN IMMEDIATE / COMMIT /
   ROLLBACK; rollback-failure swallowed so the original error wins); `projectEntities`/`projectEdges`/

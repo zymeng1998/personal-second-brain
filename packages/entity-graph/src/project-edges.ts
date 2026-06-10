@@ -8,26 +8,15 @@
  * Edges are derived from the `entities: [<ULID>…]` frontmatter field (the designed
  * graph seed). Title-based `[[wikilink]]` resolution is intentionally out of scope.
  */
-import { getNote, listNotes } from "@sb/note-vault";
+import { frontmatterOf, getNote, listNotes } from "@sb/note-vault";
 import { readMemoryEvents } from "@sb/event-log";
 import { isUlid } from "@sb/interfaces";
 import type { EntityEdge, Ulid } from "@sb/interfaces";
 import { openProjectionStore, projectEvents, resolveEntity } from "@sb/memory-kernel";
 import type { ProjectionStore } from "@sb/memory-kernel";
-import { parse as parseYaml } from "yaml";
 
 /** Edge kind for a plain entity→entity reference (domain-neutral). */
 const EDGE_KIND = "related";
-
-function frontmatterOf(content: string): Record<string, unknown> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  const block = match?.[1];
-  if (block === undefined) return {};
-  const parsed = parseYaml(block) as unknown;
-  return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
-    ? (parsed as Record<string, unknown>)
-    : {};
-}
 
 /** The entity ULIDs referenced by a note's `entities` frontmatter field. */
 function entityRefsOf(content: string): Ulid[] {

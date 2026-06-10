@@ -12,7 +12,8 @@
     "test": "node --import tsx --test test/raw-note-writer.test.ts test/raw-immutability.test.ts test/raw-immutability-invariant.test.ts test/read-notes.test.ts test/distilled-note-writer.test.ts"
   },
   "dependencies": {
-    "@sb/interfaces": "workspace:*"
+    "@sb/interfaces": "workspace:*",
+    "yaml": "^2.5.0"
   },
   "devDependencies": {
     "tsx": "^4.0.0",

@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@sb/note-vault':
+        specifier: workspace:*
+        version: link:packages/note-vault
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
@@ -72,9 +75,6 @@ importers:
       '@sb/note-vault':
         specifier: workspace:*
         version: link:../note-vault
-      yaml:
-        specifier: ^2.5.0
-        version: 2.9.0
     devDependencies:
       tsx:
         specifier: ^4.0.0
@@ -139,6 +139,9 @@ importers:
       '@sb/interfaces':
         specifier: workspace:*
         version: link:../interfaces
+      yaml:
+        specifier: ^2.5.0
+        version: 2.9.0
     devDependencies:
       tsx:
         specifier: ^4.0.0
@@ -158,9 +161,6 @@ importers:
       '@sb/note-vault':
         specifier: workspace:*
         version: link:../note-vault
-      yaml:
-        specifier: ^2.5.0
-        version: 2.9.0
     devDependencies:
       tsx:
         specifier: ^4.0.0

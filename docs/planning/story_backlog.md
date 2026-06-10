@@ -103,7 +103,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 |---|---|---|---|---|---|---|---|
 | SB-042 | Story | Pin + document the `node:sqlite` runtime requirement | EPIC-CORE-008 | P2 | Done | 1 | SB-034 |
 | SB-043 | Story | Atomic single-connection `rebuild` (one store, one transaction) | EPIC-CORE-008 | P2 | Done | 3 | SB-038 |
-| SB-044 | Story | Shared frontmatter helper in `@sb/note-vault` (DRY) | EPIC-CORE-003 | P3 | Backlog | 2 | SB-011 |
+| SB-044 | Story | Shared frontmatter helper in `@sb/note-vault` (DRY) | EPIC-CORE-003 | P3 | Done | 2 | SB-011 |
 | SB-045 | Story | Projection-table consistency hardening (entity reset + edge UNIQUE) | EPIC-CORE-008 | P3 | Backlog | 2 | SB-037, SB-038 |
 | SB-046 | Story | Single-pass note reads in projections | EPIC-CORE-008 | P3 | Backlog | 2 | SB-022 |
 
@@ -951,7 +951,12 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-044 — Shared frontmatter helper in `@sb/note-vault` (DRY)
 
-- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-003 · **Priority:** P3 · **Points:** 2 · **Status:** Done
+- **Note (impl):** `parseFrontmatter` (diagnostic `{frontmatter, body} | {reason}`) + lenient
+  `frontmatterOf` in `packages/note-vault/src/frontmatter.ts`; entity-graph (×2), task-store, and
+  `validate_notes` migrated; `yaml` dep moved into note-vault (dropped from entity-graph/task-store);
+  root devDeps `@sb/note-vault` for the script. `read-notes.ts`'s line-based field extractor deliberately
+  retained (SB-015 design: targeted fields, no full parse).
 - **Dependencies:** SB-011 (`Done`)
 - **Context (review finding, LOW; flagged in the Phase 1 review and grown since):** frontmatter
   parse/build logic now exists ~4× — `@sb/entity-graph` (×2: nodes + edges), `@sb/task-store`, and the
