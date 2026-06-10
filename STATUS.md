@@ -2,6 +2,26 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## Phase 3 + P2 follow-ups CODE REVIEW: PASS (ship-quality) — 2026-06-10
+- **Range reviewed:** `22b02b2..a5b5f51` (17 code commits: quality band SB-042..046, Phase 3
+  SB-047→055, P2 follow-ups SB-028/029/033; ~6,950 lines, 90 files).
+- **Verdict: no CRITICAL or HIGH.** Invariants hold: sidecar writes only `indexes/`; events
+  TS-owned; raw immutability + provenance test-locked; SB-054 disposability gate re-verified live.
+- **Validation re-run (all green):** root `pnpm test` 180/180; sidecar `uv run pytest` 42/42;
+  `pnpm run test:sidecar` 3/3 vs the real sidecar (0 skipped).
+- **MEDIUM findings (5):** (1) `SidecarClient` has no `child.stdin` `error` listener — EPIPE race
+  on sidecar death could crash uncaught; (2) sidecar `_rebuild` deletes the old index before
+  building (build-to-temp + rename would keep the old index on failure); (3) `openProjectionStore`
+  silently accepts a FUTURE schema_version (no forward guard); (4) `queryMemory` spawns a sidecar +
+  loads the model per call (~1–2 s/query — fine for CLI, revisit before Phase 4 loops); (5)
+  unbounded SQL `IN` list when temporal/near filters allow many notes.
+- **LOW (docs/DRY nits):** stale "default lexical"/"stubs until Phase 3" comments; `sb query`
+  USAGE omits `vector` mode; `promote-command.ts bodyOf` re-duplicates the frontmatter split that
+  SB-044 consolidated (and parses content twice); stale stdout buffer not cleared on client
+  respawn; bge QUERY_PREFIX applied to any `SB_EMBED_MODEL`.
+- **Next:** human decides whether to file MEDIUMs as backlog stories (suggest a quality band like
+  SB-042..046) before Phase 4 refinement. No code changed by the review.
+
 ## Phase 3 — DECISION REVIEW PASSED (2026-06-10); implementation started (autonomous session)
 - **Human approved all eight open decisions exactly as leaned** (OQ #9 BGE-M3 + CPU benchmark first in
   SB-049 + bge-small fallback; #10 DuckDB FTS+VSS; #11 stdio JSONL; #12 mem0/ReMe reference-only;
