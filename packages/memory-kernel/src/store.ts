@@ -121,12 +121,21 @@ export function openProjectionStore(workspace: string): ProjectionStore {
       | undefined;
     if (row === undefined) {
       db.prepare("INSERT INTO schema_version (version) VALUES (?)").run(SCHEMA_VERSION);
+    } else if (Number(row.version) > SCHEMA_VERSION) {
+      // Forward guard: a db written by NEWER code is not silently downgraded.
+      // db/ is disposable — delete it and `sb rebuild` (or upgrade this code).
+      throw new MemoryKernelError(
+        "migration_failed",
+        `projection store schema v${Number(row.version)} is newer than this code (v${SCHEMA_VERSION}): ${path}`,
+        { path, found: Number(row.version), supported: SCHEMA_VERSION },
+      );
     } else if (Number(row.version) < SCHEMA_VERSION) {
       db.prepare("UPDATE schema_version SET version = ?").run(SCHEMA_VERSION);
     }
     schemaVersion = SCHEMA_VERSION;
   } catch (err) {
     db.close();
+    if (err instanceof MemoryKernelError) throw err;
     throw new MemoryKernelError("migration_failed", `failed to migrate projection store: ${path}`, {
       path,
       cause: err instanceof Error ? err.message : String(err),

@@ -8,6 +8,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert/strict";
+import { DatabaseSync } from "node:sqlite";
 import { after, test } from "node:test";
 import { MemoryKernelError, openProjectionStore, projectionDbPath, SCHEMA_VERSION } from "../src/index.js";
 
@@ -105,4 +106,27 @@ test("a v1 store upgrades to v2 on open: version bumped + entity_edges UNIQUE in
   } finally {
     upgraded.close();
   }
+});
+
+test("a store with a NEWER schema version refuses to open (forward guard)", async () => {
+  // Review MEDIUM #3: a db written by future code must not be silently
+  // downgraded — db/ is disposable, so the remedy is delete + rebuild.
+  const ws = await makeWorkspace();
+  const current = openProjectionStore(ws);
+  current.db.prepare("UPDATE schema_version SET version = ?").run(SCHEMA_VERSION + 1);
+  current.close();
+
+  assert.throws(
+    () => openProjectionStore(ws),
+    (e: unknown) =>
+      e instanceof MemoryKernelError &&
+      e.code === "migration_failed" &&
+      /newer than this code/.test(e.message),
+  );
+
+  // The stored version was not touched by the refused open.
+  const sqlite = new DatabaseSync(projectionDbPath(ws));
+  const row = sqlite.prepare("SELECT version FROM schema_version LIMIT 1").get() as { version: number };
+  sqlite.close();
+  assert.equal(Number(row.version), SCHEMA_VERSION + 1);
 });
