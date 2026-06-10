@@ -2,6 +2,25 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ LOW NITS CLEARED + RE-REVIEW CLEAN (2026-06-10) — NO OPEN REVIEW FINDINGS
+- **`e8c722a` — all LOW review nits fixed** in one commit: stale mode-default/"stubs" comments;
+  `sb query` USAGE + `query_memory.ts` now list `lexical|vector|hybrid`; promote-command uses one
+  shared `parseFrontmatter` pass (dup `bodyOf` deleted; `bad_arguments` → `PromoteCliError`);
+  `SidecarClient` clears its stdout buffer on respawn (+ `partial` stub op regression test; dead
+  `close_stdin` stub op removed); bge query prefix gated to the bge v1/v1.5 family via
+  `query_prefix(name)` (unit-tested; default model byte-identical).
+- **Full re-review (MEDIUM+LOW bar) of everything since `51fd338`** (5 MEDIUM fixes + LOW cleanup):
+  three findings, all resolved in **`c101ea3`**: (1) indexer unlinked the old index before
+  `replace()` — atomic overwrite needs no unlink, the WAL-only delete removes the last index-less
+  crash window; (2) corrupt (non-integer) `schema_version` now trips the forward guard (NaN passed
+  neither comparison); (3) bge-*-zh wrong-prefix limitation documented (OQ #9 English-only scope).
+- **Validation (green):** builds + `typecheck:scripts` exit 0; root `pnpm test` exit 0
+  (**185 tests**); sidecar pytest **45/45**; `pnpm run test:sidecar` **3/3** vs the real sidecar.
+- **Verdict: no remaining MEDIUM or LOW findings.** Remaining notes are accepted/documented
+  design points only (lenient frontmatter fence parsing — consistent TS/Python; `list_contains`
+  vs hash-join at huge filter scale; `--title` silently ignored on `note list/get`).
+- **Next:** Phase 4 (AI workflows) refinement.
+
 ## ✅ ALL 5 REVIEW MEDIUMs FIXED + PUSHED (2026-06-10, same session as the review)
 - One atomic commit per finding (rate-limit-safe; each validated before commit):
   - `59f0121` **MEDIUM #1** — `SidecarClient` stdin `error` listener (EPIPE crash, probe-verified)
