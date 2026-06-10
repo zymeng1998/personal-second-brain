@@ -19,7 +19,8 @@ from .errors import OpError
 
 DEFAULT_MODEL = "BAAI/bge-small-en-v1.5"
 ENV_MODEL = "SB_EMBED_MODEL"
-# bge retrieval models want this prefix on QUERIES (not passages)
+# bge v1/v1.5 retrieval models want this prefix on QUERIES (not passages);
+# other families (including bge-m3) embed the query verbatim
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
 _models: dict[str, Any] = {}
@@ -27,6 +28,16 @@ _models: dict[str, Any] = {}
 
 def model_name() -> str:
     return os.environ.get(ENV_MODEL, DEFAULT_MODEL)
+
+
+def query_prefix(name: str) -> str:
+    """The instruction prefix this model family expects on queries ("" if none).
+    Only bge v1/v1.5 models use one; a custom SB_EMBED_MODEL with its own
+    instruction convention needs explicit support here."""
+    lowered = name.lower()
+    if "bge" in lowered and "-m3" not in lowered:
+        return QUERY_PREFIX
+    return ""
 
 
 def model_available() -> bool:
@@ -70,6 +81,6 @@ def embed_passages(texts: list[str]) -> list[list[float]]:
 
 def embed_query(q: str) -> list[float]:
     vector = _get_model().encode(
-        [QUERY_PREFIX + q], normalize_embeddings=True, show_progress_bar=False
+        [query_prefix(model_name()) + q], normalize_embeddings=True, show_progress_bar=False
     )
     return vector[0].tolist()

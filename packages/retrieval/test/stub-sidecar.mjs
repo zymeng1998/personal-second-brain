@@ -7,14 +7,13 @@
  *   fail            -> {ok:false, error:{code:"boom", message:"kaboom"}}
  *   garbage         -> writes a non-JSON stdout line (protocol violation)
  *   silent          -> never responds (drives the timeout test)
- *   close_stdin     -> responds, then closes its read end but stays alive
- *                      (the client's NEXT write hits EPIPE — stdin-error test)
+ *   partial         -> writes HALF a response line, no newline, never finishes
+ *                      (drives the stale-buffer-on-respawn test)
  * EOF on stdin -> exit 0.
  */
 import readline from "node:readline";
 
 const rl = readline.createInterface({ input: process.stdin });
-let stayAliveAfterStdinClose = false;
 
 function respond(envelope) {
   process.stdout.write(JSON.stringify(envelope) + "\n");
@@ -48,11 +47,8 @@ rl.on("line", (line) => {
       break;
     case "silent":
       break;
-    case "close_stdin":
-      stayAliveAfterStdinClose = true;
-      respond({ req_id, ok: true, data: { closing: true } });
-      process.stdin.destroy();
-      setTimeout(() => process.exit(0), 2000);
+    case "partial":
+      process.stdout.write('{"req_id":"' + req_id + '","ok":true,"da');
       break;
     case "query": {
       // facade tests: snippet encodes the received args; magic q values force errors
@@ -91,6 +87,4 @@ rl.on("line", (line) => {
   }
 });
 
-rl.on("close", () => {
-  if (!stayAliveAfterStdinClose) process.exit(0);
-});
+rl.on("close", () => process.exit(0));

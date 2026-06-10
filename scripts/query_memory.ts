@@ -4,7 +4,7 @@
  * Queries the L4 retrieval indexes via the @sb/retrieval facade and prints
  * ranked hits with source_ref provenance. READ-ONLY.
  *
- * Usage: pnpm run query:memory -- "<query text>" [--k <n>] [--mode lexical|hybrid] [--workspace <path>]
+ * Usage: pnpm run query:memory -- "<query text>" [--k <n>] [--mode lexical|vector|hybrid] [--workspace <path>]
  */
 import { runQuery } from "../apps/cli/src/query-command.js";
 

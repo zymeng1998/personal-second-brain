@@ -124,6 +124,8 @@ export class SidecarClient {
 
   #ensureSpawned(): ChildProcessWithoutNullStreams {
     if (this.#child !== null && !hasExited(this.#child)) return this.#child;
+    // a partial line left by a dead child must not corrupt the new child's first response
+    this.#stdoutBuffer = "";
     const child = spawn(this.#command, this.#args, {
       cwd: this.#cwd,
       stdio: ["pipe", "pipe", "pipe"],

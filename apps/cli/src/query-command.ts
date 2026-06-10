@@ -30,7 +30,7 @@ export interface QueryOptions {
   q: string;
   /** Max hits. */
   k?: number;
-  /** Ranking mode; default lexical. */
+  /** Ranking mode (lexical|vector|hybrid); default hybrid since SB-049. */
   mode?: string;
   /** Absolute workspace override; else SECOND_BRAIN_WORKSPACE / .env. */
   workspace?: string;

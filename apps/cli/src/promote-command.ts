@@ -5,9 +5,9 @@
  * `source_ref` points at the L0 origin. The raw source is NEVER mutated —
  * this gives `distill propose` real candidates end-to-end.
  */
-import { frontmatterOf, getNote, writeWorkingNote } from "@sb/note-vault";
+import { getNote, parseFrontmatter, writeWorkingNote } from "@sb/note-vault";
 import { ulid } from "@sb/interfaces";
-import { CaptureCliError, resolveSafeWorkspace } from "./capture-command.js";
+import { resolveSafeWorkspace } from "./capture-command.js";
 
 export type PromoteCliErrorCode = "bad_arguments" | "not_raw";
 
@@ -46,24 +46,17 @@ export interface PromoteResult {
   created_at: string;
 }
 
-/** Strip the frontmatter block; return the body that follows it. */
-function bodyOf(content: string): string {
-  if (!content.startsWith("---\n")) return content;
-  const end = content.indexOf("\n---", 4);
-  if (end === -1) return content;
-  const afterFence = content.indexOf("\n", end + 1);
-  return afterFence === -1 ? "" : content.slice(afterFence + 1).replace(/^\n+/, "");
-}
-
 /** Promote an L0 raw note to a new L1 working note. Never mutates the source. */
 export async function runNotePromote(opts: PromoteOptions): Promise<PromoteResult> {
   if (typeof opts.id !== "string" || opts.id.length === 0) {
-    throw new CaptureCliError("bad_arguments", "note promote requires a raw note <id>");
+    throw new PromoteCliError("bad_arguments", "note promote requires a raw note <id>");
   }
   const workspace = resolveSafeWorkspace(opts.workspace, opts.repoRoot);
 
   const source = await getNote(workspace, opts.id); // read-only; throws not_found
-  const frontmatter = frontmatterOf(source.content);
+  // One shared-parser pass (SB-044) yields both the frontmatter and the body.
+  const parsed = parseFrontmatter(source.content);
+  const frontmatter: Record<string, unknown> = parsed.ok ? parsed.frontmatter : {};
   if (frontmatter["type"] !== "raw") {
     throw new PromoteCliError(
       "not_raw",
@@ -79,7 +72,9 @@ export async function runNotePromote(opts: PromoteOptions): Promise<PromoteResul
     workspace,
     id: ulid(),
     source_ref: opts.id,
-    body: bodyOf(source.content),
+    // a raw note always parses (the type gate above already required it);
+    // leading blank lines after the fence are trimmed as before
+    body: (parsed.ok ? parsed.body : source.content).replace(/^\n+/, ""),
     createdAt,
     ...(title !== undefined && title.length > 0 ? { title } : {}),
   });

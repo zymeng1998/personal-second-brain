@@ -55,7 +55,7 @@ Projections (L3, rebuildable):
 
 Retrieval (L4, disposable indexes):
   sb index [--workspace <path>]                                # sidecar builds indexes/retrieval.duckdb + one TS-emitted 'indexed' event
-  sb query "<text>" [--k <n>] [--mode lexical|hybrid] [--workspace <path>]   # READ-ONLY ranked hits {id, score, snippet, source_ref}
+  sb query "<text>" [--k <n>] [--mode lexical|vector|hybrid] [--workspace <path>]   # READ-ONLY ranked hits {id, score, snippet, source_ref}
 `;
 
 interface ParsedCaptureArgs {

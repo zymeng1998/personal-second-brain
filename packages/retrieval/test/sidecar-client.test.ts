@@ -146,3 +146,18 @@ test("a write racing the sidecar's death rejects structured (no EPIPE crash)", a
     await client.close();
   }
 });
+
+test("a stale partial line from a dead sidecar never corrupts the respawned one", async () => {
+  // Review LOW: #stdoutBuffer must be cleared on respawn — a half-written line
+  // from the previous child would otherwise prefix the new child's first
+  // response and fail it as a protocol_error.
+  const client = stubClient(400);
+  try {
+    await expectRetrievalError(client.request("partial"), "timeout"); // half line buffered
+    process.kill(client.pid as number, "SIGKILL");
+    await new Promise((resolve) => setTimeout(resolve, 100)); // let the death settle
+    assert.deepEqual(await client.request("ping"), { pong: true }); // fresh spawn, clean buffer
+  } finally {
+    await client.close();
+  }
+});

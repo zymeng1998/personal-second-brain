@@ -42,7 +42,7 @@ export interface IndexVaultResult {
   built: IndexType[];
 }
 
-/** Optional query filters (graph/temporal — SB-055 stretch; ignored until then). */
+/** Optional query filters (graph/temporal, SB-055); compose with every mode. */
 export interface QueryFilters {
   /** Restrict to the 1-hop graph neighborhood of a note. */
   near?: Ulid;
@@ -57,7 +57,7 @@ export interface QueryMemoryInput {
   q: string;
   /** Max hits to return (default decided by the implementation). */
   k?: number;
-  /** Ranking mode; implementations default to lexical until hybrid lands (SB-049). */
+  /** Ranking mode; implementations default to hybrid (since SB-049). */
   mode?: QueryMode;
   filters?: QueryFilters;
 }

@@ -71,3 +71,15 @@ def test_model_mismatch_is_structured_error(
     with pytest.raises(OpError) as excinfo:
         op_query({"workspace": str(semantic_workspace), "q": "x", "mode": "vector"})
     assert excinfo.value.code == "index_model_mismatch"
+
+
+def test_query_prefix_only_for_bge_v1_family():
+    """Review LOW: the bge instruction prefix must not be forced onto a custom
+    SB_EMBED_MODEL from another family (or bge-m3, which wants none)."""
+    from retrieval_sidecar.embeddings import QUERY_PREFIX, query_prefix
+
+    assert query_prefix("BAAI/bge-small-en-v1.5") == QUERY_PREFIX
+    assert query_prefix("BAAI/bge-base-en-v1.5") == QUERY_PREFIX
+    assert query_prefix("BAAI/bge-m3") == ""
+    assert query_prefix("intfloat/e5-small-v2") == ""
+    assert query_prefix("sentence-transformers/all-MiniLM-L6-v2") == ""
