@@ -27,7 +27,7 @@ refinement review. Recorded here; full context in [`phase_3_story_map.md`](phase
 
 | # | Question | Decision (2026-06-10) |
 |---|---|---|
-| 9 | Embedding model | **RESOLVED:** BGE-M3 (1024-d); CPU benchmark on this Mac is SB-049's first task; documented fallback `bge-small-en-v1.5` (384-d) behind the same ops if M3 is too slow. |
+| 9 | Embedding model | **RESOLVED — fallback adopted (SB-049, 2026-06-10):** `bge-small-en-v1.5` (384-d). BGE-M3 is **unloadable** on this machine, not merely slow: its HF repo ships only `pytorch_model.bin`, transformers requires torch ≥2.6 for `.bin` loads (CVE-2025-32434), and torch on macOS x86_64 caps at 2.2.2. Fallback benchmark (i9-9880H CPU, `benchmarks/bench_embed.py`): 5.93 chunks/s indexing, 14 ms median query embed. Override via `SB_EMBED_MODEL`; known limitation: English-only (revisit on torch ≥2.6-capable hardware or via ONNX). |
 | 10 | Index store | **RESOLVED:** DuckDB for both FTS and vector (VSS/HNSW) — one engine, one disposable file. |
 | 11 | stdio JSONL vs local HTTP | **RESOLVED:** stdio JSONL; local HTTP only if warm-model latency later forces it. |
 | 12 | Embed mem0/ReMe as a Python dep, or reference only? | **RESOLVED:** reference only — no dependency. |

@@ -124,8 +124,8 @@ Cards below.
 | SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Done | 3 | SB-048 |
 | SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Done | 2 | SB-031 |
 | SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Done | 2 | SB-053 |
-| SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Ready | 3 | SB-031 |
-| SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Backlog | 2 | SB-032, SB-049 |
+| SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Done | 3 | SB-031 |
+| SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Ready | 2 | SB-032, SB-049 |
 | SB-055 | Story | Graph + temporal indexes (stretch) | EPIC-CORE-009 | P2 | Backlog | 3 | SB-054 |
 
 ### Later phases (coarse; refine before implementation)
@@ -1169,7 +1169,13 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-049 — BGE-M3 embeddings + DuckDB VSS + hybrid ranking
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+- **OQ #9 resolution (2026-06-10): fallback `bge-small-en-v1.5` (384-d) adopted.** BGE-M3 is
+  unloadable on this machine (repo ships only `pytorch_model.bin`; transformers requires torch ≥2.6
+  for `.bin` loads per CVE-2025-32434; torch on macOS x86_64 caps at 2.2.2). Fallback CPU benchmark
+  (i9-9880H): load 0.93 s, **5.93 chunks/s** indexing, **14 ms** median query embed
+  (`sidecars/retrieval/benchmarks/bench_embed.py`). English-only limitation documented; override via
+  `SB_EMBED_MODEL`.
 - **Dependencies:** SB-031; OQ #9 confirmed (CPU check is **inside** this story)
 - **Scope:** sidecar `index_vault` additionally embeds chunks (BGE-M3, 1024-d, local/offline after first
   model fetch; model cache **outside** the workspace) into a DuckDB VSS (HNSW) table in the same

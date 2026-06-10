@@ -21,8 +21,8 @@ export class QueryCliError extends Error {
   }
 }
 
-/** Default mode stays lexical until SB-049 lands hybrid. */
-export const DEFAULT_QUERY_MODE: QueryMode = "lexical";
+/** Hybrid is the default since SB-049 (vector+keyword ~70/30). */
+export const DEFAULT_QUERY_MODE: QueryMode = "hybrid";
 const KNOWN_MODES: readonly QueryMode[] = ["lexical", "vector", "hybrid"];
 
 export interface QueryOptions {

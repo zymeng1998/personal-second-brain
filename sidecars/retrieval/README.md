@@ -51,19 +51,35 @@ cannot be recovered (malformed JSON, missing `req_id`) is answered with `req_id:
 |---|---|---|---|
 | `ping` | — | `{"pong": true}` | — |
 | `health` | — | `{"version", "python"}` | — |
-| `index_vault` | `{workspace}` | `{"notes", "chunks", "built"}` | `invalid_args`, `index_build_failed` |
-| `query` | `{workspace, q, k?, mode?}` | `{"hits": [{id, score, snippet, source_ref}]}` | `invalid_args`, `unsupported_mode`, `index_missing`, `query_failed` |
+| `index_vault` | `{workspace}` | `{"notes", "chunks", "built"}` | `invalid_args`, `embed_model_unavailable`, `index_build_failed` |
+| `query` | `{workspace, q, k?, mode?, vector_weight?}` | `{"hits": [{id, score, snippet, source_ref}]}` | `invalid_args`, `unsupported_mode`, `index_missing`, `index_model_mismatch`, `query_failed` |
 | (any other) | — | — | `unknown_op` |
 
 Error codes so far: `malformed_request`, `unknown_op`, `internal_error`, `invalid_args`,
-`unsupported_mode`, `index_missing`, `index_build_failed`, `query_failed`.
+`unsupported_mode`, `index_missing`, `index_build_failed`, `query_failed`,
+`embed_model_unavailable`, `index_model_mismatch`.
 
 `index_vault` scans `vault/**/*.md` read-only, chunks heading-aware (~512 tokens, chunk id
-`<note ULID>#<seq>`, `source_ref` = note id), and full-rebuilds the DuckDB FTS index in
-`indexes/retrieval.duckdb` (the file is deleted + rebuilt — disposable by contract).
-`query` is lexical BM25 (modes `vector`/`hybrid` land with SB-049), ordered score desc with a
-deterministic id tie-break. DuckDB's `fts` extension is cached in `~/.duckdb` (outside the
-workspace) on first use.
+`<note ULID>#<seq>`, `source_ref` = note id), embeds every chunk, and full-rebuilds
+`indexes/retrieval.duckdb` (FTS/BM25 + a DuckDB **VSS HNSW** vector index, cosine metric; the file
+is deleted + rebuilt — disposable by contract, which is why VSS experimental persistence is
+acceptable). `query` modes: `lexical` (BM25), `vector` (cosine), `hybrid` (**default**: candidate
+pools from both rankers, min-max normalized, combined `vector_weight`·vec + (1−w)·lex; default
+weight 0.7, tunable via `args.vector_weight`). Ordering is score desc with a deterministic id
+tie-break. DuckDB's `fts`/`vss` extensions cache in `~/.duckdb` (outside the workspace).
+
+## Embedding model (OQ #9 resolution, 2026-06-10)
+
+Default: **`BAAI/bge-small-en-v1.5` (384-d)** — the pre-approved OQ #9 fallback. **BGE-M3 is not
+loadable on this machine**: its HF repo ships only `pytorch_model.bin` (no safetensors),
+transformers ≥4.53 requires torch ≥2.6 to load `.bin` weights (CVE-2025-32434), and torch wheels
+for macOS x86_64 stop at 2.2.2. Benchmark of the fallback on this Mac (i9-9880H, CPU):
+load 0.93 s, **5.93 chunks/s** indexing (32 × ~512-token chunks), **14 ms** median query embed
+(`benchmarks/bench_embed.py`). Override via `SB_EMBED_MODEL` (a model switch requires re-running
+`index_vault`; mismatches are rejected as `index_model_mismatch`). The model cache is the default
+HF cache (`~/.cache/huggingface`) — outside the workspace per OQ #19. Known limitation:
+bge-small-en-v1.5 is English-only (BGE-M3 was chosen for multilinguality); revisit if/when the
+hardware supports torch ≥2.6 or an ONNX path is added.
 
 ## Tests
 

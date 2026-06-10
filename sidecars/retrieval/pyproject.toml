@@ -3,7 +3,16 @@ name = "retrieval-sidecar"
 version = "0.1.0"
 description = "Second Brain retrieval sidecar: stdio JSONL server. Reads the vault read-only; writes only under indexes/."
 requires-python = ">=3.11"
-dependencies = ["duckdb>=1.1"]
+dependencies = [
+  "duckdb>=1.1",
+  # torch 2.2.x is the last release with macOS x86_64 wheels (this machine)
+  "torch>=2.2,<2.3",
+  "sentence-transformers>=3.0,<5",
+  # transformers 5.x requires torch >= 2.4 (unavailable on macOS x86_64)
+  "transformers>=4.44,<5",
+  # torch 2.2.x wheels are built against the numpy 1.x ABI
+  "numpy<2",
+]
 
 [dependency-groups]
 dev = ["pytest>=8.0"]

@@ -8,7 +8,7 @@ from retrieval_sidecar.errors import OpError
 from retrieval_sidecar.indexer import op_index_vault
 from retrieval_sidecar.querying import op_query
 
-from conftest import ULID_A, ULID_B, ULID_C, snapshot_tree, write_note
+from conftest import ULID_A, ULID_B, ULID_C, requires_model, snapshot_tree, write_note
 
 
 @pytest.fixture
@@ -22,14 +22,16 @@ def seeded_workspace(workspace: Path) -> Path:
     return workspace
 
 
+@requires_model
 def test_index_counts_notes_and_chunks(seeded_workspace: Path) -> None:
     data = op_index_vault({"workspace": str(seeded_workspace)})
     assert data["notes"] == 3
     assert data["chunks"] == 3  # short notes -> one chunk each
-    assert data["built"] == ["fts"]
+    assert data["built"] == ["fts", "vector"]
     assert (seeded_workspace / "indexes" / "retrieval.duckdb").is_file()
 
 
+@requires_model
 def test_reindex_is_idempotent(seeded_workspace: Path) -> None:
     first = op_index_vault({"workspace": str(seeded_workspace)})
     second = op_index_vault({"workspace": str(seeded_workspace)})
@@ -38,6 +40,7 @@ def test_reindex_is_idempotent(seeded_workspace: Path) -> None:
     assert op_query(query) == op_query(query)
 
 
+@requires_model
 def test_query_returns_seeded_note_with_provenance(seeded_workspace: Path) -> None:
     op_index_vault({"workspace": str(seeded_workspace)})
     data = op_query({"workspace": str(seeded_workspace), "q": "tomatoes basil"})
@@ -49,20 +52,23 @@ def test_query_returns_seeded_note_with_provenance(seeded_workspace: Path) -> No
     assert "basil" in top["snippet"].lower()
 
 
+@requires_model
 def test_query_ranking_is_score_desc(seeded_workspace: Path) -> None:
     op_index_vault({"workspace": str(seeded_workspace)})
-    data = op_query({"workspace": str(seeded_workspace), "q": "espresso", "k": 10})
+    data = op_query({"workspace": str(seeded_workspace), "q": "espresso", "k": 10, "mode": "lexical"})
     scores = [hit["score"] for hit in data["hits"]]
     assert scores == sorted(scores, reverse=True)
     assert {hit["source_ref"] for hit in data["hits"]} == {ULID_A, ULID_C}
 
 
+@requires_model
 def test_k_limits_results(seeded_workspace: Path) -> None:
     op_index_vault({"workspace": str(seeded_workspace)})
     data = op_query({"workspace": str(seeded_workspace), "q": "espresso", "k": 1})
     assert len(data["hits"]) == 1
 
 
+@requires_model
 def test_empty_vault_indexes_to_zero_and_queries_empty(workspace: Path) -> None:
     data = op_index_vault({"workspace": str(workspace)})
     assert data["notes"] == 0 and data["chunks"] == 0
@@ -70,6 +76,7 @@ def test_empty_vault_indexes_to_zero_and_queries_empty(workspace: Path) -> None:
     assert hits == {"hits": []}
 
 
+@requires_model
 def test_vault_bytes_unchanged_and_only_indexes_written(seeded_workspace: Path) -> None:
     before = snapshot_tree(seeded_workspace, exclude_top={"indexes"})
     op_index_vault({"workspace": str(seeded_workspace)})
@@ -98,17 +105,20 @@ def test_invalid_workspace_rejected() -> None:
 
 
 def test_invalid_query_args_rejected(seeded_workspace: Path) -> None:
-    op_index_vault({"workspace": str(seeded_workspace)})
     base = {"workspace": str(seeded_workspace)}
     for bad in [{**base, "q": ""}, {**base, "q": "x", "k": 0}, {**base, "q": "x", "k": True}]:
         with pytest.raises(OpError) as excinfo:
             op_query(bad)
         assert excinfo.value.code == "invalid_args"
     with pytest.raises(OpError) as excinfo:
-        op_query({**base, "q": "x", "mode": "hybrid"})
+        op_query({**base, "q": "x", "mode": "psychic"})
     assert excinfo.value.code == "unsupported_mode"
+    with pytest.raises(OpError) as excinfo:
+        op_query({**base, "q": "x", "vector_weight": 1.5})
+    assert excinfo.value.code == "invalid_args"
 
 
+@requires_model
 def test_notes_without_frontmatter_id_fall_back_to_filename(workspace: Path) -> None:
     vault = workspace / "vault" / "10_Inbox"
     vault.mkdir(parents=True)

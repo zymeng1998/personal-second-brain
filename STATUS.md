@@ -15,6 +15,32 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-049 `Done` (Phase 3, EPIC-CORE-009) — embeddings + DuckDB VSS + hybrid ranking
+- **OQ #9 RESOLUTION — fallback adopted:** default embedding model is **`bge-small-en-v1.5`
+  (384-d)**, not BGE-M3. BGE-M3 is **unloadable** on this Mac (not merely slow): its HF repo ships
+  only `pytorch_model.bin` (verified — no safetensors), transformers ≥4.53 requires torch ≥2.6 to
+  load `.bin` weights (CVE-2025-32434), and torch wheels for macOS x86_64 (Intel) stop at **2.2.2**.
+  **Benchmark (card's first task; i9-9880H CPU, `benchmarks/bench_embed.py`):** bge-small —
+  load 0.93 s, **5.93 chunks/s** indexing (32 × ~512-token chunks), **14 ms** median query embed.
+  Documented in OQ #9 + sidecar README; override via `SB_EMBED_MODEL`; English-only limitation noted
+  (revisit on torch ≥2.6 hardware or ONNX).
+- **Scope delivered:** sidecar deps `torch 2.2.2` (pinned `<2.3` for x86_64 mac) +
+  `sentence-transformers <5` + `transformers <5` + `numpy <2` (torch-2.2 ABI). `embeddings.py`
+  (lazy singleton; passage embed batch=8 normalized; bge query prefix; HF cache outside workspace;
+  `model_available()` for offline skips). `index_vault` now also embeds every chunk →
+  `embeddings (chunk_id, vec FLOAT[384])` + **HNSW (cosine)** in the same `retrieval.duckdb`
+  (threads=1 build for determinism; experimental persistence acceptable — the file is disposable);
+  `meta` table records model+dim; `built:["fts","vector"]`. `query` gains `vector` + `hybrid`
+  (**hybrid now the default** everywhere: sidecar, facade, CLI): candidate pools from both rankers,
+  min-max normalized, `vector_weight`·vec + (1−w)·lex (default 0.7, tunable arg), id tie-break;
+  model mismatch vs index → `index_model_mismatch`.
+- **Validation (green):** `uv run pytest` **33/33** (5 new semantic: vector finds the
+  "automobile servicing"→car-note paraphrase that lexical misses; hybrid default ≥ lexical on both
+  exact + paraphrase queries; weight extremes track each ranker; deterministic re-index; model
+  mismatch). TS: retrieval 15/15, cli 38/38, root **159/159** Python-free; `test:sidecar` **2/2**
+  vs the real sidecar with hybrid default. Model-dependent pytest cases skip visibly offline.
+- **Next:** SB-054 (`Ready`) — the epic disposability gate.
+
 ## SB-032 `Done` (Phase 3, EPIC-CORE-009) — `sb query` CLI + facade query
 - **Scope delivered:** `@sb/retrieval` `queryMemory(opts)` facade (validates `workspace`/`q`/`k` →
   `RetrievalError("invalid_args")`; defaults mode `lexical`; maps + shape-checks hits →

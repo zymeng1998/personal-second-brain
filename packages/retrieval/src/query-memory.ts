@@ -15,7 +15,7 @@ export interface QueryMemoryOptions {
   q: string;
   /** Max hits. */
   k?: number;
-  /** Ranking mode; defaults to lexical until hybrid lands (SB-049). */
+  /** Ranking mode; defaults to hybrid (since SB-049). */
   mode?: QueryMode;
   /** Sidecar spawn overrides (tests run a Node stub sidecar). */
   sidecar?: SidecarClientOptions;
@@ -63,7 +63,7 @@ export async function queryMemory(opts: QueryMemoryOptions): Promise<QueryMemory
     data = await client.request("query", {
       workspace: opts.workspace,
       q: opts.q,
-      mode: opts.mode ?? "lexical",
+      mode: opts.mode ?? "hybrid",
       ...(opts.k !== undefined ? { k: opts.k } : {}),
     });
   } finally {

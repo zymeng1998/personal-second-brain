@@ -83,8 +83,8 @@ pnpm run query:memory -- "espresso" [--k 5] [--workspace <path>]   # root script
 Queries `indexes/retrieval.duckdb` via the `@sb/retrieval` `queryMemory` facade and prints
 `{ ok, hits: [{id, score, snippet, source_ref}] }` ranked by score (deterministic id tie-break).
 **Read-only**: never writes events, never touches the workspace beyond the sidecar reading
-`indexes/`. Mode defaults to `lexical` until SB-049 lands hybrid (`--mode hybrid` then becomes
-the default); querying before `sb index` returns a structured `index_missing` error.
+`indexes/`. Mode defaults to `hybrid` (SB-049: vector+keyword ~70/30; `--mode lexical|vector`
+to override); querying before `sb index` returns a structured `index_missing` error.
 
 Scripts: `pnpm --filter @sb/cli test`, `… build` (`tsc --noEmit`), `… capture -- <flags>`,
 `… distill -- <propose|accept> <flags>`. Env-gated (needs `uv`): `pnpm run test:sidecar` at the

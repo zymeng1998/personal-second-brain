@@ -4,6 +4,13 @@ from pathlib import Path
 
 import pytest
 
+from retrieval_sidecar.embeddings import model_available
+
+# index_vault embeds since SB-049: skip VISIBLY when the model is not cached (offline)
+requires_model = pytest.mark.skipif(
+    not model_available(), reason="embedding model not in the local HF cache (offline)"
+)
+
 # Valid ULIDs (Crockford base32, 26 chars, leading char 0-7).
 ULID_A = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 ULID_B = "01BX5ZZKBKACTAV9WEVGEMMVRY"

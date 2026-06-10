@@ -30,7 +30,7 @@ async function expectError(promise: Promise<unknown>, code: RetrievalError["code
   await assert.rejects(promise, (e: unknown) => e instanceof RetrievalError && e.code === code);
 }
 
-test("maps hits and defaults mode to lexical", async () => {
+test("maps hits and defaults mode to hybrid", async () => {
   const ws = await makeWorkspace();
   const result = await queryMemory({ workspace: ws, q: "espresso", sidecar: SIDECAR });
   assert.equal(result.hits.length, 1);
@@ -38,7 +38,7 @@ test("maps hits and defaults mode to lexical", async () => {
   assert.equal(hit?.id, "01ARZ3NDEKTSV4RRFFQ69G5FAV#0");
   assert.equal(hit?.source_ref, "01ARZ3NDEKTSV4RRFFQ69G5FAV");
   assert.equal(hit?.score, 1.5);
-  assert.equal(hit?.snippet, "lexical|espresso|none"); // mode defaulted, k omitted
+  assert.equal(hit?.snippet, "hybrid|espresso|none"); // mode defaulted (SB-049), k omitted
 });
 
 test("k and mode pass through to the sidecar", async () => {
