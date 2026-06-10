@@ -8,7 +8,7 @@ import path from "node:path";
 import { after, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { RetrievalError, queryMemory } from "../src/index.js";
+import { RetrievalError, SidecarClient, queryMemory } from "../src/index.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const STUB = path.join(HERE, "stub-sidecar.mjs");
@@ -76,4 +76,20 @@ test("query writes nothing into the workspace", async () => {
   const ws = await makeWorkspace();
   await queryMemory({ workspace: ws, q: "espresso", sidecar: SIDECAR });
   assert.deepEqual(await readdir(ws), []);
+});
+
+test("an injected client is reused across calls and left open (caller owns it)", async () => {
+  // Review MEDIUM #4: batch callers pay the sidecar spawn + model load once.
+  const ws = await makeWorkspace();
+  const client = new SidecarClient(SIDECAR);
+  try {
+    const first = await queryMemory({ workspace: ws, q: "alpha", client });
+    const second = await queryMemory({ workspace: ws, q: "beta", mode: "lexical", client });
+    assert.equal(first.hits[0]?.snippet, "hybrid|alpha|none");
+    assert.equal(second.hits[0]?.snippet, "lexical|beta|none");
+    // still open after queryMemory: a direct request on the same transport works
+    assert.deepEqual(await client.request("ping"), { pong: true });
+  } finally {
+    await client.close();
+  }
 });

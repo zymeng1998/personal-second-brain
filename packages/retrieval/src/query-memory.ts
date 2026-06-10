@@ -21,6 +21,13 @@ export interface QueryMemoryOptions {
   filters?: QueryFilters;
   /** Sidecar spawn overrides (tests run a Node stub sidecar). */
   sidecar?: SidecarClientOptions;
+  /**
+   * Reusable transport (review MEDIUM #4): an injected client is used as-is
+   * and left OPEN — the caller owns its lifecycle, so batch callers pay the
+   * sidecar spawn + model load once instead of per query. Without it, a
+   * client is spawned from `sidecar` and closed per call.
+   */
+  client?: SidecarClient;
 }
 
 function validate(opts: QueryMemoryOptions): void {
@@ -62,7 +69,8 @@ function toHit(value: unknown): RetrievalHit {
 /** Query the L4 retrieval indexes. Read-only; returns ranked references. */
 export async function queryMemory(opts: QueryMemoryOptions): Promise<QueryMemoryResult> {
   validate(opts);
-  const client = new SidecarClient(opts.sidecar ?? {});
+  const ownClient = opts.client === undefined ? new SidecarClient(opts.sidecar ?? {}) : undefined;
+  const client = opts.client ?? (ownClient as SidecarClient);
   let data: Record<string, unknown>;
   try {
     data = await client.request("query", {
@@ -73,7 +81,7 @@ export async function queryMemory(opts: QueryMemoryOptions): Promise<QueryMemory
       ...(opts.filters !== undefined ? { filters: opts.filters } : {}),
     });
   } finally {
-    await client.close();
+    await ownClient?.close();
   }
   const rawHits = data["hits"];
   if (!Array.isArray(rawHits)) {
