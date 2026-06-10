@@ -73,6 +73,17 @@ export type {
   SidecarResponse,
 } from "./retrieval.js";
 
+export type {
+  ProposalWorkflow,
+  FactProposalItem,
+  OutputProposalItem,
+  WorkflowProposal,
+  ExtractFactsProposal,
+  ComposeOutputProposal,
+  ComposeOutputInput,
+  ComposeOutputResult,
+} from "./proposals.js";
+
 export type { PermissionScope, CapabilityGrant } from "./scope.js";
 export { ALWAYS_DENIED_SCOPES } from "./scope.js";
 

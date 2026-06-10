@@ -1,0 +1,13 @@
+{
+  "workflow": "compose_output",
+  "version": 1,
+  "proposed_at": "2026-06-10T12:05:00Z",
+  "items": [
+    {
+      "title": "Espresso maintenance summary",
+      "sources": ["01ARZ3NDEKTSV4RRFFQ69G5FAV", "01BX5ZZKBKACTAV9WEVGEMMVRY"],
+      "body": "## Maintenance\n\nDescale takes 30 minutes [01BX5ZZKBKACTAV9WEVGEMMVRY], superseding the earlier 25-minute estimate [01ARZ3NDEKTSV4RRFFQ69G5FAV].\n",
+      "tags": ["maintenance"]
+    }
+  ]
+}

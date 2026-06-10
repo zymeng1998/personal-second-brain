@@ -1,0 +1,20 @@
+{
+  "workflow": "extract_facts",
+  "version": 1,
+  "proposed_at": "2026-06-10T12:00:00Z",
+  "items": [
+    {
+      "statement": "The espresso machine descale cycle takes 25 minutes.",
+      "source_ref": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "observed_at": "2026-06-10T11:58:00Z",
+      "confidence": 0.9
+    },
+    {
+      "statement": "The descale cycle takes 30 minutes, not 25.",
+      "source_ref": "01BX5ZZKBKACTAV9WEVGEMMVRY",
+      "observed_at": "2026-06-10T11:59:00Z",
+      "confidence": 0.8,
+      "supersedes": "01BX5ZZKBKACTAV9WEVGEMMVS0"
+    }
+  ]
+}

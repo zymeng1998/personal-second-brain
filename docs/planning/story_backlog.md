@@ -138,7 +138,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-056 | Story | AI-workflow proposal contracts (interfaces + proposal schema) | EPIC-CORE-014 | P1 | In Progress | 2 | SB-010 |
+| SB-056 | Story | AI-workflow proposal contracts (interfaces + proposal schema) | EPIC-CORE-014 | P1 | Done | 2 | SB-010 |
 | SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
 | SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Backlog | 2 | SB-056 |
 | SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Backlog | 2 | SB-058 |
@@ -1272,7 +1272,9 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-056 — AI-workflow proposal contracts (interfaces + proposal schema)
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-10 — autonomous session; scope note: `write:outputs` scope name [not `write:note`];
+  `addFact` descriptor already existed since Phase 2, so only `composeOutput` was added)
 - **Dependencies:** SB-010 (`Done`)
 - **Scope:** contracts only, mirroring SB-010/019/047. (a) `schemas/json/proposal.schema.json` —
   the shared, versioned proposal envelope (OQ #22): required `workflow`

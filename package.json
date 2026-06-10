@@ -15,7 +15,7 @@
     "index:vault": "tsx scripts/index_vault.ts",
     "query:memory": "tsx scripts/query_memory.ts",
     "test": "pnpm -r run test && pnpm run test:scripts",
-    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts scripts/init_workspace.test.ts",
+    "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts scripts/init_workspace.test.ts scripts/proposal_schema.test.ts",
     "test:sidecar": "pnpm --filter @sb/retrieval run test:sidecar && pnpm --filter @sb/cli run test:sidecar",
     "typecheck:scripts": "tsc -p scripts/tsconfig.json",
     "test:coverage": "c8 --reporter=text-summary --reporter=text pnpm test"

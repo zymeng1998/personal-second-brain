@@ -13,6 +13,7 @@ import type { Event } from "./event.js";
 import type { AddFactInput, Fact, FactFilter, SupersedeFactInput } from "./fact.js";
 import type { Ulid } from "./ids.js";
 import type { Layer, Note, NoteType } from "./note.js";
+import type { ComposeOutputInput, ComposeOutputResult } from "./proposals.js";
 import type { RebuildProjectionsInput, RebuildProjectionsResult } from "./projection.js";
 import type {
   IndexVaultInput,
@@ -111,6 +112,13 @@ export interface CoreOperations {
    * ranked references with provenance; writes nothing, emits no events.
    */
   queryMemory(input: QueryMemoryInput): Promise<QueryMemoryResult>;
+  /**
+   * Write one human-confirmed L5 output note (`vault/60_Outputs/`) citing its
+   * sources (non-empty; note-id sources resolved first — OQ #24), then append
+   * one TS-emitted `note_created` memory event. Never auto-invoked: the caller
+   * is an accept step over a reviewed proposal (`proposal.schema.json`).
+   */
+  composeOutput(input: ComposeOutputInput): Promise<ComposeOutputResult>;
 }
 
 /** Design-level documentation of each operation's required scope + possible errors. */
@@ -180,5 +188,10 @@ export const OPERATION_CONTRACTS: Readonly<Record<keyof CoreOperations, Operatio
     scope: "read:index",
     errors: ["validation_failed", "scope_denied", "io_error"],
     readOnly: true,
+  },
+  composeOutput: {
+    scope: "write:outputs",
+    errors: ["validation_failed", "not_found", "scope_denied", "duplicate_id", "io_error"],
+    readOnly: false,
   },
 } as const;

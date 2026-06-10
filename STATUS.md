@@ -9,7 +9,11 @@
   review candidates). Recorded RESOLVED in `open_questions.md` + story map.
 - **Session authorization:** autonomous Phase 4 advance in dependency order
   SB-056 → 057 → 058 → 059 → 062 → 063 → 064 → 065 → 066; one atomic commit + push per story;
-  blockers recorded instead of stopping. **SB-056 → `In Progress`.**
+  blockers recorded instead of stopping.
+- **SB-056 `Done`** — `proposal.schema.json` (shared envelope; fact/output item shapes; ULID
+  provenance enforced) + `@sb/interfaces` `proposals.ts` (envelope/item/`composeOutput` IO types),
+  `write:outputs` scope, `composeOutput` contract entry; 2 example proposals; schema test
+  (examples valid + 7 rejection cases) wired into `test:scripts`. Root **187/187**. Next: SB-057.
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
