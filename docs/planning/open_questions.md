@@ -22,19 +22,19 @@ To resolve before / during the noted phase. Tracked here so they don't block sca
 
 ## Decide during Phase 3 (retrieval)
 
-| # | Question | Lean |
-|---|---|---|
-| 9 | Embedding model | BGE-M3 (sspaeti); confirm CPU-only performance on this Mac |
-| 10 | Index store | DuckDB + VSS; SQLite FTS5 vs DuckDB FTS |
-| 11 | stdio JSONL vs local HTTP | Start stdio; add HTTP only if warm-model latency demands it |
-| 12 | Embed mem0/ReMe as a Python dep, or reference only? | Reference first; embed if it clearly saves work (Apache-2.0 OK) |
-| 17 | Python toolchain (machine has only system Python 3.9.6, no uv) | **uv** with a pinned Python ≥3.11 in `sidecars/retrieval/` (`pyproject.toml` + `uv.lock`; uv installs the interpreter — no system-Python dependency) |
-| 18 | Test policy for Python-dependent tests | Root `pnpm test` stays Node-only deterministic; sidecar = `pytest`; TS↔Python integration behind an env-gated `test:sidecar` target (visible SKIP when env absent) |
-| 19 | Index artifact layout | Single `indexes/retrieval.duckdb` (FTS + vector + later graph/temporal tables, one disposable file); existing `indexes/*` subdirs reserved for aux artifacts; model cache outside the workspace |
-| 20 | Chunking | ~512-token heading-aware chunks; chunk id `<note ULID>#<seq>`; every chunk carries `source_ref` = note id |
+**All eight RESOLVED (2026-06-10): human approved every decision exactly as leaned** at the Phase 3
+refinement review. Recorded here; full context in [`phase_3_story_map.md`](phase_3_story_map.md).
 
-(#9–12, #17–20 are listed with full context in [`phase_3_story_map.md`](phase_3_story_map.md); confirm at
-the Phase 3 refinement review before SB-047 → `Ready`.)
+| # | Question | Decision (2026-06-10) |
+|---|---|---|
+| 9 | Embedding model | **RESOLVED:** BGE-M3 (1024-d); CPU benchmark on this Mac is SB-049's first task; documented fallback `bge-small-en-v1.5` (384-d) behind the same ops if M3 is too slow. |
+| 10 | Index store | **RESOLVED:** DuckDB for both FTS and vector (VSS/HNSW) — one engine, one disposable file. |
+| 11 | stdio JSONL vs local HTTP | **RESOLVED:** stdio JSONL; local HTTP only if warm-model latency later forces it. |
+| 12 | Embed mem0/ReMe as a Python dep, or reference only? | **RESOLVED:** reference only — no dependency. |
+| 17 | Python toolchain (machine had only system Python 3.9.6) | **RESOLVED:** **uv** with a pinned Python ≥3.11 in `sidecars/retrieval/` (`pyproject.toml` + `uv.lock`; uv installs the interpreter — no system-Python dependency). |
+| 18 | Test policy for Python-dependent tests | **RESOLVED:** root `pnpm test` stays Node-only deterministic; sidecar = `pytest`; TS↔Python integration behind an env-gated `test:sidecar` target (visible SKIP when env absent). |
+| 19 | Index artifact layout | **RESOLVED:** single `indexes/retrieval.duckdb` (FTS + vector + later graph/temporal tables, one disposable file); existing `indexes/*` subdirs reserved for aux artifacts; model cache outside the workspace. |
+| 20 | Chunking | **RESOLVED:** ~512-token heading-aware chunks; chunk id `<note ULID>#<seq>`; every chunk carries `source_ref` = note id. |
 
 ## Decide later
 

@@ -2,7 +2,20 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
-## Phase 3 — REFINEMENT (2026-06-10): done; awaiting decision review
+## Phase 3 — DECISION REVIEW PASSED (2026-06-10); implementation started (autonomous session)
+- **Human approved all eight open decisions exactly as leaned** (OQ #9 BGE-M3 + CPU benchmark first in
+  SB-049 + bge-small fallback; #10 DuckDB FTS+VSS; #11 stdio JSONL; #12 mem0/ReMe reference-only;
+  #17 uv + pinned Python ≥3.11; #18 env-gated `test:sidecar`, root `pnpm test` Node-only; #19 single
+  `indexes/retrieval.duckdb`, model cache outside the workspace; #20 ~512-token heading-aware chunks
+  `<ULID>#<seq>` with `source_ref`). Recorded as RESOLVED in `open_questions.md` + story map.
+- **Session authorization:** autonomous Phase 3 advance in dependency order
+  SB-047 → 030 → 048 → 031 → 053 → 032 → 049 → 054 (SB-055 stretch only); one atomic commit + push per
+  story; blockers recorded instead of stopping.
+- **Environment note:** `uv` was not present → installed via Homebrew (`uv 0.11.19`); Python 3.11.15
+  available to uv. Node 22.20 / pnpm 9 unchanged.
+- **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
+
+## Phase 3 — REFINEMENT (2026-06-10): done; decision review passed (see above)
 - **What:** decomposed EPIC-CORE-009 (`5→split` SB-030/031/032) into ≤3-pt atomic stories with full cards
   (Scope/AC/DoD/Validation/Files/Deps) and a new [`phase_3_story_map.md`](docs/planning/phase_3_story_map.md)
   (objective, "Done when" gate, architecture, open decisions, sub-phases 3A–3D + 3X stretch, dependency

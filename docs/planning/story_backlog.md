@@ -111,12 +111,14 @@ promote after the open decisions in the story map are confirmed at review. Cards
 
 ### Phase 3 — Retrieval Sidecar (EPIC-CORE-009, refined; see [`phase_3_story_map.md`](phase_3_story_map.md))
 
-Decomposed from the old `5→split` SB-030/031/032 (split rule). **`Backlog` — refined, not yet `Ready`**;
-promote after the open decisions in the story map (OQ #9–12, #17–20) are confirmed at review. Cards below.
+Decomposed from the old `5→split` SB-030/031/032 (split rule). **Decision review PASSED 2026-06-10:
+all eight open decisions (OQ #9–12, #17–20) approved exactly as leaned** (recorded in
+[`open_questions.md`](open_questions.md)) — stories promote to `Ready` as their dependencies complete.
+Cards below.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | Backlog | 2 | SB-010 |
+| SB-047 | Story | Retrieval + index contracts (interfaces) | EPIC-CORE-009 | P1 | In Progress | 2 | SB-010 |
 | SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-047 |
 | SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-030, SB-047 |
 | SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Backlog | 3 | SB-048 |
@@ -1049,7 +1051,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-047 — Retrieval + index contracts (interfaces)
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** In Progress
 - **Dependencies:** SB-010 (`Done`)
 - **Scope (contracts only, mirrors SB-010/019/020):** new `packages/interfaces/src/retrieval.ts` —
   `IndexVaultInput`/`IndexVaultResult` (counts per index type), `QueryMemoryInput`

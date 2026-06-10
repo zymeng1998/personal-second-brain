@@ -4,8 +4,10 @@ Refinement of the Phase 3 backlog (the `5→split` stories SB-030/031/032 decomp
 stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md) (cards) and
 [`phase_2_story_map.md`](phase_2_story_map.md) (prior phase).
 
-**Status (2026-06-10): REFINED — awaiting decision review.** No implementation has started. Stories stay
-`Backlog` until the open decisions below are confirmed; then SB-047 → `Ready`.
+**Status (2026-06-10): IN PROGRESS.** The decision review is complete — **all eight open decisions
+(OQ #9–12, #17–20) approved exactly as leaned** (recorded in
+[`open_questions.md`](open_questions.md)). SB-047 moved to `Ready` and implementation started the same
+day. Story statuses live in [`story_backlog.md`](story_backlog.md).
 
 ## Objective
 
@@ -36,9 +38,9 @@ or mutates the vault, never writes L0, and never touches the event log — all e
 - **Design ported, not copied,** from sspaeti/obsidian-note-taking-assistant (license unspecified —
   reference only). mem0/ReMe: reference first (OQ #12).
 
-## Open decisions (confirm before SB-047 → `Ready`)
+## Open decisions — ALL CONFIRMED 2026-06-10 (approved as leaned; see `open_questions.md`)
 
-| # | Decision | Lean |
+| # | Decision | Approved resolution |
 |---|---|---|
 | 9 | Embedding model | **BGE-M3 (1024-d)**; verify CPU-only build+query speed on this Mac during SB-049 — fallback `bge-small-en-v1.5` (384-d) behind the same op if M3 is too slow. |
 | 10 | Index store | **DuckDB for both FTS + VSS(HNSW)** — one engine, one disposable file. |
