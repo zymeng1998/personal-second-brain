@@ -15,6 +15,12 @@ from pathlib import Path
 ULID_RE = re.compile(r"^[0-7][0-9A-HJKMNP-TV-Z]{25}$")
 _FM_ID_RE = re.compile(r"^id:\s*[\"']?([0-9A-Za-z]+)[\"']?\s*$", re.MULTILINE)
 _FM_TITLE_RE = re.compile(r"^title:\s*(.+?)\s*$", re.MULTILINE)
+_FM_CREATED_RE = re.compile(r"^created:\s*[\"']?([^\"'\n]+?)[\"']?\s*$", re.MULTILINE)
+_FM_UPDATED_RE = re.compile(r"^updated:\s*[\"']?([^\"'\n]+?)[\"']?\s*$", re.MULTILINE)
+_ENTITIES_HEADER_RE = re.compile(r"^entities:\s*$")
+_LIST_ITEM_RE = re.compile(r"^\s+-\s*[\"']?([0-9A-Z]+)[\"']?\s*$")
+# [[Target]] / [[Target|alias]] / [[Target#heading]] -> "Target"
+_WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]")
 
 
 @dataclass(frozen=True)
@@ -23,6 +29,11 @@ class VaultNote:
     title: str
     body: str
     relative_path: str
+    # SB-055 graph/temporal inputs
+    entities: tuple[str, ...] = ()
+    wikilinks: tuple[str, ...] = ()
+    created: str | None = None
+    updated: str | None = None
 
 
 def split_frontmatter(text: str) -> tuple[str, str]:
@@ -55,6 +66,33 @@ def _title_of(frontmatter: str) -> str:
     return match.group(1).strip().strip("\"'")
 
 
+def _entities_of(frontmatter: str) -> tuple[str, ...]:
+    """ULIDs from the frontmatter `entities:` block (block-list form only)."""
+    refs: list[str] = []
+    in_block = False
+    for line in frontmatter.splitlines():
+        if _ENTITIES_HEADER_RE.match(line):
+            in_block = True
+            continue
+        if in_block:
+            item = _LIST_ITEM_RE.match(line)
+            if item and ULID_RE.match(item.group(1)):
+                refs.append(item.group(1))
+                continue
+            in_block = False
+    return tuple(dict.fromkeys(refs))
+
+
+def _date_of(pattern: re.Pattern[str], frontmatter: str) -> str | None:
+    match = pattern.search(frontmatter)
+    return match.group(1).strip() if match else None
+
+
+def _wikilinks_of(body: str) -> tuple[str, ...]:
+    targets = [m.group(1).strip() for m in _WIKILINK_RE.finditer(body)]
+    return tuple(dict.fromkeys(t for t in targets if t))
+
+
 def scan_vault(workspace: Path) -> list[VaultNote]:
     """Deterministic (path-sorted) read-only scan of every vault markdown note."""
     vault = workspace / "vault"
@@ -78,6 +116,10 @@ def scan_vault(workspace: Path) -> list[VaultNote]:
                 title=_title_of(frontmatter),
                 body=body,
                 relative_path=str(path.relative_to(workspace)),
+                entities=_entities_of(frontmatter),
+                wikilinks=_wikilinks_of(body),
+                created=_date_of(_FM_CREATED_RE, frontmatter),
+                updated=_date_of(_FM_UPDATED_RE, frontmatter),
             )
         )
     return notes

@@ -8,6 +8,8 @@ HNSW graph construction order is stable).
 
 from __future__ import annotations
 
+import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -17,10 +19,76 @@ from .chunking import Chunk, chunk_note
 from .embeddings import embed_passages, embedding_dim, model_name
 from .errors import OpError
 from .index_store import index_path, resolve_workspace
-from .notes import scan_vault
+from .notes import VaultNote, scan_vault
+
+# event streams whose timestamps feed the temporal index (read-only; the
+# projection stream describes index builds, not notes, so it is excluded)
+_EVENT_STREAMS = ("capture_events.jsonl", "memory_events.jsonl")
 
 
-def _rebuild(db_path: Path, chunks: list[Chunk], vectors: list[list[float]], dim: int) -> None:
+def _graph_edges(notes: list[VaultNote]) -> list[tuple[str, str, str, str]]:
+    """L4 graph edges: frontmatter `entities` refs + body `[[wikilinks]]`.
+
+    Wikilinks resolve by exact note title (path-sorted first note wins on a
+    duplicate title — deterministic); unresolved links and self-links are
+    skipped. `source_ref` = the linking note (provenance).
+    """
+    title_to_id: dict[str, str] = {}
+    for note in notes:  # notes are path-sorted, so collisions resolve deterministically
+        if note.title and note.title not in title_to_id:
+            title_to_id[note.title] = note.note_id
+    edges: list[tuple[str, str, str, str]] = []
+    for note in notes:
+        for ref in note.entities:
+            if ref != note.note_id:
+                edges.append((note.note_id, ref, "entity_ref", note.note_id))
+        for target_title in note.wikilinks:
+            target = title_to_id.get(target_title)
+            if target is not None and target != note.note_id:
+                edges.append((note.note_id, target, "wikilink", note.note_id))
+    return list(dict.fromkeys(edges))
+
+
+def _temporal_rows(workspace: Path, notes: list[VaultNote]) -> list[tuple[str, str, str]]:
+    """(note_id, iso_ts, source) rows from frontmatter dates + event timestamps."""
+    rows: list[tuple[str, str, str]] = []
+    for note in notes:
+        if note.created:
+            rows.append((note.note_id, note.created, "frontmatter:created"))
+        if note.updated:
+            rows.append((note.note_id, note.updated, "frontmatter:updated"))
+    note_ids = {note.note_id for note in notes}
+    for stream in _EVENT_STREAMS:
+        path = workspace / "events" / stream
+        if not path.is_file():
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError) as exc:
+            print(f"[retrieval-sidecar] skipping unreadable {path}: {exc}", file=sys.stderr)
+            continue
+        for line in lines:
+            if line.strip() == "":
+                continue
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue  # event validity is TS-owned; the indexer just skips junk
+            subject = event.get("subject_id")
+            occurred = event.get("occurred_at")
+            if isinstance(subject, str) and subject in note_ids and isinstance(occurred, str):
+                rows.append((subject, occurred, f"event:{event.get('kind', 'unknown')}"))
+    return list(dict.fromkeys(rows))
+
+
+def _rebuild(
+    db_path: Path,
+    chunks: list[Chunk],
+    vectors: list[list[float]],
+    dim: int,
+    edges: list[tuple[str, str, str, str]],
+    temporal: list[tuple[str, str, str]],
+) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     db_path.unlink(missing_ok=True)
     db_path.with_suffix(db_path.suffix + ".wal").unlink(missing_ok=True)
@@ -64,6 +132,37 @@ def _rebuild(db_path: Path, chunks: list[Chunk], vectors: list[list[float]], dim
         connection.execute(
             "CREATE INDEX embeddings_hnsw ON embeddings USING HNSW (vec) WITH (metric = 'cosine')"
         )
+        connection.execute(
+            """
+            CREATE TABLE graph_edges (
+              from_id    TEXT NOT NULL,
+              to_id      TEXT NOT NULL,
+              kind       TEXT NOT NULL,
+              source_ref TEXT NOT NULL
+            )
+            """
+        )
+        if edges:
+            connection.executemany("INSERT INTO graph_edges VALUES (?, ?, ?, ?)", edges)
+        connection.execute(
+            """
+            CREATE TABLE temporal (
+              note_id TEXT NOT NULL,
+              ts      TIMESTAMP,
+              bucket  DATE,
+              source  TEXT NOT NULL
+            )
+            """
+        )
+        if temporal:
+            connection.executemany(
+                """
+                INSERT INTO temporal
+                SELECT ?, TRY_CAST(? AS TIMESTAMP),
+                       CAST(TRY_CAST(? AS TIMESTAMP) AS DATE), ?
+                """,
+                [(n, ts, ts, src) for n, ts, src in temporal],
+            )
     finally:
         connection.close()
 
@@ -75,8 +174,14 @@ def op_index_vault(args: dict[str, Any]) -> dict[str, Any]:
     for note in notes:
         chunks.extend(chunk_note(note.note_id, note.title, note.body))
     vectors = embed_passages([c.text for c in chunks])  # raises OpError if the model is unavailable
+    edges = _graph_edges(notes)
+    temporal = _temporal_rows(workspace, notes)
     try:
-        _rebuild(index_path(workspace), chunks, vectors, embedding_dim())
+        _rebuild(index_path(workspace), chunks, vectors, embedding_dim(), edges, temporal)
     except duckdb.Error as exc:
         raise OpError("index_build_failed", f"duckdb: {exc}") from exc
-    return {"notes": len(notes), "chunks": len(chunks), "built": ["fts", "vector"]}
+    return {
+        "notes": len(notes),
+        "chunks": len(chunks),
+        "built": ["fts", "vector", "graph", "temporal"],
+    }

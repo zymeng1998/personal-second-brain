@@ -67,7 +67,9 @@ rl.on("line", (line) => {
             {
               id: "01ARZ3NDEKTSV4RRFFQ69G5FAV#0",
               score: 1.5,
-              snippet: `${args.mode}|${args.q}|${args.k ?? "none"}`,
+              snippet:
+                `${args.mode}|${args.q}|${args.k ?? "none"}` +
+                (args.filters !== undefined ? `|${JSON.stringify(args.filters)}` : ""),
               source_ref: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
             },
           ],

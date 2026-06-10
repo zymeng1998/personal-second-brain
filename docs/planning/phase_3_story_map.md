@@ -11,8 +11,10 @@ stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md
 SB-054 disposability gate (delete `indexes/` → lossless rebuild) is green. **OQ #9 note:** BGE-M3
 proved unloadable on this machine (torch ≤2.2.2 on macOS x86_64 vs the CVE-2025-32434 torch ≥2.6
 requirement for `.bin` weights) — the pre-approved fallback `bge-small-en-v1.5` (384-d) is the
-default. SB-055 (graph/temporal) remains the optional P2 stretch. Story statuses live in
-[`story_backlog.md`](story_backlog.md).
+default. **The SB-055 graph/temporal stretch is also `Done`** (human-approved after the gate):
+`graph_edges` (entity refs + title-resolved wikilinks) + `temporal` (frontmatter dates + event
+timestamps) tables and composable query `filters:{near,from,to}`. **All 9 Phase 3 stories
+complete.** Story statuses live in [`story_backlog.md`](story_backlog.md).
 
 ## Objective
 

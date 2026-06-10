@@ -90,6 +90,10 @@ and hybrid-default `sb index` / `sb query` with TS-emitted `indexed` events. The
 delete-`indexes/`-rebuild lossless gate is green. **Root suite 159 tests (Node-only); sidecar pytest
 33; env-gated `pnpm run test:sidecar` for the real-sidecar E2E + gate.**
 
-**Next:** SB-055 (graph + temporal indexes — P2 stretch, optional) or Phase 4 (AI workflows) after
-review. Older P2 review follow-ups remain (SB-028/029/033). Always follow the backlog workflow above:
-confirm the story is `Ready`, implement in-scope only, validate, stop at `In Review`.
+**The SB-055 graph/temporal stretch is also `Done`** (graph_edges from entity refs + wikilinks,
+temporal from frontmatter dates + event timestamps, composable query `filters:{near,from,to}`) —
+**all 9 Phase 3 stories complete; root suite 160 tests, sidecar pytest 42.**
+
+**Next:** Phase 4 (AI workflows) after review. Older P2 review follow-ups remain (SB-028/029/033).
+Always follow the backlog workflow above: confirm the story is `Ready`, implement in-scope only,
+validate, stop at `In Review`.

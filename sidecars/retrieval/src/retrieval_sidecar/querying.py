@@ -4,6 +4,11 @@ Hybrid (the default mode, SB-049): fetch a candidate pool from both rankers,
 min-max normalize each score list to [0,1], combine as
 `vector_weight * vec + (1 - vector_weight) * lex` (default 0.7/0.3, tunable via
 args.vector_weight), deterministic id tie-break.
+
+Filters (SB-055) compose with every mode via `args.filters`:
+  near: <note ULID>  -> restrict to the 1-hop graph neighborhood (plus the note itself)
+  from / to: ISO ts  -> restrict to notes with a temporal row in the inclusive range
+Multiple filters intersect. An empty allowed set short-circuits to zero hits.
 """
 
 from __future__ import annotations
@@ -42,6 +47,62 @@ def _validate(args: dict[str, Any]) -> tuple[str, int, str, float]:
     return q, k, mode, float(weight)
 
 
+def _validate_filters(args: dict[str, Any]) -> dict[str, str]:
+    filters = args.get("filters")
+    if filters is None:
+        return {}
+    if not isinstance(filters, dict):
+        raise OpError("invalid_args", "args.filters must be an object")
+    validated: dict[str, str] = {}
+    for key in ("near", "from", "to"):
+        value = filters.get(key)
+        if value is None:
+            continue
+        if not isinstance(value, str) or value.strip() == "":
+            raise OpError("invalid_args", f"args.filters.{key} must be a non-empty string")
+        validated[key] = value
+    unknown = set(filters) - {"near", "from", "to"}
+    if unknown:
+        raise OpError("invalid_args", f"unknown filter keys: {sorted(unknown)}")
+    return validated
+
+
+def _assert_castable_timestamp(connection: duckdb.DuckDBPyConnection, key: str, value: str) -> None:
+    row = connection.execute("SELECT TRY_CAST(? AS TIMESTAMP)", [value]).fetchone()
+    if row is None or row[0] is None:
+        raise OpError("invalid_args", f"args.filters.{key} is not a parseable timestamp: {value}")
+
+
+def _allowed_note_ids(
+    connection: duckdb.DuckDBPyConnection, filters: dict[str, str]
+) -> set[str] | None:
+    """The note-id set the filters allow; None means unfiltered."""
+    allowed: set[str] | None = None
+    near = filters.get("near")
+    if near is not None:
+        rows = connection.execute(
+            "SELECT to_id FROM graph_edges WHERE from_id = ? "
+            "UNION SELECT from_id FROM graph_edges WHERE to_id = ?",
+            [near, near],
+        ).fetchall()
+        allowed = {near} | {row[0] for row in rows}
+    lower, upper = filters.get("from"), filters.get("to")
+    if lower is not None or upper is not None:
+        sql = "SELECT DISTINCT note_id FROM temporal WHERE ts IS NOT NULL"
+        params: list[str] = []
+        if lower is not None:
+            _assert_castable_timestamp(connection, "from", lower)
+            sql += " AND ts >= TRY_CAST(? AS TIMESTAMP)"
+            params.append(lower)
+        if upper is not None:
+            _assert_castable_timestamp(connection, "to", upper)
+            sql += " AND ts <= TRY_CAST(? AS TIMESTAMP)"
+            params.append(upper)
+        in_range = {row[0] for row in connection.execute(sql, params).fetchall()}
+        allowed = in_range if allowed is None else allowed & in_range
+    return allowed
+
+
 def _check_model_matches(connection: duckdb.DuckDBPyConnection) -> None:
     row = connection.execute("SELECT value FROM meta WHERE key = 'embed_model'").fetchone()
     indexed_model = row[0] if row else None
@@ -53,31 +114,40 @@ def _check_model_matches(connection: duckdb.DuckDBPyConnection) -> None:
         )
 
 
+def _in_clause(column: str, allowed: set[str] | None) -> tuple[str, list[str]]:
+    if allowed is None:
+        return "", []
+    placeholders = ", ".join("?" for _ in allowed)
+    return f" AND {column} IN ({placeholders})", sorted(allowed)
+
+
 def _lexical_rows(
-    connection: duckdb.DuckDBPyConnection, q: str, n: int
+    connection: duckdb.DuckDBPyConnection, q: str, n: int, allowed: set[str] | None = None
 ) -> list[tuple[str, str, float, str]]:
+    clause, in_params = _in_clause("note_id", allowed)
     return connection.execute(
-        """
+        f"""
         SELECT chunk_id, note_id, score, substr(text, 1, ?) AS snippet
         FROM (
           SELECT *, fts_main_chunks.match_bm25(chunk_id, ?) AS score
           FROM chunks
         )
-        WHERE score IS NOT NULL
+        WHERE score IS NOT NULL{clause}
         ORDER BY score DESC, chunk_id ASC
         LIMIT ?
         """,
-        [SNIPPET_CHARS, q, n],
+        [SNIPPET_CHARS, q, *in_params, n],
     ).fetchall()
 
 
 def _vector_rows(
-    connection: duckdb.DuckDBPyConnection, q: str, n: int
+    connection: duckdb.DuckDBPyConnection, q: str, n: int, allowed: set[str] | None = None
 ) -> list[tuple[str, str, float, str]]:
     _check_model_matches(connection)
     dim_row = connection.execute("SELECT value FROM meta WHERE key = 'embed_dim'").fetchone()
     dim = int(dim_row[0]) if dim_row else 0
     query_vector = embed_query(q)
+    clause, in_params = _in_clause("c.note_id", allowed)
     return connection.execute(
         f"""
         SELECT e.chunk_id, c.note_id,
@@ -85,10 +155,11 @@ def _vector_rows(
                substr(c.text, 1, ?) AS snippet
         FROM embeddings e
         JOIN chunks c ON c.chunk_id = e.chunk_id
+        WHERE 1 = 1{clause}
         ORDER BY array_cosine_distance(e.vec, CAST(? AS FLOAT[{dim}])) ASC, e.chunk_id ASC
         LIMIT ?
         """,
-        [query_vector, SNIPPET_CHARS, query_vector, n],
+        [query_vector, SNIPPET_CHARS, *in_params, query_vector, n],
     ).fetchall()
 
 
@@ -104,11 +175,15 @@ def _normalized(rows: list[tuple[str, str, float, str]]) -> dict[str, float]:
 
 
 def _hybrid_rows(
-    connection: duckdb.DuckDBPyConnection, q: str, k: int, weight: float
+    connection: duckdb.DuckDBPyConnection,
+    q: str,
+    k: int,
+    weight: float,
+    allowed: set[str] | None = None,
 ) -> list[tuple[str, str, float, str]]:
     pool = max(k * 4, _POOL_FLOOR)
-    lexical = _lexical_rows(connection, q, pool)
-    vector = _vector_rows(connection, q, pool)
+    lexical = _lexical_rows(connection, q, pool, allowed)
+    vector = _vector_rows(connection, q, pool, allowed)
     lex_norm = _normalized(lexical)
     vec_norm = _normalized(vector)
     by_id: dict[str, tuple[str, str, float, str]] = {}
@@ -130,6 +205,7 @@ def _hybrid_rows(
 def op_query(args: dict[str, Any]) -> dict[str, Any]:
     workspace = resolve_workspace(args)
     q, k, mode, weight = _validate(args)
+    filters = _validate_filters(args)
     db_path = index_path(workspace)
     if not db_path.is_file():
         raise OpError("index_missing", f"no index at {db_path}; run index_vault first")
@@ -137,12 +213,15 @@ def op_query(args: dict[str, Any]) -> dict[str, Any]:
     try:
         connection.execute("LOAD fts")
         connection.execute("LOAD vss")
-        if mode == "lexical":
-            rows = _lexical_rows(connection, q, k)
+        allowed = _allowed_note_ids(connection, filters)
+        if allowed is not None and not allowed:
+            rows = []
+        elif mode == "lexical":
+            rows = _lexical_rows(connection, q, k, allowed)
         elif mode == "vector":
-            rows = _vector_rows(connection, q, k)
+            rows = _vector_rows(connection, q, k, allowed)
         else:
-            rows = _hybrid_rows(connection, q, k, weight)
+            rows = _hybrid_rows(connection, q, k, weight, allowed)
     except duckdb.Error as exc:
         raise OpError("query_failed", f"duckdb: {exc}") from exc
     finally:

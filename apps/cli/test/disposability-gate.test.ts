@@ -91,7 +91,7 @@ test("EPIC GATE: delete indexes/ and rebuild -> identical ranked results", { ski
 
   const firstBuild = await runIndex({ workspace: ws, sidecar: SIDECAR });
   assert.equal(firstBuild.counts.notes, 4);
-  assert.deepEqual(firstBuild.built, ["fts", "vector"]);
+  assert.deepEqual(firstBuild.built, ["fts", "vector", "graph", "temporal"]);
   const baseline = await runQuerySet(ws);
   assert.ok(
     baseline.some((r) => r.hits.length > 0),

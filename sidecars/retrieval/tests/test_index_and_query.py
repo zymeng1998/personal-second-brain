@@ -27,7 +27,7 @@ def test_index_counts_notes_and_chunks(seeded_workspace: Path) -> None:
     data = op_index_vault({"workspace": str(seeded_workspace)})
     assert data["notes"] == 3
     assert data["chunks"] == 3  # short notes -> one chunk each
-    assert data["built"] == ["fts", "vector"]
+    assert data["built"] == ["fts", "vector", "graph", "temporal"]
     assert (seeded_workspace / "indexes" / "retrieval.duckdb").is_file()
 
 

@@ -3,7 +3,7 @@
  * sidecar transport. READ-ONLY — never writes events, never touches the
  * workspace beyond the sidecar reading `indexes/`.
  */
-import type { QueryMemoryResult, QueryMode, RetrievalHit } from "@sb/interfaces";
+import type { QueryFilters, QueryMemoryResult, QueryMode, RetrievalHit } from "@sb/interfaces";
 
 import { RetrievalError } from "./errors.js";
 import { SidecarClient, type SidecarClientOptions } from "./sidecar-client.js";
@@ -17,6 +17,8 @@ export interface QueryMemoryOptions {
   k?: number;
   /** Ranking mode; defaults to hybrid (since SB-049). */
   mode?: QueryMode;
+  /** Graph-neighborhood / time-range filters (SB-055); compose with any mode. */
+  filters?: QueryFilters;
   /** Sidecar spawn overrides (tests run a Node stub sidecar). */
   sidecar?: SidecarClientOptions;
 }
@@ -30,6 +32,9 @@ function validate(opts: QueryMemoryOptions): void {
   }
   if (opts.k !== undefined && (!Number.isInteger(opts.k) || opts.k < 1)) {
     throw new RetrievalError("invalid_args", `k must be a positive integer: ${String(opts.k)}`);
+  }
+  if (opts.filters !== undefined && (typeof opts.filters !== "object" || opts.filters === null)) {
+    throw new RetrievalError("invalid_args", "filters must be an object");
   }
 }
 
@@ -65,6 +70,7 @@ export async function queryMemory(opts: QueryMemoryOptions): Promise<QueryMemory
       q: opts.q,
       mode: opts.mode ?? "hybrid",
       ...(opts.k !== undefined ? { k: opts.k } : {}),
+      ...(opts.filters !== undefined ? { filters: opts.filters } : {}),
     });
   } finally {
     await client.close();

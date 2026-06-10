@@ -52,7 +52,7 @@ cannot be recovered (malformed JSON, missing `req_id`) is answered with `req_id:
 | `ping` | — | `{"pong": true}` | — |
 | `health` | — | `{"version", "python"}` | — |
 | `index_vault` | `{workspace}` | `{"notes", "chunks", "built"}` | `invalid_args`, `embed_model_unavailable`, `index_build_failed` |
-| `query` | `{workspace, q, k?, mode?, vector_weight?}` | `{"hits": [{id, score, snippet, source_ref}]}` | `invalid_args`, `unsupported_mode`, `index_missing`, `index_model_mismatch`, `query_failed` |
+| `query` | `{workspace, q, k?, mode?, vector_weight?, filters?}` | `{"hits": [{id, score, snippet, source_ref}]}` | `invalid_args`, `unsupported_mode`, `index_missing`, `index_model_mismatch`, `query_failed` |
 | (any other) | — | — | `unknown_op` |
 
 Error codes so far: `malformed_request`, `unknown_op`, `internal_error`, `invalid_args`,
@@ -67,6 +67,14 @@ acceptable). `query` modes: `lexical` (BM25), `vector` (cosine), `hybrid` (**def
 pools from both rankers, min-max normalized, combined `vector_weight`·vec + (1−w)·lex; default
 weight 0.7, tunable via `args.vector_weight`). Ordering is score desc with a deterministic id
 tie-break. DuckDB's `fts`/`vss` extensions cache in `~/.duckdb` (outside the workspace).
+
+**Graph + temporal (SB-055):** `index_vault` also builds a `graph_edges` table (frontmatter
+`entities` ULID refs → `entity_ref` edges; body `[[wikilinks]]` resolved by exact note title →
+`wikilink` edges; unresolved/self links skipped; `source_ref` = the linking note) and a `temporal`
+table (frontmatter `created`/`updated` + capture/memory event timestamps for the note's
+`subject_id`, day-bucketed). `query` accepts `filters: {near?, from?, to?}` — `near` restricts to
+the 1-hop graph neighborhood of a note id (plus itself), `from`/`to` to notes with any temporal row
+in the inclusive ISO range; filters intersect and compose with every mode.
 
 ## Embedding model (OQ #9 resolution, 2026-06-10)
 

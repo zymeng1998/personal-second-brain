@@ -15,6 +15,30 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-055 `Done` (Phase 3 stretch) — graph + temporal indexes — ✅ ALL 9 PHASE 3 STORIES COMPLETE
+- **Human approved starting the stretch** after the SB-054 gate ("approved, start 055").
+- **Scope delivered:** `notes.py` now extracts frontmatter `entities:` ULID refs (block form),
+  body `[[wikilinks]]` (alias/heading forms normalized), and `created`/`updated` dates.
+  `index_vault` additionally builds (a) **`graph_edges`** — `entity_ref` edges from frontmatter +
+  `wikilink` edges resolved by exact note title (path-sorted first-wins on duplicate titles;
+  unresolved/self links skipped; `source_ref` = linking note), and (b) **`temporal`** —
+  frontmatter dates + capture/memory event `occurred_at` per `subject_id` (junk lines skipped;
+  projection stream excluded), day-bucketed via `TRY_CAST`; `built` is now
+  `["fts","vector","graph","temporal"]`. `query` gains `filters:{near?,from?,to?}` (validated;
+  unknown keys rejected; unparseable timestamps rejected): `near` → 1-hop neighborhood + self,
+  `from`/`to` → inclusive temporal range; filters **intersect** and compose with
+  lexical/vector/hybrid; empty allowed-set short-circuits to `[]`. `@sb/retrieval` `queryMemory`
+  passes `filters` through (typed via the SB-047 `QueryFilters`). CLI flags intentionally NOT
+  added (not in the card's file list).
+- **Validation (green):** sidecar pytest **42/42** (9 new: edge fixtures w/ provenance,
+  unresolved/self-link skip, event-timestamp temporal rows, time-range exclusion both directions,
+  near-neighborhood restriction, hybrid composition + filter intersection, empty-result
+  short-circuit, invalid filters, filtered-rebuild lossless); retrieval **16/16** (+filters
+  passthrough); root `pnpm test` **160/160** Python-free; `pnpm run test:sidecar` **3/3** — the
+  SB-054 gate re-asserted green with the graph/temporal tables in the rebuild.
+- **EPIC-CORE-009 is now fully complete (9/9 stories).** Next: Phase 4 (AI workflows) planning, or
+  the older P2 follow-ups (SB-028/029/033).
+
 ## SB-054 `Done` — ✅ EPIC-CORE-009 GATE MET; PHASE 3 REQUIRED SCOPE COMPLETE (2026-06-10)
 - **Scope delivered:** `apps/cli/test/disposability-gate.test.ts` (env-gated, wired into the cli
   `test:sidecar` target; mirrors SB-039): populate a throwaway workspace (2 captures + entity +

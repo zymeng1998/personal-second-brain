@@ -47,6 +47,13 @@ test("k and mode pass through to the sidecar", async () => {
   assert.equal(result.hits[0]?.snippet, "hybrid|x|3");
 });
 
+test("filters pass through to the sidecar verbatim (SB-055)", async () => {
+  const ws = await makeWorkspace();
+  const filters = { from: "2026-01-01T00:00:00Z", to: "2026-12-31T00:00:00Z" };
+  const result = await queryMemory({ workspace: ws, q: "x", filters, sidecar: SIDECAR });
+  assert.equal(result.hits[0]?.snippet, `hybrid|x|none|${JSON.stringify(filters)}`);
+});
+
 test("arg validation rejects empty q / bad k / missing workspace", async () => {
   const ws = await makeWorkspace();
   await expectError(queryMemory({ workspace: ws, q: "  ", sidecar: SIDECAR }), "invalid_args");
