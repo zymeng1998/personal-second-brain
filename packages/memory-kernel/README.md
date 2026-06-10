@@ -12,7 +12,16 @@ vault + event log + projections together, keeping them consistent.
   rebuildable projections/indexes, human-in-the-loop.
 - Depends on `interfaces` (+ `note-vault`/`event-log`/`fact-store`/`entity-graph`/`task-store` later).
 - **Not here** (later stories): writing facts/entities/tasks (SB-035+), the pure replay projector (SB-023),
-  the rebuild command (SB-038). `node:sqlite` is experimental in Node 22 (warning is expected/harmless).
+  the rebuild command (SB-038).
+
+## Runtime requirement: Node ≥ 22.5 (SB-042)
+
+The store uses the **built-in `node:sqlite`** driver (`DatabaseSync`), added in Node **22.5.0** and
+validated here on **22.20.x**; the floor is pinned via `engines.node` (root + this package).
+`node:sqlite` is still **experimental**: the `ExperimentalWarning` on stderr is expected and harmless,
+but the API may change before it stabilizes. **Fallback plan:** all driver access goes through
+`openProjectionStore` — if the built-in API ever breaks, swap the implementation here (e.g. to
+`better-sqlite3`) without touching the projection packages.
 
 ## SB-034 surface (current)
 

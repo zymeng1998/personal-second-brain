@@ -1,6 +1,16 @@
 # STATUS
 
 **Project:** personal-second-brain (Second Brain Core)
+
+## SB-042 `Done` (quality band) — engines pin + node:sqlite docs
+- **Scope delivered:** root + `@sb/memory-kernel` `engines.node: ">=22.5.0"` (node:sqlite/`DatabaseSync`
+  floor; was a wrong `>=20` at root); README getting-started + memory-kernel README document the
+  requirement, the experimental caveat, and the driver-fallback plan (`openProjectionStore` is the swap
+  point). Docs/manifests only — no production code change.
+- **Validation (green):** `pnpm install` exit 0 (engines satisfied on 22.20); full suite **130/130**
+  (memory-kernel 15, event-log 11, note-vault 33, fact-store 15, task-store 5, entity-graph 11, cli 28,
+  scripts 12), 0 fail.
+- **Next:** SB-043 (atomic single-connection rebuild).
 **Phase:** **Phase 1 core COMPLETE** (SB-001..018) + **Phase 1H COMPLETE** (SB-019/024/025/026/027 — EPIC-CORE-007 `Done`).
 Distillation chain shipped: contract → L2 writer → memory event → CLI `distill` → skill + safety check.
 **Phase 1 final review: PASS (ship-ready)**. **✅ PHASE 2 (EPIC-CORE-008) COMPLETE** — all 10 stories

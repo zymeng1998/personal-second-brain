@@ -101,7 +101,7 @@ promote after the open decisions in the story map are confirmed at review. Cards
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-042 | Story | Pin + document the `node:sqlite` runtime requirement | EPIC-CORE-008 | P2 | Backlog | 1 | SB-034 |
+| SB-042 | Story | Pin + document the `node:sqlite` runtime requirement | EPIC-CORE-008 | P2 | Done | 1 | SB-034 |
 | SB-043 | Story | Atomic single-connection `rebuild` (one store, one transaction) | EPIC-CORE-008 | P2 | Backlog | 3 | SB-038 |
 | SB-044 | Story | Shared frontmatter helper in `@sb/note-vault` (DRY) | EPIC-CORE-003 | P3 | Backlog | 2 | SB-011 |
 | SB-045 | Story | Projection-table consistency hardening (entity reset + edge UNIQUE) | EPIC-CORE-008 | P3 | Backlog | 2 | SB-037, SB-038 |
@@ -895,7 +895,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-042 — Pin + document the `node:sqlite` runtime requirement
 
-- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 1 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-008 · **Priority:** P2 · **Points:** 1 · **Status:** Done
 - **Dependencies:** SB-034 (`Done`)
 - **Context (review finding, MEDIUM):** the entire L3 layer depends on the built-in `node:sqlite`, which is
   **experimental** in Node 22 (emits an `ExperimentalWarning`; API may change before stabilizing). Nothing

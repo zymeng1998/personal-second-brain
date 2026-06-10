@@ -4,6 +4,9 @@
   "private": true,
   "description": "Projection store + coordination. SB-034: SQLite (node:sqlite) bootstrap for rebuildable L3 projections. Domain-neutral.",
   "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "exports": {
     ".": "./src/index.ts"
   },

@@ -73,6 +73,12 @@ These commands are implemented and verified end-to-end (capture → read → val
 The workspace lives **outside** this repo;
 point `SECOND_BRAIN_WORKSPACE` at a path that is not the repo, your home dir, or `/`.
 
+**Requires Node ≥ 22.5** (enforced via `engines.node`): the L3 projection store uses the built-in
+[`node:sqlite`](https://nodejs.org/api/sqlite.html) driver (added in 22.5, validated here on 22.20).
+`node:sqlite` is still **experimental** — the `ExperimentalWarning` on stderr is expected and harmless.
+If its API ever breaks, the swap point is `openProjectionStore` in `@sb/memory-kernel` (e.g. to
+`better-sqlite3`); nothing else touches the driver directly.
+
 ```bash
 cp .env.example .env                 # set SECOND_BRAIN_WORKSPACE to your workspace path
 pnpm install
