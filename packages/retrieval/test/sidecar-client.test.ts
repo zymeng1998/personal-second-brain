@@ -124,3 +124,25 @@ test("sidecar exit with pending requests rejects them with protocol_error", asyn
   await expectRetrievalError(pending, "protocol_error");
   await closed;
 });
+
+test("a write racing the sidecar's death rejects structured (no EPIPE crash)", async () => {
+  // Regression (review MEDIUM #1): EPIPE from writing to a just-killed sidecar
+  // fires the write callback AND a stream 'error' event on child.stdin; without
+  // a listener the event crashes the whole process instead of rejecting.
+  const client = stubClient(5_000);
+  try {
+    assert.deepEqual(await client.request("ping"), { pong: true });
+    const pending = client.request("silent"); // in flight across the death
+    process.kill(client.pid as number, "SIGKILL");
+    const racing = client.request("ping"); // write hits the closed pipe -> EPIPE
+    for (const promise of [pending, racing]) {
+      const error = await promise.then(
+        () => assert.fail("expected a rejection after the sidecar died"),
+        (e: unknown) => e,
+      );
+      assert.ok(error instanceof RetrievalError, `expected RetrievalError, got ${String(error)}`);
+    }
+  } finally {
+    await client.close();
+  }
+});

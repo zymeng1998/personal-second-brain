@@ -63,6 +63,11 @@ export class SidecarClient {
     this.#timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
+  /** PID of the live sidecar process, if any (diagnostics/tests). */
+  get pid(): number | undefined {
+    return this.#child?.pid;
+  }
+
   /** Send one request; resolves with the response `data` object. */
   request(op: string, args?: Record<string, unknown>): Promise<Record<string, unknown>> {
     if (this.#closed) {
@@ -106,7 +111,7 @@ export class SidecarClient {
     this.#closed = true;
     const child = this.#child;
     this.#child = null;
-    if (child === null || child.exitCode !== null) return;
+    if (child === null || hasExited(child)) return;
     await new Promise<void>((resolve) => {
       const killTimer = setTimeout(() => child.kill("SIGKILL"), CLOSE_GRACE_MS);
       child.once("close", () => {
@@ -118,7 +123,7 @@ export class SidecarClient {
   }
 
   #ensureSpawned(): ChildProcessWithoutNullStreams {
-    if (this.#child !== null && this.#child.exitCode === null) return this.#child;
+    if (this.#child !== null && !hasExited(this.#child)) return this.#child;
     const child = spawn(this.#command, this.#args, {
       cwd: this.#cwd,
       stdio: ["pipe", "pipe", "pipe"],
@@ -127,6 +132,10 @@ export class SidecarClient {
     child.stdout.on("data", (chunk: string) => this.#onStdout(chunk));
     // stderr is log-only by contract; consume it so the pipe never back-pressures.
     child.stderr.resume();
+    // A write racing the sidecar's death raises EPIPE on stdin as a stream
+    // 'error' event (in addition to the write callback). Without a listener it
+    // would crash the process; the write callback + 'close' do the real handling.
+    child.stdin.on("error", () => {});
     child.on("error", (error) => {
       this.#failAllPending(toSpawnError(error, this.#command));
     });
@@ -204,6 +213,11 @@ export class SidecarClient {
       this.#settle(reqId, undefined, error);
     }
   }
+}
+
+/** A child killed by a signal has exitCode === null but signalCode set. */
+function hasExited(child: ChildProcessWithoutNullStreams): boolean {
+  return child.exitCode !== null || child.signalCode !== null;
 }
 
 function toSpawnError(error: unknown, command: string): RetrievalError {
