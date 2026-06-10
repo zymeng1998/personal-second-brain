@@ -13,6 +13,7 @@ import { runNoteGet, runNoteList } from "./note-command.js";
 import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-command.js";
 import { runRebuild } from "./rebuild-command.js";
 import { runIndex } from "./index-command.js";
+import { runQuery } from "./query-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -50,6 +51,7 @@ Projections (L3, rebuildable):
 
 Retrieval (L4, disposable indexes):
   sb index [--workspace <path>]                                # sidecar builds indexes/retrieval.duckdb + one TS-emitted 'indexed' event
+  sb query "<text>" [--k <n>] [--mode lexical|hybrid] [--workspace <path>]   # READ-ONLY ranked hits {id, score, snippet, source_ref}
 `;
 
 interface ParsedCaptureArgs {
@@ -157,6 +159,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "index") {
     return handleIndex(argv.slice(1), out, err);
+  }
+  if (command === "query") {
+    return handleQuery(argv.slice(1), out, err);
   }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
@@ -434,6 +439,68 @@ async function handleIndex(
   }
   try {
     const result = await runIndex(workspace !== undefined ? { workspace } : {});
+    out(`${JSON.stringify(result)}\n`);
+    return 0;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+async function handleQuery(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  if (args[0] === "--help" || args[0] === "-h") {
+    out(USAGE);
+    return 0;
+  }
+  let q: string | undefined;
+  let k: number | undefined;
+  let mode: string | undefined;
+  let workspace: string | undefined;
+  try {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i] as string;
+      switch (arg) {
+        case "--workspace":
+          workspace = requireValue(args, ++i, arg);
+          break;
+        case "--mode":
+          mode = requireValue(args, ++i, arg);
+          break;
+        case "--k": {
+          const value = requireValue(args, ++i, arg);
+          const n = Number.parseInt(value, 10);
+          if (!Number.isInteger(n) || n < 1) {
+            throw new CaptureCliError("bad_arguments", `--k must be a positive integer: ${value}`);
+          }
+          k = n;
+          break;
+        }
+        default:
+          if (arg.startsWith("--")) {
+            throw new CaptureCliError("bad_arguments", `unknown argument: ${arg}`);
+          }
+          if (q !== undefined) {
+            throw new CaptureCliError("bad_arguments", `unexpected extra argument: ${arg}`);
+          }
+          q = arg;
+      }
+    }
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+  try {
+    const result = await runQuery({
+      q: q ?? "",
+      ...(k !== undefined ? { k } : {}),
+      ...(mode !== undefined ? { mode } : {}),
+      ...(workspace !== undefined ? { workspace } : {}),
+    });
     out(`${JSON.stringify(result)}\n`);
     return 0;
   } catch (e) {

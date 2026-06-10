@@ -45,6 +45,36 @@ rl.on("line", (line) => {
       break;
     case "silent":
       break;
+    case "query": {
+      // facade tests: snippet encodes the received args; magic q values force errors
+      if (args.q === "boom") {
+        respond({ req_id, ok: false, error: { code: "query_failed", message: "stub query failure" } });
+        break;
+      }
+      if (args.q === "badshape") {
+        respond({ req_id, ok: true, data: { hits: [{ wrong: true }] } });
+        break;
+      }
+      if (args.q === "nohits") {
+        respond({ req_id, ok: true, data: {} });
+        break;
+      }
+      respond({
+        req_id,
+        ok: true,
+        data: {
+          hits: [
+            {
+              id: "01ARZ3NDEKTSV4RRFFQ69G5FAV#0",
+              score: 1.5,
+              snippet: `${args.mode}|${args.q}|${args.k ?? "none"}`,
+              source_ref: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            },
+          ],
+        },
+      });
+      break;
+    }
     default:
       respond({ req_id, ok: false, error: { code: "unknown_op", message: `unknown op: ${op}` } });
   }

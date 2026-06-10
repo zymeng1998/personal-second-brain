@@ -15,6 +15,24 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-032 `Done` (Phase 3, EPIC-CORE-009) — `sb query` CLI + facade query
+- **Scope delivered:** `@sb/retrieval` `queryMemory(opts)` facade (validates `workspace`/`q`/`k` →
+  `RetrievalError("invalid_args")`; defaults mode `lexical`; maps + shape-checks hits →
+  `protocol_error` on malformed; read-only). `apps/cli` `query` command
+  (`sb query "<q>" [--k N] [--mode lexical|hybrid] [--workspace]`) printing
+  `{ok,hits:[{id,score,snippet,source_ref}]}`; `QueryCliError("bad_arguments")` for empty q / bad k /
+  unknown mode. `scripts/query_memory.ts` stub replaced by thin delegation. **The lexical pipeline is
+  now end-to-end** (capture → index → query). New env-gated E2E (`apps/cli test:sidecar`, root
+  `test:sidecar` runs retrieval + cli): capture → `runIndex` → `runQuery("xylophone")` → top hit is the
+  captured note (`source_ref` = note id, chunk id prefix matches), exactly one `indexed` event, query
+  appends nothing.
+- **Validation (green):** retrieval **15/15** (6 new facade: mapping + mode default, k/mode passthrough,
+  arg validation, sidecar_error passthrough, malformed hits → protocol_error, no writes); cli **38/38**
+  (4 new query-command); builds + `typecheck:scripts` exit 0; root `pnpm test` exit 0 — **159/159**
+  (Python-free); `pnpm run test:sidecar` — **2/2 pass** against the real sidecar (ping/health + full
+  capture→index→query E2E).
+- **Next:** SB-049 (`Ready`) — BGE-M3 embeddings + DuckDB VSS + hybrid (CPU benchmark first).
+
 ## SB-053 `Done` (Phase 3, EPIC-CORE-009) — `sb index` CLI + `indexed` projection event
 - **Scope delivered:** `apps/cli` `index` command (`runIndex` in `index-command.ts`): safe workspace →
   `SidecarClient.request("index_vault")` → validate counts → **only on success** append one TS-emitted

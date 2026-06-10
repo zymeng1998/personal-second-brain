@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/sidecar-client.test.ts",
+    "test": "node --import tsx --test test/sidecar-client.test.ts test/query-memory.test.ts",
     "test:sidecar": "node --import tsx --test test/sidecar-integration.test.ts"
   },
   "dependencies": {

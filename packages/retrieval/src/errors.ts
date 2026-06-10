@@ -3,6 +3,7 @@
  */
 
 export type RetrievalErrorCode =
+  | "invalid_args"
   | "spawn_failed"
   | "timeout"
   | "protocol_error"

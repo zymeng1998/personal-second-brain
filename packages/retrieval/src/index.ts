@@ -6,3 +6,5 @@ export { SidecarClient, DEFAULT_SIDECAR_CWD } from "./sidecar-client.js";
 export type { SidecarClientOptions } from "./sidecar-client.js";
 export { RetrievalError } from "./errors.js";
 export type { RetrievalErrorCode } from "./errors.js";
+export { queryMemory } from "./query-memory.js";
+export type { QueryMemoryOptions } from "./query-memory.js";

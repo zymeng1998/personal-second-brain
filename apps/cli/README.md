@@ -73,5 +73,19 @@ TS-emitted `indexed` projection event (`actor:"cli"`, payload = `{notes, chunks,
 event. Requires `uv` (see `sidecars/retrieval/README.md`); unit tests use a Node stub sidecar so
 `pnpm test` stays Python-free.
 
+## `query` (SB-032, READ-ONLY retrieval)
+
+```bash
+pnpm --filter @sb/cli exec tsx src/index.ts query "espresso" [--k 5] [--mode lexical] [--workspace <path>]
+pnpm run query:memory -- "espresso" [--k 5] [--workspace <path>]   # root script, same path
+```
+
+Queries `indexes/retrieval.duckdb` via the `@sb/retrieval` `queryMemory` facade and prints
+`{ ok, hits: [{id, score, snippet, source_ref}] }` ranked by score (deterministic id tie-break).
+**Read-only**: never writes events, never touches the workspace beyond the sidecar reading
+`indexes/`. Mode defaults to `lexical` until SB-049 lands hybrid (`--mode hybrid` then becomes
+the default); querying before `sb index` returns a structured `index_missing` error.
+
 Scripts: `pnpm --filter @sb/cli test`, `… build` (`tsc --noEmit`), `… capture -- <flags>`,
-`… distill -- <propose|accept> <flags>`.
+`… distill -- <propose|accept> <flags>`. Env-gated (needs `uv`): `pnpm run test:sidecar` at the
+root runs the real capture → index → query E2E.
