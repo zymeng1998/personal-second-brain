@@ -2,6 +2,29 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ ALL 5 REVIEW MEDIUMs FIXED + PUSHED (2026-06-10, same session as the review)
+- One atomic commit per finding (rate-limit-safe; each validated before commit):
+  - `59f0121` **MEDIUM #1** — `SidecarClient` stdin `error` listener (EPIPE crash, probe-verified)
+    **+ bonus bug found while testing:** `close()` hung forever on a SIGNAL-killed sidecar
+    (`exitCode` stays null; only `signalCode` set) — both fixed via `hasExited()`; new `pid`
+    accessor + kill-based regression test.
+  - `6527455` **MEDIUM #3** — projection store forward guard: schema_version NEWER than the code →
+    `migration_failed` (named found/supported), no silent downgrade; refused open leaves the db
+    untouched.
+  - `e7957de` **MEDIUM #5** — query filters bind ONE DuckDB LIST param (`list_contains`) instead of
+    one `?` per allowed note id; semantics + determinism unchanged (all 9 SB-055 filter tests).
+  - `bfeaa0d` **MEDIUM #2** — atomic index swap: build into `retrieval.duckdb.tmp`, `replace()` on
+    success only; failed build keeps the previous index byte-identical (failure-injection test).
+  - `0e686d6` **MEDIUM #4** — `queryMemory` accepts an injected reusable `SidecarClient` (left
+    open, caller-owned — spawn + model load once for Phase 4 batch callers); default per-call
+    behavior unchanged.
+- **Final validation (green):** root `pnpm test` exit 0, 0 failures (**183 tests**: retrieval 18,
+  memory-kernel 17); sidecar `uv run pytest` **44/44**; `pnpm run test:sidecar` **3/3** vs the
+  real sidecar (SB-054 gate re-asserted with the tmp-swap build path).
+- **LOW review nits remain unfixed by choice** (docs/DRY: stale comments, USAGE `vector` omission,
+  `bodyOf` duplication, respawn buffer, bge prefix) — file as a small cleanup story if wanted.
+- **Next:** Phase 4 (AI workflows) refinement.
+
 ## Phase 3 + P2 follow-ups CODE REVIEW: PASS (ship-quality) — 2026-06-10
 - **Range reviewed:** `22b02b2..a5b5f51` (17 code commits: quality band SB-042..046, Phase 3
   SB-047→055, P2 follow-ups SB-028/029/033; ~6,950 lines, 90 files).
