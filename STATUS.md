@@ -15,6 +15,22 @@
   available to uv. Node 22.20 / pnpm 9 unchanged.
 - **SB-047 → `In Progress`** (deps `Done`; decision gate cleared).
 
+## SB-053 `Done` (Phase 3, EPIC-CORE-009) — `sb index` CLI + `indexed` projection event
+- **Scope delivered:** `apps/cli` `index` command (`runIndex` in `index-command.ts`): safe workspace →
+  `SidecarClient.request("index_vault")` → validate counts → **only on success** append one TS-emitted
+  `indexed` projection event (`actor:"cli"`, payload `{notes,chunks,built}`) → print
+  `{ok,counts,built,event_id}`. Sidecar failure → structured `RetrievalError`, **no event**; invalid
+  sidecar counts → `IndexCliError("bad_sidecar_result")`, no event; event-append failure after a build →
+  `event_append_failed`. `scripts/index_vault.ts` Phase-0 stub replaced by thin delegation to `runIndex`.
+  cli gains the `@sb/retrieval` dep. Unit tests run a Node stub sidecar (`STUB_SIDECAR_MODE`) —
+  Python-free.
+- **Validation (green):** `@sb/cli` **34/34** (5 new: one-run-one-event w/ counts; failure→no event;
+  bad counts→no event; raw + capture/memory streams byte-unchanged; repeated runs append-only);
+  cli build + `typecheck:scripts` exit 0; root `pnpm test` exit 0 — **149/149** (Python-free); real E2E
+  on a throwaway workspace (capture-style note → `sb index` → `retrieval.duckdb` built + exactly one
+  schema-valid `indexed` event).
+- **Next:** SB-032 (`Ready`) — `sb query` CLI + facade query.
+
 ## SB-031 `Done` (Phase 3, EPIC-CORE-009) — FTS index build + lexical query (sidecar, DuckDB)
 - **Scope delivered:** sidecar gains `duckdb>=1.1` (uv dep; resolved 1.5.3) + two ops.
   `index_vault {workspace}` — read-only scan of `vault/**/*.md` (path-sorted, deterministic;

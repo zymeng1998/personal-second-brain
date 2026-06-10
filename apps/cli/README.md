@@ -57,5 +57,21 @@ cat proposal.json | pnpm --filter @sb/cli distill -- accept [--workspace <path>]
   `event_append_failed` error is returned. Bad/missing proposal → `bad_proposal` / `bad_arguments` to
   stderr with a non-zero exit. The LLM that authors the proposal is the skill (SB-027), not this command.
 
+## `index` (SB-053, L4 retrieval indexes)
+
+```bash
+pnpm --filter @sb/cli exec tsx src/index.ts index [--workspace <path>]
+pnpm run index:vault [-- --workspace <path>]   # root script, same path
+```
+
+Drives the Python retrieval sidecar (`sidecars/retrieval`, spawned via `uv run` over stdio JSONL)
+to full-rebuild `indexes/retrieval.duckdb` from the vault, then — **only on success** — appends one
+TS-emitted `indexed` projection event (`actor:"cli"`, payload = `{notes, chunks, built}`) and prints
+`{ ok, counts, built, event_id }`. The sidecar reads the vault **read-only** and writes only under
+`indexes/` (disposable); it never writes events. A sidecar failure returns a structured error
+(`RetrievalError` codes `spawn_failed`/`timeout`/`protocol_error`/`sidecar_error`) and appends **no**
+event. Requires `uv` (see `sidecars/retrieval/README.md`); unit tests use a Node stub sidecar so
+`pnpm test` stays Python-free.
+
 Scripts: `pnpm --filter @sb/cli test`, `… build` (`tsc --noEmit`), `… capture -- <flags>`,
 `… distill -- <propose|accept> <flags>`.

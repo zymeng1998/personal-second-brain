@@ -50,6 +50,9 @@ importers:
       '@sb/note-vault':
         specifier: workspace:*
         version: link:../../packages/note-vault
+      '@sb/retrieval':
+        specifier: workspace:*
+        version: link:../../packages/retrieval
       '@sb/task-store':
         specifier: workspace:*
         version: link:../../packages/task-store

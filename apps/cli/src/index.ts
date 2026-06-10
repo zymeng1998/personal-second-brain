@@ -12,6 +12,7 @@ import { CaptureCliError, runCapture } from "./capture-command.js";
 import { runNoteGet, runNoteList } from "./note-command.js";
 import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-command.js";
 import { runRebuild } from "./rebuild-command.js";
+import { runIndex } from "./index-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -46,6 +47,9 @@ Distillation (human-confirmed L1 → L2):
 
 Projections (L3, rebuildable):
   sb rebuild [--workspace <path>]                              # rebuild facts/entities/edges/tasks from the event log + vault
+
+Retrieval (L4, disposable indexes):
+  sb index [--workspace <path>]                                # sidecar builds indexes/retrieval.duckdb + one TS-emitted 'indexed' event
 `;
 
 interface ParsedCaptureArgs {
@@ -150,6 +154,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "rebuild") {
     return handleRebuild(argv.slice(1), out, err);
+  }
+  if (command === "index") {
+    return handleIndex(argv.slice(1), out, err);
   }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
@@ -397,6 +404,36 @@ async function handleRebuild(
   }
   try {
     const result = await runRebuild(workspace !== undefined ? { workspace } : {});
+    out(`${JSON.stringify(result)}\n`);
+    return 0;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+async function handleIndex(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  if (args[0] === "--help" || args[0] === "-h") {
+    out(USAGE);
+    return 0;
+  }
+  let workspace: string | undefined;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i] as string;
+    if (arg === "--workspace") {
+      workspace = requireValue(args, ++i, arg);
+      continue;
+    }
+    err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown argument: ${arg}`)))}\n`);
+    return 1;
+  }
+  try {
+    const result = await runIndex(workspace !== undefined ? { workspace } : {});
     out(`${JSON.stringify(result)}\n`);
     return 0;
   } catch (e) {

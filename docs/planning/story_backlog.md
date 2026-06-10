@@ -122,8 +122,8 @@ Cards below.
 | SB-030 | Story | Python sidecar skeleton (stdio JSONL, ping/health) | EPIC-CORE-009 | P1 | Done | 3 | SB-047 |
 | SB-048 | Story | TS sidecar transport client (`@sb/retrieval`) | EPIC-CORE-009 | P1 | Done | 3 | SB-030, SB-047 |
 | SB-031 | Story | FTS index build + lexical query (sidecar, DuckDB) | EPIC-CORE-009 | P1 | Done | 3 | SB-048 |
-| SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Ready | 2 | SB-031 |
-| SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Backlog | 2 | SB-053 |
+| SB-053 | Story | `sb index` CLI + `indexed` projection event | EPIC-CORE-009 | P1 | Done | 2 | SB-031 |
+| SB-032 | Story | `sb query` CLI + facade query | EPIC-CORE-009 | P1 | Ready | 2 | SB-053 |
 | SB-049 | Story | BGE-M3 embeddings + DuckDB VSS + hybrid ranking | EPIC-CORE-009 | P1 | Backlog | 3 | SB-031 |
 | SB-054 | Story | Index disposability gate (delete `indexes/` → lossless rebuild) | EPIC-CORE-009 | P1 | Backlog | 2 | SB-032, SB-049 |
 | SB-055 | Story | Graph + temporal indexes (stretch) | EPIC-CORE-009 | P2 | Backlog | 3 | SB-054 |
@@ -1134,7 +1134,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ## SB-053 — `sb index` CLI + `indexed` projection event
 
-- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-009 · **Priority:** P1 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-031
 - **Scope:** `apps/cli` `index` command (`runIndex`): resolve safe workspace → `SidecarClient.indexVault`
   → on success append one **`indexed` projection event** (TS-emitted, `actor:"cli"`, payload = counts;
