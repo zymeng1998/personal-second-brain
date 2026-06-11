@@ -140,7 +140,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 |---|---|---|---|---|---|---|---|
 | SB-056 | Story | AI-workflow proposal contracts (interfaces + proposal schema) | EPIC-CORE-014 | P1 | Done | 2 | SB-010 |
 | SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
-| SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Backlog | 2 | SB-056 |
+| SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Done | 2 | SB-056 |
 | SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Backlog | 2 | SB-058 |
 | SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
 | SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
@@ -1325,7 +1325,8 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-058 — L5 output writer (`writeOutputNote`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-10 — autonomous session)
 - **Dependencies:** SB-056
 - **Scope:** `@sb/note-vault` `writeOutputNote()` (`output-note-writer.ts` + `OutputNoteWriteError`),
   mirroring the L1/L2 writers: target `vault/60_Outputs/`, frontmatter `type: output` / `layer: 5`,

@@ -3,6 +3,7 @@
  * SB-011: low-level raw (L0) write primitive. SB-012: raw immutability guard.
  * SB-015: read-only note list/get. SB-024: L2 distilled-note write primitive.
  * SB-044: shared frontmatter parsing. SB-029: L1 working-note write primitive.
+ * SB-058: L5 output-note write primitive (must cite sources).
  */
 export { writeRawNote, RAW_SOURCE_KINDS } from "./raw-note-writer.js";
 export type { WriteRawNoteInput, WriteRawNoteResult, RawSourceKind } from "./raw-note-writer.js";
@@ -10,6 +11,8 @@ export { writeDistilledNote, DISTILLED_RELATIVE_DIR } from "./distilled-note-wri
 export type { WriteDistilledNoteInput, WriteDistilledNoteResult } from "./distilled-note-writer.js";
 export { writeWorkingNote, WORKING_RELATIVE_DIR } from "./working-note-writer.js";
 export type { WriteWorkingNoteInput, WriteWorkingNoteResult } from "./working-note-writer.js";
+export { writeOutputNote, OUTPUTS_RELATIVE_DIR } from "./output-note-writer.js";
+export type { WriteOutputNoteInput, WriteOutputNoteResult } from "./output-note-writer.js";
 export {
   guardRawImmutable,
   updateRawNote,
@@ -28,6 +31,7 @@ export {
   NoteReadError,
   DistilledNoteWriteError,
   WorkingNoteWriteError,
+  OutputNoteWriteError,
 } from "./errors.js";
 export type {
   RawNoteWriteErrorCode,
@@ -35,4 +39,5 @@ export type {
   NoteReadErrorCode,
   DistilledNoteWriteErrorCode,
   WorkingNoteWriteErrorCode,
+  OutputNoteWriteErrorCode,
 } from "./errors.js";

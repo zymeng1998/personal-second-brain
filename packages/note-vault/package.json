@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/raw-note-writer.test.ts test/raw-immutability.test.ts test/raw-immutability-invariant.test.ts test/read-notes.test.ts test/distilled-note-writer.test.ts test/working-note-writer.test.ts"
+    "test": "node --import tsx --test test/raw-note-writer.test.ts test/raw-immutability.test.ts test/raw-immutability-invariant.test.ts test/read-notes.test.ts test/distilled-note-writer.test.ts test/working-note-writer.test.ts test/output-note-writer.test.ts"
   },
   "dependencies": {
     "@sb/interfaces": "workspace:*",

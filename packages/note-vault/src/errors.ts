@@ -55,6 +55,28 @@ export class WorkingNoteWriteError extends Error {
   }
 }
 
+/** Structured errors for the L5 output-note write path (SB-058). */
+export type OutputNoteWriteErrorCode =
+  | "invalid_ulid"
+  | "unsafe_path"
+  | "invalid_title"
+  | "missing_sources"
+  | "invalid_body"
+  | "already_exists"
+  | "write_failed";
+
+export class OutputNoteWriteError extends Error {
+  readonly code: OutputNoteWriteErrorCode;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: OutputNoteWriteErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "OutputNoteWriteError";
+    this.code = code;
+    if (details !== undefined) this.details = details;
+  }
+}
+
 export class DistilledNoteWriteError extends Error {
   readonly code: DistilledNoteWriteErrorCode;
   readonly details?: Record<string, unknown>;

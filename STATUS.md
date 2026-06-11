@@ -20,6 +20,11 @@
   failure report; supersede supported on both paths; list = read-only `listCurrentFacts`. cli
   **51/51** (7 new incl. invalid-file-writes-nothing, supersede repoint, runtime per-item failure,
   `main()` round-trip); root **194/194**. Next: SB-058 (L5 writer).
+- **SB-058 `Done`** — `@sb/note-vault` `writeOutputNote()` (`output-note-writer.ts` +
+  `OutputNoteWriteError`): `vault/60_Outputs/`, `type:output`/`layer:5`, required non-empty title
+  + **non-empty `sources`** enforced pre-IO, exclusive create, raw-path/escape refusal.
+  note-vault **47/47** (5 new incl. Ajv schema-validity of the output branch + never-overwrite);
+  build exit 0. Next: SB-059 (`sb output create` + `note_created` event).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
