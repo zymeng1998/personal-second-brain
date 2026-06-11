@@ -143,7 +143,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Done | 2 | SB-056 |
 | SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Done | 2 | SB-058 |
 | SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
-| SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
+| SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
 | SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
 | SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Backlog | 2 | SB-059 |
 | SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Backlog | 2 | SB-062, SB-063, SB-064, SB-065 |
@@ -1389,7 +1389,8 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-063 — `skills/braindump` + safety check
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session)
 - **Dependencies:** SB-056
 - **Scope:** `skills/braindump/SKILL.md`: take a freeform dump → `sb capture` it verbatim as L0
   (loss-free first, always) → propose a segmentation (titles/tags per segment, task-status

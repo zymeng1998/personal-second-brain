@@ -38,6 +38,11 @@
   `extract-safety.test.ts` (capture→promote→draft writes NOTHING [vault snapshot + events +
   no db]→accept writes exactly 2 provenance-carrying facts, vault byte-unchanged). cli **57/57**.
   Next: SB-063 (braindump skill).
+- **SB-063 `Done`** — `skills/braindump/SKILL.md` (capture-first verbatim → segmentation proposal
+  [`workflow:braindump` envelope] → per-segment human-confirmed `note promote`; existing CLI only;
+  follow-ups handed to dedicated skills) + `braindump-safety.test.ts` (verbatim L0 + exactly one
+  capture event; proposing writes nothing; 2 promotes → 2 L1 notes citing the origin, L0
+  byte-unchanged). cli **58/58**. Next: SB-064 (review skill).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
