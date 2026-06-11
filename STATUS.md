@@ -24,8 +24,17 @@
   unenforced in the CLI (schema enforces); `assertSourcesResolve` treats any `getNote` error as
   not-a-note. **Full system re-verified:** root 204 exit 0; `test:sidecar` 3/3 real; coverage
   90.19% lines (baseline held).
-- **Next:** Phase 5 (Surfaces, EPIC-CORE-010 — needs refinement/split) or EPIC-CORE-011 (security
-  hardening, SB-050 P0 when sensitive material appears). Human picks at next session.
+- **EPIC-CORE-011 (Security & Privacy Hardening) REFINED (same session)** — the highest-priority
+  remaining epic (P0/P1 vs Surfaces P2), refinement only, no implementation. Old SB-051/052
+  (`5→split`) decomposed; 6 stories ≤3 pts, 15 pts total: SB-050 (secure_refs primitive, P0) →
+  SB-067 (`sb secref` CLI + validation pass) → SB-068 (pure `grantAllows`) → SB-069 (first-party
+  grants registry) → SB-073 (enforcement at the operations boundary) → SB-074 (epic gate:
+  over-scope rejected everywhere + secure-ref round-trip with byte-leak assertion). Map:
+  **`security_story_map.md`** (new); cards in `story_backlog.md`.
+- **⏸ STOPPED at the decision review: OQ #26–#28 filed** (grants registry in-code first-party
+  only; enforcement for ALL callers, cli = everything minus `ALWAYS_DENIED_SCOPES`, no env
+  bypass; secure_ref schema validated by a separate validate_notes pass). **Human confirms (or
+  amends) → SB-050 `Ready`.** Alternative next: Phase 5 Surfaces refinement (P2).
 
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +

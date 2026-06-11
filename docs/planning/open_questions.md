@@ -51,6 +51,17 @@ stays boundary-docs until a batch/non-interactive need appears).
 | 24 | L5 `sources` validation depth | `sb output create` resolves note-id sources via `getNote` (missing ⇒ fail, nothing written); non-note ULIDs (fact ids) accepted as-is; schema already enforces non-empty. |
 | 25 | Review-skill scope v1 | Deterministic candidate queries only (inbox working notes older than N days; never-promoted raws; stale-`status` tasks); heuristics live in the skill; no new CLI surface. |
 
+## Decide before EPIC-CORE-011 implementation (security hardening)
+
+Raised at the 2026-06-10 security refinement ([`security_story_map.md`](security_story_map.md)).
+**None resolved yet — stories stay `Backlog` until the human confirms these.**
+
+| # | Question | Lean |
+|---|---|---|
+| 26 | Grant declaration/loading | Static in-code registry for first-party callers; workspace `config/grants.json` reserved for domain apps (EPIC-CORE-012), not built yet. |
+| 27 | Enforcement default | Enforce for ALL callers at the operations boundary; `cli` holds every scope except `ALWAYS_DENIED_SCOPES`; no env bypass. (Refines OQ #13's capability-token lean.) |
+| 28 | secure_ref validation home | `schemas/markdown/secure_ref.schema.json`; validated by `validate_notes.ts` as a separate pass (secure_refs lives outside `vault/`); pointer files must have no body. |
+
 ## Decide later
 
 | # | Question | Lean |

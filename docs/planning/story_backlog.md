@@ -154,9 +154,14 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 |---|---|---|---|---|---|---|---|
 | SB-040 | Story | Obsidian helper (optional surface) | EPIC-CORE-010 | P2 | Backlog | 5→split | SB-010 |
 | SB-041 | Story | Web dashboard (capture/review) | EPIC-CORE-010 | P2 | Backlog | 8→split | SB-010 |
-| SB-050 | Story | secure_refs pointer pattern impl | EPIC-CORE-011 | P0 | Backlog | 3 | SB-010 |
-| SB-051 | Story | Permission/scope model in interfaces | EPIC-CORE-011 | P1 | Backlog | 5→split | SB-010 |
-| SB-052 | Story | Scope enforcement at the interfaces boundary | EPIC-CORE-011 | P1 | Backlog | 5→split | SB-051 |
+| SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | Backlog | 3 | SB-010 |
+| SB-051 | Story | ~~Permission/scope model in interfaces~~ **SPLIT (2026-06-10)** → SB-068 + SB-069 | EPIC-CORE-011 | P1 | Split | 5→split | — |
+| SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
+| SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Backlog | 2 | SB-050 |
+| SB-068 | Story | Pure grant resolver (`grantAllows`) in interfaces | EPIC-CORE-011 | P1 | Backlog | 2 | SB-010 |
+| SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Backlog | 3 | SB-068 |
+| SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Backlog | 3 | SB-069 |
+| SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Backlog | 2 | SB-067, SB-073 |
 | SB-060 | Story | Capability/scope contract for domain apps | EPIC-CORE-012 | P1 | Backlog | 3 | SB-051 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015, SB-060 |
 | SB-900 | Epic-stub | Broker domain app | EPIC-DOMAIN-001 | P3 | **Deferred** | — | Core stable + SB-060/061 |
@@ -1468,6 +1473,89 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
   if needed), `docs/planning/{implementation_roadmap.md,story_backlog.md,phase_4_story_map.md}`,
   `STATUS.md`.
 - **Out of Scope:** performance gates; multi-machine reproducibility; sidecar-AI scenarios.
+
+---
+
+# Security story cards (EPIC-CORE-011 — refined 2026-06-10; `Backlog` until OQ #26–#28 confirmed)
+
+See [`security_story_map.md`](security_story_map.md) for objective, open decisions (OQ #26–#28),
+and the dependency graph. Shared constraints: raw sensitive bytes NEVER enter the workspace;
+`ALWAYS_DENIED_SCOPES` are hard-denied for every caller; enforcement sits at the operations
+boundary only; no new external dependency.
+
+## SB-050 — secure_refs pointer primitive
+
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-010 (`Done`)
+- **Scope:** `schemas/markdown/secure_ref.schema.json` (frontmatter-only pointer: `id`
+  (`secref_…`), `kind`, `location: external` const, opaque `locator`, `captured_at`, optional
+  `notes`; NO body) + `@sb/note-vault` `writeSecureRef`/`listSecureRefs` (`secure_refs/<id>.md`,
+  exclusive create, refuses non-empty body or any content-bearing field, never under `vault/`).
+- **AC:** written ref is Ajv-valid; a body/content payload is rejected writing nothing;
+  never-overwrite; reader returns metadata only. **Validation:** note-vault tests + root `pnpm test`.
+- **Files:** `schemas/markdown/secure_ref.schema.json(new)`,
+  `packages/note-vault/src/{secure-ref.ts(new),errors.ts,index.ts}` + test, docs, `STATUS.md`.
+- **Out of Scope:** CLI (SB-067); reading external storage; encryption.
+
+## SB-067 — `sb secref add/list` CLI + validation pass
+
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P0 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-050
+- **Scope:** `sb secref add --kind <k> --locator <opaque> [--notes]` / `sb secref list`;
+  `validate_notes.ts` gains a secure_refs pass (OQ #28: separate pass, files outside `vault/`).
+- **AC:** add → one schema-valid pointer file + stdout envelope; list read-only; validate flags a
+  hand-broken ref. **Validation:** cli + scripts tests; root `pnpm test`.
+- **Files:** `apps/cli/src/{secref-command.ts(new),index.ts}` + test, `scripts/validate_notes.ts`
+  (+test), docs, `STATUS.md`.
+- **Out of Scope:** grants/enforcement; secure storage management.
+
+## SB-068 — Pure grant resolver in interfaces
+
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-010 (`Done`)
+- **Scope:** `@sb/interfaces` `grantAllows(grant, scope): boolean` — wildcard segment matching,
+  deny overrides allow, `ALWAYS_DENIED_SCOPES` hard-denied regardless of grant. Pure; table tests.
+- **AC:** table tests cover exact/wildcard/deny/always-denied; no I/O. **Validation:** interfaces
+  typecheck + new test target; root `pnpm test`.
+- **Files:** `packages/interfaces/src/{scope.ts,index.ts}` (+ test wiring), docs, `STATUS.md`.
+- **Out of Scope:** registry (SB-069); enforcement (SB-073).
+
+## SB-069 — First-party caller grants registry
+
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-068
+- **Scope (OQ #26/#27):** typed in-code registry + `grantFor(caller)`: `cli` = all scopes minus
+  `ALWAYS_DENIED_SCOPES`; `sidecar:retrieval` = `read:notes` + `write:index` + `read:index`;
+  `skill:*` = none (skills write via cli). Documented least-privilege rationale per caller.
+- **AC:** registry matches the documented table; unknown caller → empty grant; ALWAYS_DENIED never
+  present. **Validation:** interfaces tests; root `pnpm test`.
+- **Files:** `packages/interfaces/src/{grants.ts(new),index.ts}` + test, docs, `STATUS.md`.
+- **Out of Scope:** `config/grants.json` (domain apps, EPIC-CORE-012); enforcement.
+
+## SB-073 — Scope enforcement at the operations boundary
+
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-069
+- **Scope:** `enforceScope(caller, operation)` (resolves `OPERATION_CONTRACTS[op].scope` via
+  `grantFor` + `grantAllows`; deny → structured `scope_denied`) consulted at every CLI command
+  entry point with `caller: "cli"`. No env bypass (OQ #27). All existing tests stay green.
+- **AC:** every write command passes through the check; a forced under-scoped caller is rejected;
+  zero behavior change for the default cli grant. **Validation:** cli tests; root `pnpm test`.
+- **Files:** `packages/interfaces/src/{enforce.ts(new),index.ts}`, `apps/cli/src/*-command.ts`
+  (entry-point wiring), tests, docs, `STATUS.md`.
+- **Out of Scope:** per-package internal checks; domain-app grant loading.
+
+## SB-074 — Security epic gate
+
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-067, SB-073
+- **Scope:** the epic "Done when" automated (`apps/cli/test/security-gate.test.ts`): (a) an
+  over-scoped caller gets `scope_denied` on EVERY write operation; (b) no grant can obtain
+  `ALWAYS_DENIED_SCOPES`; (c) secure-ref round-trip (create → list → cite from a note) with a
+  byte-leak assertion (the sensitive payload string never appears anywhere in the workspace).
+- **AC:** gate green in root `pnpm test`; docs marked met. **Validation:** root `pnpm test`.
+- **Files:** `apps/cli/test/security-gate.test.ts(new)`, docs, `STATUS.md`.
+- **Out of Scope:** penetration testing; encryption audits.
 
 ---
 
