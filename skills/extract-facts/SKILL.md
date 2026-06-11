@@ -89,6 +89,10 @@ one `fact_added` (or `fact_superseded`) memory event and one projection row. Out
 `{ ok, written, fact_ids, failed: [{ index, code, message }] }`; a non-empty `failed` exits
 non-zero — report it to the user verbatim.
 
+**Retry hazard:** on a partial failure (some items written, some in `failed`), do NOT re-run the
+same file — the successful items would be written twice. Remove the written items from the
+proposal (use `failed[].index`), fix the rest, confirm again, then accept the trimmed file.
+
 ## Out of scope
 
 - Auto-accept, batch/scheduled extraction, auto-dedupe.

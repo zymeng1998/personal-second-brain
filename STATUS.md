@@ -16,6 +16,14 @@
   `composeOutput`); `sb fact add/accept/list`; `writeOutputNote` (L5) + `sb output create` +
   `note_created` event; skills `extract-facts` / `braindump` / `review` / `compose-output` w/ four
   E2E safety tests. Roadmap "Phase 4 — Done when" marked **met**; CLAUDE.md current-phase updated.
+- **Phase 4 self-review (same session): PASS — one MEDIUM found + fixed** (`pnpm --filter @sb/cli
+  fact|output|query` script aliases referenced by the skill docs didn't exist — added + smoke-
+  tested) and the partial-accept **retry hazard documented** in extract-facts (don't re-run a
+  partially-failed file; trim written items via `failed[].index`). LOW notes accepted: CLI
+  timestamp validation (`Date.parse`) is looser than the schema's `date-time`; `tags` uniqueness
+  unenforced in the CLI (schema enforces); `assertSourcesResolve` treats any `getNote` error as
+  not-a-note. **Full system re-verified:** root 204 exit 0; `test:sidecar` 3/3 real; coverage
+  90.19% lines (baseline held).
 - **Next:** Phase 5 (Surfaces, EPIC-CORE-010 — needs refinement/split) or EPIC-CORE-011 (security
   hardening, SB-050 P0 when sensitive material appears). Human picks at next session.
 
