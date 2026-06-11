@@ -43,6 +43,12 @@
   follow-ups handed to dedicated skills) + `braindump-safety.test.ts` (verbatim L0 + exactly one
   capture event; proposing writes nothing; 2 promotes → 2 L1 notes citing the origin, L0
   byte-unchanged). cli **58/58**. Next: SB-064 (review skill).
+- **SB-064 `Done`** — `skills/review/SKILL.md` (OQ #25 v1: exactly three documented deterministic
+  candidate queries — aged inbox / never-promoted raws / stale tasks; every action maps to an
+  existing confirmed command; `leave` always offered; zero confirmations = zero writes) +
+  `review-safety.test.ts` (queries reproducible incl. the set-difference orphan raw; second pass
+  identical; full pass leaves vault+events+db byte-identical). cli **59/59**. Next: SB-065
+  (compose-output skill).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts

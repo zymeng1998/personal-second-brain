@@ -144,7 +144,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Done | 2 | SB-058 |
 | SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
 | SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
-| SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
+| SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
 | SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Backlog | 2 | SB-059 |
 | SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Backlog | 2 | SB-062, SB-063, SB-064, SB-065 |
 
@@ -1409,7 +1409,8 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-064 — `skills/review` + safety check
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session)
 - **Dependencies:** SB-057
 - **Scope:** `skills/review/SKILL.md`: deterministic candidate surfacing only (OQ #25) — working
   notes in `00_Inbox` older than N days (`sb note list` + frontmatter `created`), raw notes never
