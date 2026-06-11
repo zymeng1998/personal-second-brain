@@ -15,6 +15,7 @@ import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-
 import { runRebuild } from "./rebuild-command.js";
 import { runIndex } from "./index-command.js";
 import { runQuery } from "./query-command.js";
+import { FactCliError, runFactAccept, runFactAdd, runFactList } from "./fact-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -49,6 +50,11 @@ Distillation (human-confirmed L1 → L2):
   sb distill propose [--limit <n>] [--workspace <path>]        # READ-ONLY: list L1 candidates + scaffold
   sb distill accept --file <proposal.json> [--workspace <path>]
   cat proposal.json | sb distill accept [--workspace <path>]   # accept is the only writing step
+
+Facts (L3, human-confirmed; provenance mandatory):
+  sb fact add --statement <s> --source-ref <ulid> [--confidence <0..1>] [--observed-at <iso>] [--supersedes <ulid>] [--workspace <path>]
+  sb fact accept --file <proposal.json> [--workspace <path>]   # batch-write a REVIEWED extract_facts proposal; invalid file writes nothing
+  sb fact list [--source-ref <ulid>] [--min-confidence <0..1>] [--limit <n>] [--workspace <path>]   # READ-ONLY current facts
 
 Projections (L3, rebuildable):
   sb rebuild [--workspace <path>]                              # rebuild facts/entities/edges/tasks from the event log + vault
@@ -157,6 +163,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "distill") {
     return handleDistill(argv.slice(1), out, err, stdin);
+  }
+  if (command === "fact") {
+    return handleFact(argv.slice(1), out, err);
   }
   if (command === "rebuild") {
     return handleRebuild(argv.slice(1), out, err);
@@ -332,6 +341,145 @@ function parseDistillArgs(args: string[]): ParsedDistillArgs {
     }
   }
   return parsed;
+}
+
+interface ParsedFactArgs {
+  statement?: string;
+  sourceRef?: string;
+  observedAt?: string;
+  confidence?: number;
+  supersedes?: string;
+  minConfidence?: number;
+  limit?: number;
+  file?: string;
+  workspace?: string;
+}
+
+function parseFactArgs(args: string[]): ParsedFactArgs {
+  const parsed: ParsedFactArgs = {};
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i] as string;
+    const next = (): string => {
+      const value = args[++i];
+      if (value === undefined) throw new FactCliError("bad_arguments", `missing value for ${arg}`);
+      return value;
+    };
+    switch (arg) {
+      case "--":
+        break;
+      case "--statement":
+        parsed.statement = next();
+        break;
+      case "--source-ref":
+        parsed.sourceRef = next();
+        break;
+      case "--observed-at":
+        parsed.observedAt = next();
+        break;
+      case "--confidence": {
+        const value = Number(next());
+        if (!Number.isFinite(value)) throw new FactCliError("bad_arguments", "--confidence must be a number");
+        parsed.confidence = value;
+        break;
+      }
+      case "--supersedes":
+        parsed.supersedes = next();
+        break;
+      case "--min-confidence": {
+        const value = Number(next());
+        if (!Number.isFinite(value)) throw new FactCliError("bad_arguments", "--min-confidence must be a number");
+        parsed.minConfidence = value;
+        break;
+      }
+      case "--limit": {
+        const value = Number.parseInt(next(), 10);
+        if (!Number.isInteger(value) || value < 1) throw new FactCliError("bad_arguments", "--limit must be a positive integer");
+        parsed.limit = value;
+        break;
+      }
+      case "--file":
+        parsed.file = next();
+        break;
+      case "--workspace":
+        parsed.workspace = next();
+        break;
+      default:
+        throw new FactCliError("bad_arguments", `unknown fact argument: ${arg}`);
+    }
+  }
+  return parsed;
+}
+
+async function handleFact(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  const sub = args[0];
+  if (sub === undefined || sub === "--help" || sub === "-h") {
+    out(USAGE);
+    return sub === undefined ? 1 : 0;
+  }
+
+  try {
+    const parsed = parseFactArgs(args.slice(1));
+    if (sub === "add") {
+      if (parsed.statement === undefined || parsed.sourceRef === undefined) {
+        throw new FactCliError("bad_arguments", "fact add requires --statement and --source-ref (provenance)");
+      }
+      const result = await runFactAdd({
+        statement: parsed.statement,
+        sourceRef: parsed.sourceRef,
+        ...(parsed.observedAt !== undefined ? { observedAt: parsed.observedAt } : {}),
+        ...(parsed.confidence !== undefined ? { confidence: parsed.confidence } : {}),
+        ...(parsed.supersedes !== undefined ? { supersedes: parsed.supersedes } : {}),
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
+    if (sub === "accept") {
+      if (parsed.file === undefined) {
+        throw new FactCliError("bad_arguments", "fact accept requires --file <proposal.json>");
+      }
+      let raw: string;
+      try {
+        raw = await readFile(parsed.file, "utf8");
+      } catch (e) {
+        throw new FactCliError("bad_arguments", `cannot read proposal file: ${parsed.file}`, {
+          cause: e instanceof Error ? e.message : String(e),
+        });
+      }
+      let proposal: unknown;
+      try {
+        proposal = JSON.parse(raw);
+      } catch {
+        throw new FactCliError("invalid_proposal", "proposal is not valid JSON");
+      }
+      const result = await runFactAccept({
+        proposal,
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return result.ok ? 0 : 1;
+    }
+    if (sub === "list") {
+      const result = await runFactList({
+        ...(parsed.sourceRef !== undefined ? { sourceRef: parsed.sourceRef } : {}),
+        ...(parsed.minConfidence !== undefined ? { minConfidence: parsed.minConfidence } : {}),
+        ...(parsed.limit !== undefined ? { limit: parsed.limit } : {}),
+        ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
+    err(`${JSON.stringify(errorEnvelope(new FactCliError("bad_arguments", `unknown fact subcommand: ${sub}`)))}\n`);
+    return 1;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
 }
 
 async function handleDistill(

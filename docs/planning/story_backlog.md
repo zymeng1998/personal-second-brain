@@ -139,7 +139,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-056 | Story | AI-workflow proposal contracts (interfaces + proposal schema) | EPIC-CORE-014 | P1 | Done | 2 | SB-010 |
-| SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
+| SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
 | SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Backlog | 2 | SB-056 |
 | SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Backlog | 2 | SB-058 |
 | SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
@@ -1297,7 +1297,10 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-057 — `sb fact` CLI (add / accept-file / list)
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session; scope note: accept-file validation is structural-typed
+  mirroring `proposal.schema.json` — the same approach as `distill accept`, no Ajv dep in the CLI;
+  the schema itself is test-locked by SB-056)
 - **Dependencies:** SB-056
 - **Scope:** the human-confirmed write path for L3 facts. `apps/cli` `fact` command
   (`fact-command.ts`): (a) `sb fact add --statement <s> --source-ref <ulid> [--confidence <0..1>]

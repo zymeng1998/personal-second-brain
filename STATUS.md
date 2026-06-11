@@ -14,6 +14,12 @@
   provenance enforced) + `@sb/interfaces` `proposals.ts` (envelope/item/`composeOutput` IO types),
   `write:outputs` scope, `composeOutput` contract entry; 2 example proposals; schema test
   (examples valid + 7 rejection cases) wired into `test:scripts`. Root **187/187**. Next: SB-057.
+- **SB-057 `Done`** — `sb fact add/accept/list` (`fact-command.ts` + dispatch/USAGE): add = one
+  `fact_added` event + one row; accept = whole-file structural validation FIRST (invalid file
+  writes nothing; mirrors the schema like `distill accept`), then sequential writes w/ per-item
+  failure report; supersede supported on both paths; list = read-only `listCurrentFacts`. cli
+  **51/51** (7 new incl. invalid-file-writes-nothing, supersede repoint, runtime per-item failure,
+  `main()` round-trip); root **194/194**. Next: SB-058 (L5 writer).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
