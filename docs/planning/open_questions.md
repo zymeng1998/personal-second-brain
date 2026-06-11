@@ -54,13 +54,17 @@ stays boundary-docs until a batch/non-interactive need appears).
 ## Decide before EPIC-CORE-011 implementation (security hardening)
 
 Raised at the 2026-06-10 security refinement ([`security_story_map.md`](security_story_map.md)).
-**None resolved yet — stories stay `Backlog` until the human confirms these.**
+**ALL THREE RESOLVED (2026-06-10): human approved exactly as leaned**, with explicit guardrails:
+secure_ref is a reference primitive, never a secret container; raw secrets appear nowhere
+(notes/events/tests/fixtures/logs/errors); the CLI goes through the SAME grant resolver as every
+other caller; **no env/test/dev bypass of enforcement is allowed**; audit evidence must not leak
+secret values.
 
-| # | Question | Lean |
+| # | Question | Decision (2026-06-10, approved as leaned) |
 |---|---|---|
-| 26 | Grant declaration/loading | Static in-code registry for first-party callers; workspace `config/grants.json` reserved for domain apps (EPIC-CORE-012), not built yet. |
-| 27 | Enforcement default | Enforce for ALL callers at the operations boundary; `cli` holds every scope except `ALWAYS_DENIED_SCOPES`; no env bypass. (Refines OQ #13's capability-token lean.) |
-| 28 | secure_ref validation home | `schemas/markdown/secure_ref.schema.json`; validated by `validate_notes.ts` as a separate pass (secure_refs lives outside `vault/`); pointer files must have no body. |
+| 26 | Grant declaration/loading | **RESOLVED:** static in-code registry for first-party callers this phase; workspace `config/grants.json` reserved for domain apps (EPIC-CORE-012), not built yet. |
+| 27 | Enforcement default | **RESOLVED:** enforce for ALL callers at the operations boundary; `cli` may hold every scope except `ALWAYS_DENIED_SCOPES` but goes through the same resolver; **no env bypass**. (Refines OQ #13.) |
+| 28 | secure_ref validation home | **RESOLVED:** `schemas/markdown/secure_ref.schema.json`; validated by `validate_notes.ts` as a separate pass (secure_refs lives outside `vault/`); pointer files must have no body. |
 
 ## Decide later
 

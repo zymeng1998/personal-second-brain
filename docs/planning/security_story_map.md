@@ -4,10 +4,13 @@ Refinement of the EPIC-CORE-011 backlog (the `5→split` SB-051/052 decomposed i
 stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md) (cards) and
 [`phase_4_story_map.md`](phase_4_story_map.md) (prior refinement).
 
-**Status (2026-06-10): REFINED — awaiting the open-decision review (OQ #26–#28).** No
-implementation has started; stories promote to `Ready` only after the human confirms the open
-decisions below. New story ids are **SB-067..069 + SB-073..074** (SB-070–072 are taken by
-EPIC-CORE-013 media intake).
+**Status (2026-06-10): DECISION REVIEW PASSED — OQ #26–#28 approved exactly as leaned** (recorded
+in [`open_questions.md`](open_questions.md)) with guardrails: secure_ref = reference primitive
+only; no raw secrets anywhere; the CLI uses the same grant resolver as every caller; **no
+env/test/dev bypass**; audit evidence without secret values. **Implementation authorized in
+dependency order SB-050 → 067 → 068 → 069 → 073 → 074** (one atomic commit + push per story;
+stop at the next decision review before anything beyond this chain). Story ids skip SB-070–072
+(EPIC-CORE-013 media intake).
 
 ## Objective
 

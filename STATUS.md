@@ -36,6 +36,15 @@
   bypass; secure_ref schema validated by a separate validate_notes pass). **Human confirms (or
   amends) → SB-050 `Ready`.** Alternative next: Phase 5 Surfaces refinement (P2).
 
+## EPIC-CORE-011 — DECISION REVIEW PASSED (2026-06-10); autonomous security session STARTED
+- **Human approved OQ #26–#28 exactly as leaned**, with guardrails: one atomic commit per story;
+  no raw secrets in notes/events/tests/snapshots/fixtures/logs/errors; secure_ref = reference
+  primitive, never a secret container; negative tests for denied scopes / unknown grants /
+  malformed secure_refs / missing grants / attempted env bypass; audit evidence without secret
+  values; root suite + coverage baseline maintained; **stop at the next decision review after
+  SB-074**.
+- **Session authorization:** SB-050 → 067 → 068 → 069 → 073 → 074. **SB-050 → `In Progress`.**
+
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +
   `sidecars/ai` deferred [roadmap deviation approved]; #22 shared proposal envelope schema;

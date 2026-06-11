@@ -154,7 +154,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 |---|---|---|---|---|---|---|---|
 | SB-040 | Story | Obsidian helper (optional surface) | EPIC-CORE-010 | P2 | Backlog | 5→split | SB-010 |
 | SB-041 | Story | Web dashboard (capture/review) | EPIC-CORE-010 | P2 | Backlog | 8→split | SB-010 |
-| SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | Backlog | 3 | SB-010 |
+| SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | In Progress | 3 | SB-010 |
 | SB-051 | Story | ~~Permission/scope model in interfaces~~ **SPLIT (2026-06-10)** → SB-068 + SB-069 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Backlog | 2 | SB-050 |
