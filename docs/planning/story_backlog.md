@@ -145,7 +145,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
 | SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
 | SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
-| SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Backlog | 2 | SB-059 |
+| SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Done | 2 | SB-059 |
 | SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Backlog | 2 | SB-062, SB-063, SB-064, SB-065 |
 
 ### Later phases (coarse; refine before implementation)
@@ -1428,7 +1428,8 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-065 — `skills/compose-output` + safety check
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-10 — autonomous session)
 - **Dependencies:** SB-059
 - **Scope:** `skills/compose-output/SKILL.md`: retrieval-grounded L5 drafting — gather context via
   `sb query` (hybrid default) + `note get`; draft the output **with explicit citations** mapping

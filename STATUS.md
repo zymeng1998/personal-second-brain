@@ -49,6 +49,12 @@
   `review-safety.test.ts` (queries reproducible incl. the set-difference orphan raw; second pass
   identical; full pass leaves vault+events+db byte-identical). cli **59/59**. Next: SB-065
   (compose-output skill).
+- **SB-065 `Done`** — `skills/compose-output/SKILL.md` (no-uncited-claims rule; `sources` must
+  cover every `[<ULID>]` citation; retrieval-grounded via `sb query` w/ lexical fallback; `output
+  create` is the only write) + `compose-output-safety.test.ts` (drafting writes nothing;
+  fabricated citation ⇒ `source_not_found`, nothing lands; confirmed create ⇒ one schema-valid
+  L5 + one `note_created` event; body citations ⊆ sources). cli **60/60**. 4B COMPLETE. Next:
+  SB-066 (Phase 4 gate).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
