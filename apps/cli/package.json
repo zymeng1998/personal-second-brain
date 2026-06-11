@@ -11,7 +11,7 @@
     "rebuild": "tsx src/index.ts rebuild",
     "start": "tsx src/index.ts",
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/capture-command.test.ts test/note-command.test.ts test/distill-command.test.ts test/distill-safety.test.ts test/rebuild-command.test.ts test/reproducibility.test.ts test/index-command.test.ts test/query-command.test.ts test/promote-command.test.ts test/fact-command.test.ts test/output-command.test.ts test/extract-safety.test.ts test/braindump-safety.test.ts test/review-safety.test.ts test/compose-output-safety.test.ts",
+    "test": "node --import tsx --test test/capture-command.test.ts test/note-command.test.ts test/distill-command.test.ts test/distill-safety.test.ts test/rebuild-command.test.ts test/reproducibility.test.ts test/index-command.test.ts test/query-command.test.ts test/promote-command.test.ts test/fact-command.test.ts test/output-command.test.ts test/extract-safety.test.ts test/braindump-safety.test.ts test/review-safety.test.ts test/compose-output-safety.test.ts test/phase4-gate.test.ts",
     "test:sidecar": "node --import tsx --test test/sidecar-e2e.test.ts test/disposability-gate.test.ts"
   },
   "dependencies": {

@@ -4,11 +4,13 @@ Refinement of the Phase 4 backlog into ≤3-pt atomic stories, per the split rul
 [`story_backlog.md`](story_backlog.md) (cards) and [`phase_3_story_map.md`](phase_3_story_map.md)
 (prior phase).
 
-**Status (2026-06-10): DECISION REVIEW PASSED — all five open decisions (OQ #21–#25) approved
-exactly as leaned** (recorded in [`open_questions.md`](open_questions.md)), including the OQ #21
-skills-first/`sidecars/ai`-deferred roadmap deviation. **Implementation authorized to proceed
-autonomously in dependency order** (one atomic commit + push per story; blockers recorded instead
-of stopping). Story statuses live in [`story_backlog.md`](story_backlog.md).
+**Status (2026-06-10): EPIC GATE MET — Phase 4 COMPLETE.** All five open decisions (OQ #21–#25)
+were approved exactly as leaned (recorded in [`open_questions.md`](open_questions.md)), including
+the OQ #21 skills-first/`sidecars/ai`-deferred roadmap deviation, and all nine stories
+(SB-056..059 + SB-062..066) are `Done` — implemented, tested, and pushed in one autonomous
+session. The SB-066 gate (propose-without-accept writes nothing; accepted writes carry
+provenance; L0/L1 byte-unchanged; every event schema-valid) is green in root `pnpm test`.
+Story statuses live in [`story_backlog.md`](story_backlog.md).
 Story ids skip SB-060/061 (taken by EPIC-CORE-012) and SB-070–072 (taken by EPIC-CORE-013 media
 intake); the Phase 4 set is **SB-056..059 + SB-062..066**.
 

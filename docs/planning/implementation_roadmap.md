@@ -50,12 +50,13 @@ this machine), TS `packages/retrieval` facade over **stdio JSONL**; rebuildable 
 
 `sidecars/ai` extraction/distillation suggestions (human-confirmed); Claude-Code skills for
 braindump/distill/review; L5 outputs citing sources.
-- **Status:** **Refined 2026-06-10** — EPIC-CORE-014, 9 stories ≤3 pts (SB-056..059 + SB-062..066,
-  22 pts; distill itself shipped in Phase 1H). See [`phase_4_story_map.md`](phase_4_story_map.md).
-  Awaiting the OQ #21–#25 decision review; note the OQ #21 lean proposes **skills-first** with
-  `sidecars/ai` deferred (deviation from the line above — needs explicit approval).
+- **Status:** ✅ **COMPLETE 2026-06-10** — EPIC-CORE-014, all 9 stories `Done` (SB-056..059 +
+  SB-062..066; distill itself shipped in Phase 1H). OQ #21–#25 approved as leaned: **skills-first**
+  engine with `sidecars/ai` deferred (approved deviation from the line above — the boundary README
+  stays authoritative until a batch/non-interactive need appears). See
+  [`phase_4_story_map.md`](phase_4_story_map.md).
 - **Done when:** AI proposes facts/notes with provenance; nothing is mutated without confirmation.
-  (Automated as SB-066.)
+  (Automated as SB-066 — **met**, green in root `pnpm test`.)
 
 ## Phase 5 — Surfaces
 

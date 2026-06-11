@@ -31,7 +31,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Backlog | secure_refs, permission scopes, secret handling. |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Backlog | Capability/scope model + generic example-readonly smoke test. |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
-| EPIC-CORE-014 | AI Workflows | 4 | P1 | **Refined** | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H); `sb fact` + L5 `sb output` confirmed write paths. **Refined 2026-06-10 into SB-056..059 + SB-062..066 (22 pts)** — see [`phase_4_story_map.md`](phase_4_story_map.md). `Backlog` until the OQ #21–#25 decision review. |
+| EPIC-CORE-014 | AI Workflows | 4 | P1 | Done | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H) + `sb fact` / L5 `sb output create` confirmed write paths. **Gate met 2026-06-10** (SB-066): propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable. **All 9 stories `Done`** (SB-056..059 + SB-062..066, one autonomous session). |
 | EPIC-DOMAIN-001 | Broker Domain App | 6+ | P3 | **Deferred** | Broker tool, docs-only until core is stable. **Not planned in detail.** |
 
 ---
@@ -146,7 +146,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
 | SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
 | SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Done | 2 | SB-059 |
-| SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Backlog | 2 | SB-062, SB-063, SB-064, SB-065 |
+| SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Done | 2 | SB-062, SB-063, SB-064, SB-065 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -1448,7 +1448,10 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-066 — Phase 4 provenance + confirmation gate
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  — **the epic gate is MET (2026-06-10)**: `apps/cli/test/phase4-gate.test.ts` (Node-only, in
+  `pnpm test`; retrieval not needed — grounding is exercised by the skill docs, the gate sweeps
+  the write paths)
 - **Dependencies:** SB-062, SB-063, SB-064, SB-065
 - **Scope:** the epic **"Done when"** as an automated test (mirrors SB-027/039/054):
   `apps/cli/test/phase4-gate.test.ts` sweeps every Phase 4 write path on a throwaway workspace —

@@ -2,6 +2,23 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ PHASE 4 (EPIC-CORE-014) COMPLETE — GATE MET (2026-06-10, one autonomous session)
+- **All 9 stories `Done` and pushed** (SB-056 → 057 → 058 → 059 → 062 → 063 → 064 → 065 → 066,
+  one atomic commit each). **SB-066 gate green in root `pnpm test`:** propose-without-accept across
+  all four workflows leaves vault+events+db byte-identical (projection-cache materialization primed
+  before baseline); accepted writes carry provenance (facts: `source_ref`+`observed_at`+
+  `confidence`; outputs: non-empty resolvable `sources`; promotes cite L0 origin); L0/L1
+  byte-unchanged; all appended events validate against event schema v1.
+- **Final counts:** root `pnpm test` exit 0 — **204 tests** (cli 61, note-vault 47, retrieval 19,
+  memory-kernel 17, scripts 20, others unchanged); no sidecar/retrieval changes this phase
+  (`test:sidecar` untouched).
+- **Shipped:** `proposal.schema.json` + `@sb/interfaces` proposals contracts (`write:outputs`,
+  `composeOutput`); `sb fact add/accept/list`; `writeOutputNote` (L5) + `sb output create` +
+  `note_created` event; skills `extract-facts` / `braindump` / `review` / `compose-output` w/ four
+  E2E safety tests. Roadmap "Phase 4 — Done when" marked **met**; CLAUDE.md current-phase updated.
+- **Next:** Phase 5 (Surfaces, EPIC-CORE-010 — needs refinement/split) or EPIC-CORE-011 (security
+  hardening, SB-050 P0 when sensitive material appears). Human picks at next session.
+
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +
   `sidecars/ai` deferred [roadmap deviation approved]; #22 shared proposal envelope schema;

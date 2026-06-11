@@ -99,5 +99,14 @@ temporal from frontmatter dates + event timestamps, composable query `filters:{n
 real candidates), SB-033 (`test:coverage` via c8 — baseline 90% lines — + `init_workspace`
 subprocess tests). **Root suite 180 tests.**
 
-**Next:** Phase 4 (AI workflows) after review. Always follow the backlog workflow above: confirm
-the story is `Ready`, implement in-scope only, validate, stop at `In Review`.
+**Phase 4 (EPIC-CORE-014, AI Workflows) is COMPLETE (2026-06-10)** — skills-first engine
+(OQ #21–#25 approved; `sidecars/ai` deferred, boundary-docs only): `proposal.schema.json` shared
+envelope + `@sb/interfaces` proposal contracts, the **`sb fact`** (add/accept-file/list) and
+**`sb output create`** (L5, resolvable non-empty `sources` + `note_created` event) confirmed write
+paths, and four skills — `extract-facts`, `braindump`, `review`, `compose-output` — each with an
+E2E safety test. The **SB-066 gate** (propose-without-accept writes nothing; accepted writes carry
+provenance; L0/L1 byte-unchanged; events schema-valid) is green. **Root suite 204 tests.**
+
+**Next:** Phase 5 (Surfaces) refinement, or EPIC-CORE-011 (security hardening). Always follow the
+backlog workflow above: confirm the story is `Ready`, implement in-scope only, validate, stop at
+`In Review`.
