@@ -11,6 +11,7 @@ export type PermissionScope =
   | "write:distill"
   | "write:facts"
   | "write:outputs"
+  | "write:notes"
   | "read:facts"
   | "rebuild:projections"
   | "write:index"

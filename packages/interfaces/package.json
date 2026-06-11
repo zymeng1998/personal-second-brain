@@ -9,7 +9,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/scope.test.ts"
+    "test": "node --import tsx --test test/scope.test.ts test/grants.test.ts"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

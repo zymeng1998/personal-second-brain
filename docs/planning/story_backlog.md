@@ -159,7 +159,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Done | 2 | SB-050 |
 | SB-068 | Story | Pure grant resolver (`grantAllows`) in interfaces | EPIC-CORE-011 | P1 | Done | 2 | SB-010 |
-| SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Backlog | 3 | SB-068 |
+| SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Done | 3 | SB-068 |
 | SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Backlog | 3 | SB-069 |
 | SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Backlog | 2 | SB-067, SB-073 |
 | SB-060 | Story | Capability/scope contract for domain apps | EPIC-CORE-012 | P1 | Backlog | 3 | SB-051 |
@@ -1529,7 +1529,9 @@ boundary only; no new external dependency.
 
 ## SB-069 — First-party caller grants registry
 
-- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session; enabling change noted: `write:notes` scope added to the
+  union — the promote path needs it for SB-073 enforcement, and the cli grant includes it)
 - **Dependencies:** SB-068
 - **Scope (OQ #26/#27):** typed in-code registry + `grantFor(caller)`: `cli` = all scopes minus
   `ALWAYS_DENIED_SCOPES`; `sidecar:retrieval` = `read:notes` + `write:index` + `read:index`;

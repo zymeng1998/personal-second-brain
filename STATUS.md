@@ -61,6 +61,11 @@
   explicitly allowed) → `deny` → `allow`; pure + **environment-blind** (no env inspection exists
   to bypass — negative-tested with SB_SKIP_SCOPES/SB_DEV/NODE_ENV set). interfaces gains a test
   target (4 table tests) wired into root `pnpm -r`. Root **217 tests** exit 0. Next: SB-069.
+- **SB-069 `Done`** — `grants.ts` `grantFor(caller)` static first-party registry (OQ #26): `cli`
+  = all 11 operational scopes (incl. new `write:notes` for the promote path) minus ALWAYS_DENIED;
+  `sidecar:retrieval` = read:notes + write/read:index only; `skill:*`/unknown = EMPTY grant
+  (denied everything). Least-privilege rationale documented per caller. interfaces **7/7**;
+  root **220 tests** exit 0. Next: SB-073 (boundary enforcement).
 
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +
