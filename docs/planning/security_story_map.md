@@ -7,10 +7,11 @@ stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md
 **Status (2026-06-10): DECISION REVIEW PASSED — OQ #26–#28 approved exactly as leaned** (recorded
 in [`open_questions.md`](open_questions.md)) with guardrails: secure_ref = reference primitive
 only; no raw secrets anywhere; the CLI uses the same grant resolver as every caller; **no
-env/test/dev bypass**; audit evidence without secret values. **Implementation authorized in
-dependency order SB-050 → 067 → 068 → 069 → 073 → 074** (one atomic commit + push per story;
-stop at the next decision review before anything beyond this chain). Story ids skip SB-070–072
-(EPIC-CORE-013 media intake).
+env/test/dev bypass**; audit evidence without secret values. **EPIC GATE MET — all 6 stories `Done` (2026-06-10, one autonomous session):** SB-050 → 067 →
+068 → 069 → 073 → 074, one atomic commit each. The SB-074 gate (under-privileged callers denied
+on every write op; `ALWAYS_DENIED_SCOPES` unobtainable even via explicit allow; secure-ref
+round-trip with a full workspace byte-leak scan) is green in root `pnpm test`. Story ids skip
+SB-070–072 (EPIC-CORE-013 media intake).
 
 ## Objective
 

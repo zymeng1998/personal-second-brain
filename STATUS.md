@@ -36,6 +36,23 @@
   bypass; secure_ref schema validated by a separate validate_notes pass). **Human confirms (or
   amends) → SB-050 `Ready`.** Alternative next: Phase 5 Surfaces refinement (P2).
 
+## ✅ EPIC-CORE-011 (SECURITY) COMPLETE — GATE MET (2026-06-10, one autonomous session)
+- **All 6 stories `Done` + pushed** (SB-050 → 067 → 068 → 069 → 073 → 074, one atomic commit
+  each). **SB-074 gate green in root `pnpm test`:** (a) under-privileged callers (rogue, sidecar,
+  skills) `scope_denied` on every write op + direct write scopes, zero filesystem writes; (b)
+  `ALWAYS_DENIED_SCOPES` unobtainable by any caller — even a synthetic grant explicitly allowing
+  them; (c) secure-ref round-trip (CLI add → list → cited from a note) with a full workspace
+  byte-leak scan — the in-memory sensitive sentinel appears in NO file.
+- **Final counts:** root `pnpm test` exit 0 — **229 tests** (cli 73, note-vault 52, interfaces 7,
+  scripts 21); `test:sidecar` 3/3 real; **coverage 92.08% lines (baseline 90.15 — improved)**.
+- **Guardrails honored:** no raw secrets anywhere (placeholders/sentinels only); secure_ref is a
+  reference primitive (no body param exists; single-line ≤500-char metadata; `not_a_container`);
+  denial messages name caller+scope only, locator values never echoed; **no env bypass exists**
+  (negative-tested with 4 flags set); the CLI goes through the same `grantAllows` as every caller.
+- **Next:** Phase 5 (Surfaces, EPIC-CORE-010 — needs refinement/split) or EPIC-CORE-012 (domain
+  app boundary, SB-060/061 — now unblocked by the scope model). **Stopped per authorization: the
+  approved security chain is complete; the next decision review is the human's.**
+
 ## EPIC-CORE-011 — DECISION REVIEW PASSED (2026-06-10); autonomous security session STARTED
 - **Human approved OQ #26–#28 exactly as leaned**, with guardrails: one atomic commit per story;
   no raw secrets in notes/events/tests/snapshots/fixtures/logs/errors; secure_ref = reference

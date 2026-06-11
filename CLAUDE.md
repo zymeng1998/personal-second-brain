@@ -107,6 +107,15 @@ paths, and four skills — `extract-facts`, `braindump`, `review`, `compose-outp
 E2E safety test. The **SB-066 gate** (propose-without-accept writes nothing; accepted writes carry
 provenance; L0/L1 byte-unchanged; events schema-valid) is green. **Root suite 204 tests.**
 
-**Next:** Phase 5 (Surfaces) refinement, or EPIC-CORE-011 (security hardening). Always follow the
-backlog workflow above: confirm the story is `Ready`, implement in-scope only, validate, stop at
-`In Review`.
+**EPIC-CORE-011 (Security & Privacy Hardening) is COMPLETE (2026-06-10)** — OQ #26–#28 approved:
+the **secure_refs pointer primitive** (`secure_ref.schema.json`, `writeSecureRef`/`listSecureRefs`,
+`sb secref add/list`, a separate `validate_notes` pass — reference primitive only, never a secret
+container; locators never echoed) and the **permission model made real**: `grantAllows` (pure,
+environment-blind), the first-party grants registry (`cli` = all operational scopes minus
+`ALWAYS_DENIED_SCOPES` through the SAME resolver; `sidecar:retrieval` index-only; skills hold
+nothing), and **enforcement at the CLI operations boundary with no env bypass**. The SB-074 gate
+is green. **Root suite 229 tests; coverage 92.08% lines.**
+
+**Next:** Phase 5 (Surfaces, EPIC-CORE-010) refinement, or EPIC-CORE-012 (domain app boundary —
+SB-060/061, now unblocked by the scope model). Always follow the backlog workflow above: confirm
+the story is `Ready`, implement in-scope only, validate, stop at `In Review`.
