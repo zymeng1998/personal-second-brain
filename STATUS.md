@@ -43,7 +43,13 @@
   malformed secure_refs / missing grants / attempted env bypass; audit evidence without secret
   values; root suite + coverage baseline maintained; **stop at the next decision review after
   SB-074**.
-- **Session authorization:** SB-050 → 067 → 068 → 069 → 073 → 074. **SB-050 → `In Progress`.**
+- **Session authorization:** SB-050 → 067 → 068 → 069 → 073 → 074.
+- **SB-050 `Done`** — `secure_ref.schema.json` (frontmatter-only pointer; `location: external`
+  const; opaque locator ≤500) + `@sb/note-vault` `writeSecureRef`/`listSecureRefs`
+  (`secure-ref.ts` + `SecureRefError`): no body param exists; single-line length-capped metadata
+  (`not_a_container`); messages/details never echo values (leak-sentinel-tested); exclusive
+  create; fixed `secure_refs/` target; list reports malformed files (smuggled body, missing
+  locator, garbled) without throwing. note-vault **52/52** (5 new); build exit 0. Next: SB-067.
 
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +

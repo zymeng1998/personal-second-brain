@@ -13,6 +13,13 @@ export { writeWorkingNote, WORKING_RELATIVE_DIR } from "./working-note-writer.js
 export type { WriteWorkingNoteInput, WriteWorkingNoteResult } from "./working-note-writer.js";
 export { writeOutputNote, OUTPUTS_RELATIVE_DIR } from "./output-note-writer.js";
 export type { WriteOutputNoteInput, WriteOutputNoteResult } from "./output-note-writer.js";
+export { writeSecureRef, listSecureRefs, SECURE_REFS_RELATIVE_DIR } from "./secure-ref.js";
+export type {
+  WriteSecureRefInput,
+  WriteSecureRefResult,
+  SecureRefRecord,
+  ListSecureRefsResult,
+} from "./secure-ref.js";
 export {
   guardRawImmutable,
   updateRawNote,
@@ -32,6 +39,7 @@ export {
   DistilledNoteWriteError,
   WorkingNoteWriteError,
   OutputNoteWriteError,
+  SecureRefError,
 } from "./errors.js";
 export type {
   RawNoteWriteErrorCode,
@@ -40,4 +48,5 @@ export type {
   DistilledNoteWriteErrorCode,
   WorkingNoteWriteErrorCode,
   OutputNoteWriteErrorCode,
+  SecureRefErrorCode,
 } from "./errors.js";

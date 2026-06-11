@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://second-brain.local/schemas/markdown/secure_ref.schema.json",
+  "title": "Secure Reference v1",
+  "version": "1.0.0",
+  "description": "Frontmatter of a secure_refs/<id>.md pointer file (privacy_and_security.md pattern). A secure ref is a REFERENCE PRIMITIVE, never a secret container: it stores metadata plus an opaque locator into external secure storage. The document bytes never enter the workspace, and the pointer file must have NO body content. Validated as a separate validate_notes pass (OQ #28).",
+  "type": "object",
+  "required": ["id", "kind", "location", "locator", "captured_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^secref_[A-Za-z0-9_-]+$",
+      "description": "Canonical secure-ref id (SECURE_REF_PATTERN). Notes cite this id; it is not a ULID and never appears as an event subject_id."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Document category, e.g. identity_document, bank_statement, lease. Metadata only — never the document's contents."
+    },
+    "location": {
+      "const": "external",
+      "description": "Always 'external': the bytes live in external secure storage, never in this workspace or repo."
+    },
+    "locator": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Opaque pointer into external secure storage (e.g. a keychain item name or encrypted-volume path). MUST NOT contain the secret/document content itself."
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the pointer was recorded (ISO-8601)."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional one-line metadata annotation. Never document contents."
+    }
+  }
+}

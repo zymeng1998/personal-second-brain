@@ -55,6 +55,29 @@ export class WorkingNoteWriteError extends Error {
   }
 }
 
+/** Structured errors for the secure_refs pointer primitive (SB-050).
+ * Messages NEVER echo locator/notes values — they may be sensitive. */
+export type SecureRefErrorCode =
+  | "invalid_id"
+  | "invalid_field"
+  | "not_a_container"
+  | "unsafe_path"
+  | "already_exists"
+  | "write_failed"
+  | "read_failed";
+
+export class SecureRefError extends Error {
+  readonly code: SecureRefErrorCode;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: SecureRefErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "SecureRefError";
+    this.code = code;
+    if (details !== undefined) this.details = details;
+  }
+}
+
 /** Structured errors for the L5 output-note write path (SB-058). */
 export type OutputNoteWriteErrorCode =
   | "invalid_ulid"

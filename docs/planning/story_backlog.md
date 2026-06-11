@@ -154,7 +154,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 |---|---|---|---|---|---|---|---|
 | SB-040 | Story | Obsidian helper (optional surface) | EPIC-CORE-010 | P2 | Backlog | 5→split | SB-010 |
 | SB-041 | Story | Web dashboard (capture/review) | EPIC-CORE-010 | P2 | Backlog | 8→split | SB-010 |
-| SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | In Progress | 3 | SB-010 |
+| SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | Done | 3 | SB-010 |
 | SB-051 | Story | ~~Permission/scope model in interfaces~~ **SPLIT (2026-06-10)** → SB-068 + SB-069 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Backlog | 2 | SB-050 |
@@ -1485,7 +1485,10 @@ boundary only; no new external dependency.
 
 ## SB-050 — secure_refs pointer primitive
 
-- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P0 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P0 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session; guardrail notes: single-line ≤500-char metadata enforcement
+  [`not_a_container`], error messages/details never echo locator/notes values, no body parameter
+  exists at all)
 - **Dependencies:** SB-010 (`Done`)
 - **Scope:** `schemas/markdown/secure_ref.schema.json` (frontmatter-only pointer: `id`
   (`secref_…`), `kind`, `location: external` const, opaque `locator`, `captured_at`, optional
