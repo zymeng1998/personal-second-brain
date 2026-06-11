@@ -18,6 +18,7 @@ import { runQuery } from "./query-command.js";
 import { FactCliError, runFactAccept, runFactAdd, runFactList } from "./fact-command.js";
 import { OutputCliError, runOutputCreate } from "./output-command.js";
 import { SecrefCliError, runSecrefAdd, runSecrefList } from "./secref-command.js";
+import { enforceScope } from "@sb/interfaces";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -152,8 +153,14 @@ async function readStream(stream: Readable | NodeJS.ReadStream): Promise<string>
   return Buffer.concat(chunks).toString("utf8");
 }
 
-/** Run the CLI. Returns a process exit code. IO is injectable for tests. */
-export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<number> {
+/**
+ * Run the CLI. Returns a process exit code. IO is injectable for tests.
+ * `caller` is the scope-enforcement identity (default "cli" — the human's
+ * proxy, which still goes through the same grant resolver); injectable so
+ * negative tests can exercise denial through the real path. NOT an env flag —
+ * there is no environment-based bypass.
+ */
+export async function main(argv: string[], io: Partial<CliIO> = {}, caller = "cli"): Promise<number> {
   const out = io.out ?? ((text: string) => void process.stdout.write(text));
   const err = io.err ?? ((text: string) => void process.stderr.write(text));
   const stdin = io.stdin ?? process.stdin;
@@ -168,28 +175,28 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
     return 0;
   }
   if (command === "note") {
-    return handleNote(argv.slice(1), out, err);
+    return handleNote(argv.slice(1), out, err, caller);
   }
   if (command === "distill") {
-    return handleDistill(argv.slice(1), out, err, stdin);
+    return handleDistill(argv.slice(1), out, err, stdin, caller);
   }
   if (command === "fact") {
-    return handleFact(argv.slice(1), out, err);
+    return handleFact(argv.slice(1), out, err, caller);
   }
   if (command === "output") {
-    return handleOutput(argv.slice(1), out, err);
+    return handleOutput(argv.slice(1), out, err, caller);
   }
   if (command === "secref") {
-    return handleSecref(argv.slice(1), out, err);
+    return handleSecref(argv.slice(1), out, err, caller);
   }
   if (command === "rebuild") {
-    return handleRebuild(argv.slice(1), out, err);
+    return handleRebuild(argv.slice(1), out, err, caller);
   }
   if (command === "index") {
-    return handleIndex(argv.slice(1), out, err);
+    return handleIndex(argv.slice(1), out, err, caller);
   }
   if (command === "query") {
-    return handleQuery(argv.slice(1), out, err);
+    return handleQuery(argv.slice(1), out, err, caller);
   }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
@@ -218,6 +225,7 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
 
   try {
+    enforceScope(caller, "capture");
     const result = await runCapture({
       content: content ?? "",
       source: parsed.source ?? "",
@@ -268,7 +276,7 @@ function parseNoteArgs(args: string[]): ParsedNoteArgs {
   return parsed;
 }
 
-async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: string) => void): Promise<number> {
+async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: string) => void, caller = "cli"): Promise<number> {
   // Drop standalone `--` separators (also forwarded by `pnpm run ... --`).
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -286,6 +294,7 @@ async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: 
   }
 
   try {
+    enforceScope(caller, sub === "promote" ? "write:notes" : sub === "get" ? "getNote" : "listNotes");
     if (sub === "list") {
       const result = await runNoteList({
         ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
@@ -429,6 +438,7 @@ async function handleFact(
   rawArgs: string[],
   out: (t: string) => void,
   err: (t: string) => void,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -439,6 +449,15 @@ async function handleFact(
 
   try {
     const parsed = parseFactArgs(args.slice(1));
+    if (sub === "list") {
+      enforceScope(caller, "listFacts");
+    } else {
+      // accept is the batch fact-writing path: it requires the full fact
+      // capability (add + supersede); plain add needs supersedeFact only
+      // when --supersedes is given
+      enforceScope(caller, "addFact");
+      if (sub === "accept" || parsed.supersedes !== undefined) enforceScope(caller, "supersedeFact");
+    }
     if (sub === "add") {
       if (parsed.statement === undefined || parsed.sourceRef === undefined) {
         throw new FactCliError("bad_arguments", "fact add requires --statement and --source-ref (provenance)");
@@ -501,6 +520,7 @@ async function handleSecref(
   rawArgs: string[],
   out: (t: string) => void,
   err: (t: string) => void,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -530,6 +550,7 @@ async function handleSecref(
       else throw new SecrefCliError("bad_arguments", `unknown secref argument: ${arg}`);
     }
     if (sub === "add") {
+      enforceScope(caller, "write:secure_refs"); // pointer METADATA; external docs stay hard-denied
       const result = await runSecrefAdd({
         kind: kind ?? "",
         locator: locator ?? "",
@@ -541,6 +562,7 @@ async function handleSecref(
       return 0;
     }
     if (sub === "list") {
+      enforceScope(caller, "read:notes"); // listing pointer metadata, never external contents
       const result = await runSecrefList({
         ...(workspace !== undefined ? { workspace } : {}),
       });
@@ -559,6 +581,7 @@ async function handleOutput(
   rawArgs: string[],
   out: (t: string) => void,
   err: (t: string) => void,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -571,6 +594,7 @@ async function handleOutput(
     if (sub !== "create") {
       throw new OutputCliError("bad_arguments", `unknown output subcommand: ${sub}`);
     }
+    enforceScope(caller, "composeOutput");
     let file: string | undefined;
     let workspace: string | undefined;
     const rest = args.slice(1);
@@ -619,6 +643,7 @@ async function handleDistill(
   out: (t: string) => void,
   err: (t: string) => void,
   stdin: Readable | NodeJS.ReadStream,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -636,6 +661,7 @@ async function handleDistill(
   }
 
   try {
+    enforceScope(caller, sub === "accept" ? "acceptDistillation" : "proposeDistillation");
     if (sub === "propose") {
       const result = await runDistillPropose({
         ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
@@ -689,6 +715,7 @@ async function handleRebuild(
   rawArgs: string[],
   out: (t: string) => void,
   err: (t: string) => void,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   if (args[0] === "--help" || args[0] === "-h") {
@@ -706,6 +733,7 @@ async function handleRebuild(
     return 1;
   }
   try {
+    enforceScope(caller, "rebuildProjections");
     const result = await runRebuild(workspace !== undefined ? { workspace } : {});
     out(`${JSON.stringify(result)}\n`);
     return 0;
@@ -719,6 +747,7 @@ async function handleIndex(
   rawArgs: string[],
   out: (t: string) => void,
   err: (t: string) => void,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   if (args[0] === "--help" || args[0] === "-h") {
@@ -736,6 +765,7 @@ async function handleIndex(
     return 1;
   }
   try {
+    enforceScope(caller, "indexVault");
     const result = await runIndex(workspace !== undefined ? { workspace } : {});
     out(`${JSON.stringify(result)}\n`);
     return 0;
@@ -749,6 +779,7 @@ async function handleQuery(
   rawArgs: string[],
   out: (t: string) => void,
   err: (t: string) => void,
+  caller = "cli",
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   if (args[0] === "--help" || args[0] === "-h") {
@@ -793,6 +824,7 @@ async function handleQuery(
     return 1;
   }
   try {
+    enforceScope(caller, "queryMemory");
     const result = await runQuery({
       q: q ?? "",
       ...(k !== undefined ? { k } : {}),

@@ -25,6 +25,7 @@ const CLI_SCOPES: PermissionScope[] = [
   "write:facts",
   "write:outputs",
   "write:notes",
+  "write:secure_refs", // pointer METADATA only; read:secure_refs (external docs) stays hard-denied
   "read:facts",
   "rebuild:projections",
   "write:index",

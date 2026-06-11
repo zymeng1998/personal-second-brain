@@ -160,7 +160,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Done | 2 | SB-050 |
 | SB-068 | Story | Pure grant resolver (`grantAllows`) in interfaces | EPIC-CORE-011 | P1 | Done | 2 | SB-010 |
 | SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Done | 3 | SB-068 |
-| SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Backlog | 3 | SB-069 |
+| SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Done | 3 | SB-069 |
 | SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Backlog | 2 | SB-067, SB-073 |
 | SB-060 | Story | Capability/scope contract for domain apps | EPIC-CORE-012 | P1 | Backlog | 3 | SB-051 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015, SB-060 |
@@ -1543,7 +1543,13 @@ boundary only; no new external dependency.
 
 ## SB-073 — Scope enforcement at the operations boundary
 
-- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session; scope notes: the boundary is the CLI dispatch in `index.ts`
+  — `main(argv, io, caller)` threads the identity into every handler, enforced per subcommand;
+  `caller` is an explicit injection seam for negative tests, NOT an env flag; new
+  `write:secure_refs` scope for pointer-metadata writes [`read:secure_refs` = external docs stays
+  hard-denied]; secref/promote use direct scopes, everything else its `OPERATION_CONTRACTS` entry;
+  unknown operation names are denied)
 - **Dependencies:** SB-069
 - **Scope:** `enforceScope(caller, operation)` (resolves `OPERATION_CONTRACTS[op].scope` via
   `grantFor` + `grantAllows`; deny → structured `scope_denied`) consulted at every CLI command

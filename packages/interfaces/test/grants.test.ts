@@ -14,7 +14,7 @@ const scope = (s: string): PermissionScope => s as PermissionScope;
 test("cli holds every operational scope; sidecar:retrieval is read-vault/index-only", () => {
   const cli = grantFor("cli");
   for (const s of [
-    "write:capture", "write:distill", "write:facts", "write:outputs", "write:notes",
+    "write:capture", "write:distill", "write:facts", "write:outputs", "write:notes", "write:secure_refs",
     "read:facts", "rebuild:projections", "write:index", "read:index", "append:events", "read:notes",
   ]) {
     assert.equal(grantAllows(cli, scope(s)), true, `cli must hold ${s}`);

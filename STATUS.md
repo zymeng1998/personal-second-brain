@@ -66,6 +66,15 @@
   `sidecar:retrieval` = read:notes + write/read:index only; `skill:*`/unknown = EMPTY grant
   (denied everything). Least-privilege rationale documented per caller. interfaces **7/7**;
   root **220 tests** exit 0. Next: SB-073 (boundary enforcement).
+- **SB-073 `Done`** — `enforce.ts` `enforceScope(caller, opOrScope)` + `ScopeDeniedError`
+  (audit-friendly: names caller+scope, never payloads; unknown op names DENIED). The boundary =
+  the CLI dispatch: `main(argv, io, caller="cli")` threads identity into all 8 handlers; every
+  subcommand enforced (contracts where they exist; `write:notes` promote, `write:secure_refs`
+  secref add [new scope — external-doc `read:secure_refs` stays hard-denied], `read:notes` secref
+  list). No env bypass exists (negative-tested with 4 flags set). cli **70/70** (6 new: rogue
+  caller denied on all 15 command forms with zero writes; skills hold nothing; cli passes through
+  the same resolver; env-bypass attempt; unknown-op denial; leak-free denial messages). Root
+  **226 tests** exit 0. Next: SB-074 (epic gate).
 
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +

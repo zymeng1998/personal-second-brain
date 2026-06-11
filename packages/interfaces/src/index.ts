@@ -87,6 +87,7 @@ export type {
 export type { PermissionScope, CapabilityGrant } from "./scope.js";
 export { ALWAYS_DENIED_SCOPES, grantAllows } from "./scope.js";
 export { grantFor } from "./grants.js";
+export { enforceScope, ScopeDeniedError } from "./enforce.js";
 
 export type {
   GetNoteInput,
