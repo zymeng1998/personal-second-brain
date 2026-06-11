@@ -29,7 +29,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Done | Python DuckDB FTS+VSS retrieval over stdio JSONL (bge-small embeddings — OQ #9 fallback). **Gate met 2026-06-10** (SB-054): delete-`indexes/`-rebuild lossless. **All 9 stories `Done` incl. the SB-055 graph/temporal stretch** (query `filters:{near,from,to}`). |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Done | secure_refs pointer primitive + `sb secref` + validation pass; `grantAllows` resolver + first-party grants registry + enforcement at the CLI operations boundary (no env bypass). **Gate met 2026-06-10** (SB-074): under-privileged callers denied on every write op; `ALWAYS_DENIED_SCOPES` unobtainable; secure-ref round-trip leak-free. **All 6 stories `Done`** (SB-050/067/068/069/073/074). |
-| EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Backlog | Capability/scope model + generic example-readonly smoke test. |
+| EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Refined | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, never weakening EPIC-CORE-011) + generic `domain-apps/example-readonly/` smoke test. **REFINED 2026-06-11** into SB-060/075/076/061/077 (≤3 pts each) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
 | EPIC-CORE-014 | AI Workflows | 4 | P1 | Done | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H) + `sb fact` / L5 `sb output create` confirmed write paths. **Gate met 2026-06-10** (SB-066): propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable. **All 9 stories `Done`** (SB-056..059 + SB-062..066, one autonomous session). |
 | EPIC-DOMAIN-001 | Broker Domain App | 6+ | P3 | **Deferred** | Broker tool, docs-only until core is stable. **Not planned in detail.** |
@@ -148,6 +148,21 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Done | 2 | SB-059 |
 | SB-066 | Story | Phase 4 provenance + confirmation gate | EPIC-CORE-014 | P1 | Done | 2 | SB-062, SB-063, SB-064, SB-065 |
 
+### EPIC-CORE-012 — Domain App Boundary (refined; see [`domain_boundary_story_map.md`](domain_boundary_story_map.md))
+
+Refined 2026-06-11: the coarse SB-060/061 decomposed into 5 atomic stories (≤3 pts; 12 pts total).
+SB-060/061 ids retained with narrowed scope; SB-075–077 are new. Detailed cards below
+("EPIC-CORE-012 story cards"). **Blocked on the OQ #29–#31 decision review** — stories promote to
+`Ready` only after the human confirms (or amends) the leans.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-068, SB-069 (`Done`) |
+| SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Backlog | 3 | SB-060 |
+| SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-075 |
+| SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015 (`Done`), SB-076 |
+| SB-077 | Story | Domain-boundary epic gate (config cannot bypass security) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-061, SB-074 (`Done`) |
+
 ### Later phases (coarse; refine before implementation)
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
@@ -162,9 +177,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Done | 3 | SB-068 |
 | SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Done | 3 | SB-069 |
 | SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Done | 2 | SB-067, SB-073 |
-| SB-060 | Story | Capability/scope contract for domain apps | EPIC-CORE-012 | P1 | Backlog | 3 | SB-051 |
-| SB-061 | Story | Generic `domain-apps/example-readonly/` smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015, SB-060 |
-| SB-900 | Epic-stub | Broker domain app | EPIC-DOMAIN-001 | P3 | **Deferred** | — | Core stable + SB-060/061 |
+| SB-900 | Epic-stub | Broker domain app | EPIC-DOMAIN-001 | P3 | **Deferred** | — | Core stable + EPIC-CORE-012 |
 
 > Stories marked `5→split` or `8→split` **must be decomposed** into ≤3-point stories during refinement
 > before they can become `Ready` (project split rule). They are intentionally left coarse now.
@@ -1576,6 +1589,120 @@ boundary only; no new external dependency.
 
 ---
 
+# EPIC-CORE-012 story cards (Domain App Boundary)
+
+Refined 2026-06-11 — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md) for the
+objective, fixed guardrails, architecture, and the OQ #29–#31 decision review (required before
+SB-060 goes `Ready`). Epic-wide invariants (every card inherits these): external grants are
+**default-deny**; `ALWAYS_DENIED_SCOPES` remain ungrantable even through config (schema-excluded
+AND `grantAllows`-hard-denied); config can never override/mutate the first-party registry; unknown
+caller / unknown scope / malformed config / privileged-scope attempts **fail closed**; the example
+app is **read-only**; all callers keep going through the same `grantFor`/`grantAllows`/
+`enforceScope` path.
+
+## SB-060 — Grant config contract (schema + types)
+
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-068, SB-069 (both `Done`)
+- **Scope:** `schemas/json/grant_config.schema.json` (draft 2020-12, strict:
+  `additionalProperties:false` at every level): `{ version: 1 (const), grants: [{ app, allow[],
+  deny?[] }] }`; `app` must match `^domain-app:[a-z0-9][a-z0-9-]*$` (reserved identities
+  unrepresentable — OQ #31); `allow`/`deny` items drawn from the grantable set = the operational
+  scopes (the `CLI_SCOPES` union + the `read:notes:<sub>` pattern) — `write:raw`, `delete:*`, and
+  `read:secure_refs` are **structurally absent**. `@sb/interfaces` gains the matching
+  `GrantConfig`/`GrantConfigEntry` types + a valid example fixture (used by SB-075 tests). No
+  loading, no resolution change.
+- **AC:** schema test (wired like `proposal.schema.json`'s): the example fixture validates; rejection
+  cases — privileged scope in allow AND in deny, `app: "cli"` / `"sidecar:retrieval"` / `"skill:x"`,
+  unknown scope string, missing version, wrong version, extra property, non-array grants — all
+  rejected by Ajv. **Validation:** `test:scripts` + interfaces typecheck; root `pnpm test`.
+- **Files:** `schemas/json/grant_config.schema.json(new)`, schema test (new, in `scripts`/schema
+  test home), `packages/interfaces/src/{grant-config.ts(new),index.ts}`, docs, `STATUS.md`.
+- **Out of Scope:** loading/parsing (SB-075); resolution (SB-076); any change to `scope.ts` /
+  `grants.ts` / `enforce.ts`.
+
+## SB-075 — Fail-closed `config/grants.json` loader
+
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-060
+- **Scope (OQ #29/#31):** `@sb/interfaces` pure `parseGrantConfig(text): GrantConfig` —
+  dependency-free strict TS validation mirroring the schema exactly (interfaces stays
+  runtime-dep-free) — plus a thin `loadGrantConfig(workspace)` fs wrapper reading
+  `config/grants.json`. **Any** violation (invalid JSON, schema violation, reserved/non-`domain-app:`
+  app id, unknown scope, privileged scope, duplicate app id) throws a structured
+  `GrantConfigError("grant_config_invalid", details)` naming the first offending path — the WHOLE
+  file is rejected, nothing partial loads. Missing file ⇒ valid empty config (no external grants).
+  Error messages never echo grant payloads beyond the offending key path.
+- **AC:** parser accepts the SB-060 fixture; every rejection case above throws with nothing
+  returned; **schema⇔validator lock-step test**: the same accept+reject fixture set is run through
+  both Ajv (against `grant_config.schema.json`) and `parseGrantConfig`, asserting identical
+  verdicts (drift impossible). **Validation:** interfaces tests; root `pnpm test`.
+- **Files:** `packages/interfaces/src/{grant-config.ts,index.ts}` + tests, docs, `STATUS.md`.
+- **Out of Scope:** consulting the config during resolution/enforcement (SB-076); watching/caching
+  config; any CLI change.
+
+## SB-076 — Config-aware grant resolution (first-party precedence absolute)
+
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-075
+- **Scope:** `@sb/interfaces` `resolveGrant(caller, config?)`: (1) first-party registry consulted
+  FIRST and is non-overridable — for a registry caller the config is **ignored entirely**, even if
+  a hostile entry somehow bypassed parsing (defense in depth; the registry object is never mutated);
+  (2) `domain-app:*` callers resolve from the validated config (allow + optional deny, then the
+  unchanged `grantAllows` precedence: ALWAYS_DENIED → deny → allow); (3) everyone else ⇒ empty
+  grant. `enforceScope(caller, operation, config?)` threads the optional config; the CLI dispatch
+  (`main(argv, io, caller)`) loads the workspace config **only when `caller` is not first-party**
+  (OQ #30 — the dispatch stays the single boundary; no second enforcement path).
+- **AC:** first-party behavior byte-identical (all existing cli/interfaces tests green,
+  unmodified); a config-granted `domain-app:*` caller passes exactly its granted read scopes and
+  is denied everything else; a config entry shadowing a first-party id (injected as an in-memory
+  object, since the parser rejects it) is provably ignored; no env inspection added anywhere.
+  **Validation:** interfaces + cli tests; root `pnpm test`.
+- **Files:** `packages/interfaces/src/{grants.ts,enforce.ts,index.ts}` + tests,
+  `apps/cli/src/index.ts` (config threading only), docs, `STATUS.md`.
+- **Out of Scope:** the example app (SB-061); new CLI flags/surfaces; per-package internal checks.
+
+## SB-061 — Generic example read-only domain app + smoke test
+
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-015 (`Done`), SB-076
+- **Scope (OQ #14/#30):** `domain-apps/example-readonly/` — a minimal, **generic** (never broker)
+  TS consumer acting as `domain-app:example-readonly`, granted ONLY `read:notes` + `read:facts`
+  via a checked-in sample `config/grants.json`; it reaches core operations exclusively through the
+  enforced CLI dispatch (programmatic `main(argv, io, caller)`), per ADR-001's interfaces-only
+  rule + the OQ #30 boundary. README documents the binding pattern (identity, grant, invocation
+  path, cooperative-enforcement honesty note) as the template for future domain apps.
+- **AC (smoke test, Node-only, in root `pnpm test`):** on a populated throwaway workspace —
+  (a) `note list`, `note get`, `fact list` succeed under the domain-app identity; (b) **every**
+  write command form (capture, distill, fact add/accept, output create, note promote, secref add,
+  rebuild, index) ⇒ `scope_denied`, with the workspace byte-identical after the denial sweep
+  (zero filesystem writes); (c) the ADR-001 domain-leakage grep of `packages/` + `schemas/` stays
+  clean. **Validation:** new smoke test target wired into root `pnpm test`.
+- **Files:** `domain-apps/example-readonly/{package.json,src/,test/,README.md,sample
+  config}` (new), root workspace wiring, docs, `STATUS.md`.
+- **Out of Scope:** any write scope (a justified write-scope example needs its own story); broker
+  vocabulary anywhere; query via the Python sidecar (read:index not in the example grant — keeps
+  the smoke test Node-only).
+
+## SB-077 — Domain-boundary epic gate (config cannot bypass security)
+
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-061, SB-074 (`Done`)
+- **Scope:** the epic "Done when" automated (`apps/cli/test/domain-boundary-gate.test.ts`, Node-only,
+  in root `pnpm test`): (a) configs granting `write:raw` / `delete:*` / `read:secure_refs` (each,
+  in allow and via wildcard) ⇒ whole config rejected AND the requesting caller denied everything;
+  (b) a config redefining `cli` / `sidecar:retrieval` / `skill:*` ⇒ rejected, and first-party
+  grant behavior provably unchanged (registry callers resolve identically with and without any
+  config present); (c) malformed config (bad JSON, unknown scope, schema violation) ⇒ fail closed:
+  every `domain-app:*` caller denied on every operation, zero writes; (d) unknown caller + unknown
+  scope still denied; (e) the SB-074 security gate re-asserted green alongside (no weakening).
+- **AC:** gate green in root `pnpm test`; story map + epics table marked met; coverage baseline
+  (92.08% lines) held. **Validation:** root `pnpm test` + `test:coverage`.
+- **Files:** `apps/cli/test/domain-boundary-gate.test.ts(new)`, docs, `STATUS.md`.
+- **Out of Scope:** penetration testing; Phase 5 Surfaces; broker.
+
+---
+
 # Later-epic notes (coarse)
 
 These remain `Backlog`/`Deferred`. Refine (split to ≤3 points + add AC/validation/files) before any
@@ -1595,8 +1722,12 @@ implementation. Detailed cards will be written when each phase is reached.
 - **EPIC-CORE-010 Surfaces (SB-040–041):** optional Obsidian helper, then dashboard. All via interfaces.
 - **EPIC-CORE-011 Security & Privacy (SB-050–052):** secure_refs pointer impl (P0 when sensitive material
   appears), permission/scope model in interfaces, then enforcement at the boundary.
-- **EPIC-CORE-012 Domain App Boundary (SB-060–061):** capability/scope contract for domain apps; a
-  **generic** `domain-apps/example-readonly/` smoke test (never broker) proving interface-only access.
+- **EPIC-CORE-012 Domain App Boundary:** **REFINED** (2026-06-11) into ≤3-pt stories — see the
+  EPIC-CORE-012 table above and detailed cards, plus
+  [`domain_boundary_story_map.md`](domain_boundary_story_map.md). Strict fail-closed
+  `config/grants.json` (schema + loader + config-aware resolution, first-party precedence
+  absolute, ALWAYS_DENIED ungrantable) + a **generic** `domain-apps/example-readonly/` read-only
+  smoke test (never broker) proving interface-only access. Blocked on the OQ #29–#31 review.
 - **EPIC-CORE-013 Media Transcription Intake (SB-070–072):** **Backlog.** Optional adapter that ingests
   transcripts from the standalone `psb-media-transcriber` artifact store (`~/PersonalSecondBrainMediaArtifacts/`,
   layout `<YYYY>/<MM>/<media_id>/` + `by-name/`) as L0 captures via `interfaces` only. MUST read the artifact

@@ -2,6 +2,34 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## EPIC-CORE-012 (Domain App Boundary) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #29–#31 REVIEW
+- **Human chose EPIC-CORE-012 next** (over Phase 5 Surfaces — explicitly not started) with fixed
+  guardrails: `config/grants.json` must not weaken the completed Security epic; external grants
+  default-deny; `ALWAYS_DENIED_SCOPES` ungrantable even through config; config never
+  overrides/mutates the first-party in-code registry; fail closed on unknown caller / unknown
+  scope / malformed config / privileged-scope attempts; read-only example app; same
+  resolver/enforcer path for all CLI ops; tests proving config can't bypass security; atomic
+  commits; stop after refinement for OQ approval.
+- **Refinement only — no implementation.** Coarse SB-060/061 (3+3; SB-060's dep on the split
+  SB-051 was stale) decomposed into **5 stories ≤3 pts, 12 pts total**: SB-060 (grant config
+  contract: strict `grant_config.schema.json` + `GrantConfig` types, privileged scopes
+  structurally absent, `app` pattern `domain-app:*` only) → SB-075 (fail-closed loader: pure
+  `parseGrantConfig`, whole-file rejection, missing file = empty config) → SB-076 (config-aware
+  `resolveGrant` with ABSOLUTE first-party precedence; `enforceScope(caller, op, config?)`; CLI
+  dispatch loads config only for non-first-party callers; first-party behavior byte-identical) →
+  SB-061 (generic `domain-apps/example-readonly/` app, `read:notes`+`read:facts` only, every
+  write `scope_denied` + zero-write sweep, ADR-001 grep clean) → SB-077 (epic gate:
+  privileged/first-party-shadowing/malformed configs all fail closed; SB-074 gate re-asserted).
+  Map: **`domain_boundary_story_map.md`** (new); cards + tables in `story_backlog.md`; epic →
+  `Refined`.
+- **⏸ STOPPED at the decision review: OQ #29–#31 filed** (#29 schema-as-contract +
+  dependency-free TS validator in `@sb/interfaces`, Ajv test-only lock-step; #30 domain apps
+  invoke ONLY via the existing enforced CLI dispatch `main(argv, io, caller)` — no second
+  enforcement path, cooperative-enforcement honesty note; #31 whole-file fail-closed rejection +
+  `domain-app:*` namespace, reserved identities unrepresentable). **Human confirms (or amends) →
+  SB-060 `Ready`** → implement SB-060 → 075 → 076 → 061 → 077, one atomic commit each. All 5
+  stories `Backlog` per the Ready rule.
+
 ## ✅ PHASE 4 (EPIC-CORE-014) COMPLETE — GATE MET (2026-06-10, one autonomous session)
 - **All 9 stories `Done` and pushed** (SB-056 → 057 → 058 → 059 → 062 → 063 → 064 → 065 → 066,
   one atomic commit each). **SB-066 gate green in root `pnpm test`:** propose-without-accept across

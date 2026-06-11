@@ -66,6 +66,22 @@ secret values.
 | 27 | Enforcement default | **RESOLVED:** enforce for ALL callers at the operations boundary; `cli` may hold every scope except `ALWAYS_DENIED_SCOPES` but goes through the same resolver; **no env bypass**. (Refines OQ #13.) |
 | 28 | secure_ref validation home | **RESOLVED:** `schemas/markdown/secure_ref.schema.json`; validated by `validate_notes.ts` as a separate pass (secure_refs lives outside `vault/`); pointer files must have no body. |
 
+## Decide before EPIC-CORE-012 implementation (domain app boundary)
+
+Filed 2026-06-11 during the EPIC-CORE-012 refinement (SB-060/075/076/061/077 — see
+[`domain_boundary_story_map.md`](domain_boundary_story_map.md)). **PENDING human review** — SB-060
+goes `Ready` only after these are approved (or amended). Epic-wide guardrails already fixed by the
+authorization (not open): external grants default-deny; `ALWAYS_DENIED_SCOPES` ungrantable even
+through config; config never overrides the first-party registry; fail closed on unknown caller /
+unknown scope / malformed config / privileged-scope attempts; read-only example app; one atomic
+commit per story.
+
+| # | Question | Lean |
+|---|---|---|
+| 29 | **Grant config validation mechanism** — Ajv at runtime vs dependency-free TS validator? | `grant_config.schema.json` is the published contract; runtime validation is a **strict dependency-free TS validator in `@sb/interfaces`** (the package has zero runtime deps today — keep it that way). Ajv stays test-only: a lock-step test runs the same accept+reject fixtures through both the schema and the TS validator and asserts identical verdicts (no drift). Mirrors the existing note-vault pattern. |
+| 30 | **Domain-app invocation boundary** — new enforcing facade vs the existing CLI dispatch? | Domain apps reach core operations **only through the existing enforced CLI dispatch** — programmatic `main(argv, io, caller)` with the app's own `domain-app:<name>` identity; `enforceScope` gains an optional grant-config parameter, consulted **only** for non-first-party callers. No second enforcement path. Honesty note: this is cooperative architectural enforcement (test-locked), not adversarial sandboxing — documented as such in the example app README. (Refines OQ #13/#14.) |
+| 31 | **Config rejection semantics + caller namespace** — skip bad entries vs whole-file rejection? | **Whole-file rejection**: any invalid entry (unknown scope, privileged scope, reserved app id, schema violation, duplicate app) ⇒ structured `grant_config_invalid`, nothing loads, all config-dependent callers denied — fail closed and loud, never partial grants. Config may only declare `^domain-app:[a-z0-9][a-z0-9-]*$` apps (reserved identities unrepresentable in the schema AND re-rejected by the loader). Missing file = valid empty config (default-deny). |
+
 ## Decide later
 
 | # | Question | Lean |
