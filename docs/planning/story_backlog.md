@@ -142,7 +142,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
 | SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Done | 2 | SB-056 |
 | SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Done | 2 | SB-058 |
-| SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
+| SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Done | 3 | SB-057 |
 | SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
 | SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
 | SB-065 | Story | `skills/compose-output` + safety check | EPIC-CORE-014 | P1 | Backlog | 2 | SB-059 |
@@ -1367,7 +1367,8 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-062 — `skills/extract-facts` + safety check
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-10 — autonomous session)
 - **Dependencies:** SB-057
 - **Scope:** `skills/extract-facts/SKILL.md` mirroring `skills/distill`: read the target note(s)
   via read-only commands; draft a `proposal.schema.json` `extract_facts` proposal (statement +

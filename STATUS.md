@@ -32,6 +32,12 @@
   SB-053 mirror). cli **56/56** (5 new incl. unresolvable-source-writes-nothing + L0
   byte-unchanged); root suite exit 0 (**199 tests**). 4A COMPLETE. Next: SB-062 (extract-facts
   skill).
+- **SB-062 `Done`** — `skills/extract-facts/SKILL.md` (mirrors distill: 4 safety rules incl.
+  provenance-mandatory + OQ #23 duplicate surfacing with add/supersede/skip; read-only steps =
+  `note get`/`fact list`/`query`; `fact accept --file` is the only write) +
+  `extract-safety.test.ts` (capture→promote→draft writes NOTHING [vault snapshot + events +
+  no db]→accept writes exactly 2 provenance-carrying facts, vault byte-unchanged). cli **57/57**.
+  Next: SB-063 (braindump skill).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts
