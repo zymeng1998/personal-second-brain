@@ -157,7 +157,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | Done | 3 | SB-010 |
 | SB-051 | Story | ~~Permission/scope model in interfaces~~ **SPLIT (2026-06-10)** → SB-068 + SB-069 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
-| SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Backlog | 2 | SB-050 |
+| SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Done | 2 | SB-050 |
 | SB-068 | Story | Pure grant resolver (`grantAllows`) in interfaces | EPIC-CORE-011 | P1 | Backlog | 2 | SB-010 |
 | SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Backlog | 3 | SB-068 |
 | SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Backlog | 3 | SB-069 |
@@ -1502,7 +1502,9 @@ boundary only; no new external dependency.
 
 ## SB-067 — `sb secref add/list` CLI + validation pass
 
-- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P0 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P0 · **Points:** 2 · **Status:** Done
+  (2026-06-10 — autonomous session; audit note: `secref add` stdout echoes id/kind/path/
+  captured_at but never the locator value; ids default to `secref_<ULID>`)
 - **Dependencies:** SB-050
 - **Scope:** `sb secref add --kind <k> --locator <opaque> [--notes]` / `sb secref list`;
   `validate_notes.ts` gains a secure_refs pass (OQ #28: separate pass, files outside `vault/`).

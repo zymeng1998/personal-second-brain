@@ -113,6 +113,62 @@ function loadValidator(): ValidateFunction {
   return ajv.compile(schema);
 }
 
+const SECURE_REF_SCHEMA_PATH = join(REPO_ROOT, "schemas", "markdown", "secure_ref.schema.json");
+
+function loadSecureRefValidator(): ValidateFunction {
+  let schemaText: string;
+  try {
+    schemaText = readFileSync(SECURE_REF_SCHEMA_PATH, "utf8");
+  } catch {
+    throw new OperationalError("missing_schema", `secure_ref schema not found: ${SECURE_REF_SCHEMA_PATH}`);
+  }
+  const ajv = new Ajv2020({ allErrors: true, strict: false });
+  addFormats(ajv);
+  return ajv.compile(JSON.parse(schemaText) as Record<string, unknown>);
+}
+
+/**
+ * The SEPARATE secure_refs pass (SB-067, OQ #28): pointer files live OUTSIDE
+ * `vault/`, must be frontmatter-only (no body), and must validate against
+ * `secure_ref.schema.json`. A missing `secure_refs/` dir is fine (nothing to
+ * check); `README.md` is documentation, not a pointer.
+ */
+async function secureRefResults(workspace: string): Promise<FileResult[]> {
+  const dir = join(workspace, "secure_refs");
+  let entries: string[];
+  try {
+    entries = await readdir(dir);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw new OperationalError("vault_unreadable", `cannot read secure_refs: ${dir}`);
+  }
+  const validate = loadSecureRefValidator();
+  const results: FileResult[] = [];
+  for (const name of entries.filter((e) => e.endsWith(".md") && e !== "README.md").sort()) {
+    const rel = relative(workspace, join(dir, name));
+    const content = await readFile(join(dir, name), "utf8");
+    const parsed = parseFrontmatter(content);
+    if (!parsed.ok) {
+      results.push({ path: rel, ok: false, errors: [parsed.reason] });
+      continue;
+    }
+    const errors: string[] = [];
+    if (parsed.body.trim().length > 0) {
+      errors.push("secure_ref body must be empty (pointer files carry no content)");
+    }
+    // yaml parses unquoted timestamps as Date; the schema expects a string
+    const frontmatter = { ...parsed.frontmatter };
+    if (frontmatter["captured_at"] instanceof Date) {
+      frontmatter["captured_at"] = frontmatter["captured_at"].toISOString();
+    }
+    if (!validate(frontmatter)) {
+      errors.push(...(validate.errors ?? []).map(formatAjvError));
+    }
+    results.push({ path: rel, ok: errors.length === 0, errors });
+  }
+  return results;
+}
+
 async function vaultMarkdownFiles(vault: string): Promise<string[]> {
   let entries: string[];
   try {
@@ -156,6 +212,9 @@ export async function validateWorkspaceNotes(opts: { workspace?: string } = {}):
       results.push({ path: rel, ok: false, errors: (validate.errors ?? []).map(formatAjvError) });
     }
   }
+
+  // the separate secure_refs pass (OQ #28) — same report, distinct file set
+  results.push(...(await secureRefResults(workspace)));
 
   const invalid = results.filter((r) => !r.ok).length;
   return { vault, checked: results.length, valid: results.length - invalid, invalid, results };

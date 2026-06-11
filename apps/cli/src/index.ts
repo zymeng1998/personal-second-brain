@@ -17,6 +17,7 @@ import { runIndex } from "./index-command.js";
 import { runQuery } from "./query-command.js";
 import { FactCliError, runFactAccept, runFactAdd, runFactList } from "./fact-command.js";
 import { OutputCliError, runOutputCreate } from "./output-command.js";
+import { SecrefCliError, runSecrefAdd, runSecrefList } from "./secref-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -56,6 +57,10 @@ Facts (L3, human-confirmed; provenance mandatory):
   sb fact add --statement <s> --source-ref <ulid> [--confidence <0..1>] [--observed-at <iso>] [--supersedes <ulid>] [--workspace <path>]
   sb fact accept --file <proposal.json> [--workspace <path>]   # batch-write a REVIEWED extract_facts proposal; invalid file writes nothing
   sb fact list [--source-ref <ulid>] [--min-confidence <0..1>] [--limit <n>] [--workspace <path>]   # READ-ONLY current facts
+
+Secure refs (metadata pointers; the document bytes NEVER enter the workspace):
+  sb secref add --kind <category> --locator <opaque> [--notes <one line>] [--id secref_<x>] [--workspace <path>]
+  sb secref list [--workspace <path>]                          # READ-ONLY pointers + malformed-file report
 
 Outputs (L5, human-confirmed; must cite sources):
   sb output create --file <proposal.json> [--workspace <path>]  # write ONE reviewed compose_output proposal -> vault/60_Outputs/ + note_created event
@@ -173,6 +178,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "output") {
     return handleOutput(argv.slice(1), out, err);
+  }
+  if (command === "secref") {
+    return handleSecref(argv.slice(1), out, err);
   }
   if (command === "rebuild") {
     return handleRebuild(argv.slice(1), out, err);
@@ -482,6 +490,64 @@ async function handleFact(
       return 0;
     }
     err(`${JSON.stringify(errorEnvelope(new FactCliError("bad_arguments", `unknown fact subcommand: ${sub}`)))}\n`);
+    return 1;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+async function handleSecref(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  const sub = args[0];
+  if (sub === undefined || sub === "--help" || sub === "-h") {
+    out(USAGE);
+    return sub === undefined ? 1 : 0;
+  }
+  try {
+    let kind: string | undefined;
+    let locator: string | undefined;
+    let notes: string | undefined;
+    let id: string | undefined;
+    let workspace: string | undefined;
+    const rest = args.slice(1);
+    for (let i = 0; i < rest.length; i++) {
+      const arg = rest[i] as string;
+      const next = (): string => {
+        const value = rest[++i];
+        if (value === undefined) throw new SecrefCliError("bad_arguments", `missing value for ${arg}`);
+        return value;
+      };
+      if (arg === "--kind") kind = next();
+      else if (arg === "--locator") locator = next();
+      else if (arg === "--notes") notes = next();
+      else if (arg === "--id") id = next();
+      else if (arg === "--workspace") workspace = next();
+      else throw new SecrefCliError("bad_arguments", `unknown secref argument: ${arg}`);
+    }
+    if (sub === "add") {
+      const result = await runSecrefAdd({
+        kind: kind ?? "",
+        locator: locator ?? "",
+        ...(notes !== undefined ? { notes } : {}),
+        ...(id !== undefined ? { id } : {}),
+        ...(workspace !== undefined ? { workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
+    if (sub === "list") {
+      const result = await runSecrefList({
+        ...(workspace !== undefined ? { workspace } : {}),
+      });
+      out(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
+    err(`${JSON.stringify(errorEnvelope(new SecrefCliError("bad_arguments", `unknown secref subcommand: ${sub}`)))}\n`);
     return 1;
   } catch (e) {
     err(`${JSON.stringify(errorEnvelope(e))}\n`);

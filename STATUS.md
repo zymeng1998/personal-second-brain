@@ -50,6 +50,12 @@
   (`not_a_container`); messages/details never echo values (leak-sentinel-tested); exclusive
   create; fixed `secure_refs/` target; list reports malformed files (smuggled body, missing
   locator, garbled) without throwing. note-vault **52/52** (5 new); build exit 0. Next: SB-067.
+- **SB-067 `Done`** — `sb secref add/list` (`secref-command.ts` + dispatch/USAGE + package
+  script alias): add stdout = audit metadata only (locator never echoed — asserted); ids default
+  `secref_<ULID>`; list = read-only refs + malformed report. `validate_notes.ts` gains the
+  separate secure_refs pass (OQ #28: outside-vault file set, empty-body required, Date→ISO
+  coercion before Ajv; README skipped). cli **64/64** (3 new); scripts **21** (1 new);
+  root suite exit 0 (**213 tests**); `typecheck:scripts` exit 0. Next: SB-068.
 
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +

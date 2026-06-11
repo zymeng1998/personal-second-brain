@@ -180,3 +180,31 @@ test("--help prints usage and exits 0", async () => {
   assert.equal(code, 0);
   assert.match(stdout, /read-only frontmatter validation/);
 });
+
+test("secure_refs pass: valid pointer ok; smuggled body / bad schema flagged (SB-067)", async () => {
+  const ws = await makeWorkspace({ "a.md": VALID_RAW });
+  const dir = join(ws, "secure_refs");
+  await mkdir(dir, { recursive: true });
+  await writeFile(
+    join(dir, "secref_good.md"),
+    '---\nid: secref_good\nkind: "lease"\nlocation: external\nlocator: "external://placeholder"\ncaptured_at: "2026-06-10T12:00:00Z"\n---\n',
+    "utf8",
+  );
+  await writeFile(
+    join(dir, "secref_smuggle.md"),
+    '---\nid: secref_smuggle\nkind: "lease"\nlocation: external\nlocator: "l"\ncaptured_at: "2026-06-10T12:00:00Z"\n---\n\nsmuggled document body\n',
+    "utf8",
+  );
+  await writeFile(join(dir, "secref_bad.md"), "---\nid: secref_bad\nlocation: internal\n---\n", "utf8");
+  await writeFile(join(dir, "README.md"), "docs only", "utf8");
+
+  const report = await validateWorkspaceNotes({ workspace: ws });
+  const byPath = new Map(report.results.map((r) => [r.path, r]));
+  assert.equal(byPath.get(join("secure_refs", "secref_good.md"))?.ok, true);
+  const smuggle = byPath.get(join("secure_refs", "secref_smuggle.md"));
+  assert.equal(smuggle?.ok, false);
+  assert.match((smuggle?.errors ?? []).join(" "), /body must be empty/);
+  assert.equal(byPath.get(join("secure_refs", "secref_bad.md"))?.ok, false);
+  assert.equal(byPath.has(join("secure_refs", "README.md")), false, "README is not a pointer");
+  assert.equal(report.invalid, 2);
+});
