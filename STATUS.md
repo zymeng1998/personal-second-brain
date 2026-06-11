@@ -25,6 +25,13 @@
   + **non-empty `sources`** enforced pre-IO, exclusive create, raw-path/escape refusal.
   note-vault **47/47** (5 new incl. Ajv schema-validity of the output branch + never-overwrite);
   build exit 0. Next: SB-059 (`sb output create` + `note_created` event).
+- **SB-059 `Done`** — `sb output create --file` (`output-command.ts` + dispatch/USAGE): validate
+  the `compose_output` proposal (exactly one item, v1) → resolve ULID sources (note OR current
+  fact; non-ULID accepted; failure ⇒ nothing written) → `writeOutputNote` → TS-emitted
+  `note_created` event (`actor:"cli"`, subject = note id; append failure structured, note kept —
+  SB-053 mirror). cli **56/56** (5 new incl. unresolvable-source-writes-nothing + L0
+  byte-unchanged); root suite exit 0 (**199 tests**). 4A COMPLETE. Next: SB-062 (extract-facts
+  skill).
 
 ## Phase 4 — REFINED (2026-06-10); ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #21–#25)
 - **What:** Phase 4 (AI workflows) decomposed into **EPIC-CORE-014** with 9 atomic stories ≤3 pts

@@ -141,7 +141,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-056 | Story | AI-workflow proposal contracts (interfaces + proposal schema) | EPIC-CORE-014 | P1 | Done | 2 | SB-010 |
 | SB-057 | Story | `sb fact` CLI (add / accept-file / list) | EPIC-CORE-014 | P1 | Done | 3 | SB-056 |
 | SB-058 | Story | L5 output writer (`writeOutputNote`, `vault/60_Outputs/`) | EPIC-CORE-014 | P1 | Done | 2 | SB-056 |
-| SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Backlog | 2 | SB-058 |
+| SB-059 | Story | `sb output create` CLI + `note_created` memory event | EPIC-CORE-014 | P1 | Done | 2 | SB-058 |
 | SB-062 | Story | `skills/extract-facts` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
 | SB-063 | Story | `skills/braindump` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-056 |
 | SB-064 | Story | `skills/review` + safety check | EPIC-CORE-014 | P1 | Backlog | 3 | SB-057 |
@@ -1344,7 +1344,10 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ## SB-059 — `sb output create` CLI + `note_created` memory event
 
-- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-014 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-10 — autonomous session; scope notes: `AppendableMemoryKind` already included
+  `note_created` so no event-log change was needed; OQ #24 resolution implemented as "ULID source
+  must be a note OR a current fact id, non-ULID strings accepted as-is")
 - **Dependencies:** SB-058
 - **Scope:** `apps/cli` `output` command (`output-command.ts`): `sb output create --file
   <proposal.json>` (envelope `workflow: compose_output`, single item v1) → validate → **resolve

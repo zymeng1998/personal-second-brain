@@ -16,6 +16,7 @@ import { runRebuild } from "./rebuild-command.js";
 import { runIndex } from "./index-command.js";
 import { runQuery } from "./query-command.js";
 import { FactCliError, runFactAccept, runFactAdd, runFactList } from "./fact-command.js";
+import { OutputCliError, runOutputCreate } from "./output-command.js";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -55,6 +56,9 @@ Facts (L3, human-confirmed; provenance mandatory):
   sb fact add --statement <s> --source-ref <ulid> [--confidence <0..1>] [--observed-at <iso>] [--supersedes <ulid>] [--workspace <path>]
   sb fact accept --file <proposal.json> [--workspace <path>]   # batch-write a REVIEWED extract_facts proposal; invalid file writes nothing
   sb fact list [--source-ref <ulid>] [--min-confidence <0..1>] [--limit <n>] [--workspace <path>]   # READ-ONLY current facts
+
+Outputs (L5, human-confirmed; must cite sources):
+  sb output create --file <proposal.json> [--workspace <path>]  # write ONE reviewed compose_output proposal -> vault/60_Outputs/ + note_created event
 
 Projections (L3, rebuildable):
   sb rebuild [--workspace <path>]                              # rebuild facts/entities/edges/tasks from the event log + vault
@@ -166,6 +170,9 @@ export async function main(argv: string[], io: Partial<CliIO> = {}): Promise<num
   }
   if (command === "fact") {
     return handleFact(argv.slice(1), out, err);
+  }
+  if (command === "output") {
+    return handleOutput(argv.slice(1), out, err);
   }
   if (command === "rebuild") {
     return handleRebuild(argv.slice(1), out, err);
@@ -476,6 +483,65 @@ async function handleFact(
     }
     err(`${JSON.stringify(errorEnvelope(new FactCliError("bad_arguments", `unknown fact subcommand: ${sub}`)))}\n`);
     return 1;
+  } catch (e) {
+    err(`${JSON.stringify(errorEnvelope(e))}\n`);
+    return 1;
+  }
+}
+
+async function handleOutput(
+  rawArgs: string[],
+  out: (t: string) => void,
+  err: (t: string) => void,
+): Promise<number> {
+  const args = rawArgs.filter((a) => a !== "--");
+  const sub = args[0];
+  if (sub === undefined || sub === "--help" || sub === "-h") {
+    out(USAGE);
+    return sub === undefined ? 1 : 0;
+  }
+
+  try {
+    if (sub !== "create") {
+      throw new OutputCliError("bad_arguments", `unknown output subcommand: ${sub}`);
+    }
+    let file: string | undefined;
+    let workspace: string | undefined;
+    const rest = args.slice(1);
+    for (let i = 0; i < rest.length; i++) {
+      const arg = rest[i] as string;
+      const next = (): string => {
+        const value = rest[++i];
+        if (value === undefined) throw new OutputCliError("bad_arguments", `missing value for ${arg}`);
+        return value;
+      };
+      if (arg === "--file") file = next();
+      else if (arg === "--workspace") workspace = next();
+      else throw new OutputCliError("bad_arguments", `unknown output argument: ${arg}`);
+    }
+    if (file === undefined) {
+      throw new OutputCliError("bad_arguments", "output create requires --file <proposal.json>");
+    }
+    let raw: string;
+    try {
+      raw = await readFile(file, "utf8");
+    } catch (e) {
+      throw new OutputCliError("bad_arguments", `cannot read proposal file: ${file}`, {
+        cause: e instanceof Error ? e.message : String(e),
+      });
+    }
+    let proposal: unknown;
+    try {
+      proposal = JSON.parse(raw);
+    } catch {
+      throw new OutputCliError("invalid_proposal", "proposal is not valid JSON");
+    }
+    const result = await runOutputCreate({
+      proposal,
+      ...(workspace !== undefined ? { workspace } : {}),
+    });
+    out(`${JSON.stringify(result)}\n`);
+    return 0;
   } catch (e) {
     err(`${JSON.stringify(errorEnvelope(e))}\n`);
     return 1;
