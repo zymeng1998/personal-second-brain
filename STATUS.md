@@ -56,6 +56,11 @@
   separate secure_refs pass (OQ #28: outside-vault file set, empty-body required, Date→ISO
   coercion before Ajv; README skipped). cli **64/64** (3 new); scripts **21** (1 new);
   root suite exit 0 (**213 tests**); `typecheck:scripts` exit 0. Next: SB-068.
+- **SB-068 `Done`** — `grantAllows(grant, scope)` in `@sb/interfaces` `scope.ts`: `*` = one
+  segment, shorter pattern = hierarchical prefix, precedence `ALWAYS_DENIED_SCOPES` (hard, even if
+  explicitly allowed) → `deny` → `allow`; pure + **environment-blind** (no env inspection exists
+  to bypass — negative-tested with SB_SKIP_SCOPES/SB_DEV/NODE_ENV set). interfaces gains a test
+  target (4 table tests) wired into root `pnpm -r`. Root **217 tests** exit 0. Next: SB-069.
 
 ## Phase 4 — DECISION REVIEW PASSED (2026-06-10); autonomous implementation session STARTED
 - **Human approved all five open decisions exactly as leaned** (OQ #21 skills-first +

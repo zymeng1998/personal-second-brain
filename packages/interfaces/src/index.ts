@@ -85,7 +85,7 @@ export type {
 } from "./proposals.js";
 
 export type { PermissionScope, CapabilityGrant } from "./scope.js";
-export { ALWAYS_DENIED_SCOPES } from "./scope.js";
+export { ALWAYS_DENIED_SCOPES, grantAllows } from "./scope.js";
 
 export type {
   GetNoteInput,

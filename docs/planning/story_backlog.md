@@ -158,7 +158,7 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 | SB-051 | Story | ~~Permission/scope model in interfaces~~ **SPLIT (2026-06-10)** → SB-068 + SB-069 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-067 | Story | `sb secref add/list` CLI + validate_notes secure_refs pass | EPIC-CORE-011 | P0 | Done | 2 | SB-050 |
-| SB-068 | Story | Pure grant resolver (`grantAllows`) in interfaces | EPIC-CORE-011 | P1 | Backlog | 2 | SB-010 |
+| SB-068 | Story | Pure grant resolver (`grantAllows`) in interfaces | EPIC-CORE-011 | P1 | Done | 2 | SB-010 |
 | SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Backlog | 3 | SB-068 |
 | SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Backlog | 3 | SB-069 |
 | SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Backlog | 2 | SB-067, SB-073 |
@@ -1516,7 +1516,9 @@ boundary only; no new external dependency.
 
 ## SB-068 — Pure grant resolver in interfaces
 
-- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-011 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-10 — autonomous session; semantics: `*` = one segment, shorter pattern = hierarchical
+  prefix; precedence ALWAYS_DENIED → deny → allow; resolver is environment-blind by construction)
 - **Dependencies:** SB-010 (`Done`)
 - **Scope:** `@sb/interfaces` `grantAllows(grant, scope): boolean` — wildcard segment matching,
   deny overrides allow, `ALWAYS_DENIED_SCOPES` hard-denied regardless of grant. Pure; table tests.
