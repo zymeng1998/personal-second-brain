@@ -175,7 +175,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 | SB-078 | Story | Surface caller grants (`surface:obsidian-helper`, `surface:dashboard`) | EPIC-CORE-010 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
 | SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Done | 2 | SB-078 |
 | SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Done | 3 | SB-079 |
-| SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-078 |
+| SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Done | 3 | SB-078 |
 | SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-081 |
 | SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-082 |
 | SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-080, SB-082 |
@@ -1827,7 +1827,11 @@ invariants untouched; one atomic commit per story.
 
 ## SB-081 — Read-only dashboard server (localhost, zero-dep)
 
-- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Done
+  (2026-06-11 — autonomous session; notes: static serving is an exact-name whitelist [index.html
+  /app.js/style.css] — no path traversal surface; non-GET API requests already 405 in v1 [the
+  SB-082 capture endpoint will carve out its POST + CSRF]; UI is CSP-clean: zero inline
+  script/style, plain ES modules)
 - **Dependencies:** SB-078
 - **Scope (OQ #33):** `apps/dashboard` package: zero-runtime-dependency `node:http` server bound
   to `127.0.0.1` (port configurable, never `0.0.0.0`); JSON API fronting the enforced dispatch as

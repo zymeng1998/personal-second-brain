@@ -36,6 +36,17 @@
   closed `empty_draft`); EXACTLY one capture event per run (counted); draft byte-untouched;
   prior L0 bytes unchanged across runs. helper **9/9** (5 new); root `pnpm test` exit 0 —
   **275 tests**, 0 fail. Next: SB-081 (read-only dashboard server).
+- **SB-081 `Done`** — `apps/dashboard` (`@sb/dashboard`): zero-dep `node:http` bound
+  **127.0.0.1 only** (asserted from `server.address()`); JSON API as `surface:dashboard`
+  (`GET /api/notes[?type]`, `/api/notes/:ULID`, `/api/facts` — fact-list envelope passthrough);
+  static UI = exact-name whitelist (no traversal surface), CSP-clean plain ES modules (no inline
+  script/style); **strict headers on EVERY response** (CSP self / nosniff / frame-DENY /
+  no-referrer / no-store — asserted on 200s, 404s, 405s, static); dispatch errors passed through
+  as payload-free envelopes with mapped statuses (scope_denied→403 etc.); non-GET → 405 (v1
+  read-only); secure_refs have NO endpoint. Tests 2/2: full round-trip + zero-write snapshot
+  across the whole HTTP session + identity denial probes (rebuild/distill accept/fact add/secref
+  add ⇒ `scope_denied`). Root `pnpm test` exit 0 — **277 tests**, 0 fail. Next: SB-082 (capture
+  form + X-SB-CSRF).
 
 ## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
 - **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT

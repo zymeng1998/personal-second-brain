@@ -1,0 +1,23 @@
+{
+  "name": "@sb/dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local web dashboard (SB-081/082/083, OQ #33/#35). Zero-runtime-dependency node:http server bound to 127.0.0.1 only; no-build static UI; runs as surface:dashboard through the one enforced dispatch. secure_refs are not surfaced by design.",
+  "type": "module",
+  "exports": {
+    ".": "./src/server.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/dashboard-server.test.ts"
+  },
+  "dependencies": {
+    "@sb/cli": "workspace:*",
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

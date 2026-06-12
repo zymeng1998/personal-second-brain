@@ -1,0 +1,136 @@
+:root {
+  --surface: #faf7f2;
+  --panel: #ffffff;
+  --ink: #1b1a17;
+  --muted: #6f6a60;
+  --accent: #275d4a;
+  --line: #e4ded2;
+  --mono: "SF Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: 15px/1.55 -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem 0.9rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.tag {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.filter {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.note-list, .fact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.note-list li {
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.note-list li:hover, .note-list li.active {
+  background: #f0ebe1;
+}
+
+.note-list .title { display: block; }
+
+.note-list .meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.note-view {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 74vh;
+  overflow-y: auto;
+}
+
+.fact-list li {
+  padding: 0.5rem 0.4rem;
+  border-left: 3px solid var(--accent);
+  margin-bottom: 0.55rem;
+  background: #f7f4ec;
+}
+
+.fact-list .conf {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.foot {
+  padding: 0.4rem 1.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.error { color: #8c2f1b; font-family: var(--mono); font-size: 0.8rem; }

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Second Brain — Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Second Brain</h1>
+    <p class="tag">local dashboard · 127.0.0.1 · read view</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-labelledby="notes-heading">
+      <div class="panel-head">
+        <h2 id="notes-heading">Notes</h2>
+        <label class="filter">
+          type
+          <select id="type-filter">
+            <option value="">all</option>
+            <option value="raw">raw</option>
+            <option value="working">working</option>
+            <option value="distilled">distilled</option>
+            <option value="entity">entity</option>
+            <option value="output">output</option>
+          </select>
+        </label>
+      </div>
+      <ul id="note-list" class="note-list"></ul>
+    </section>
+
+    <section class="panel panel-wide" aria-labelledby="note-heading">
+      <h2 id="note-heading">Note</h2>
+      <pre id="note-view" class="note-view">Select a note from the list.</pre>
+    </section>
+
+    <section class="panel" aria-labelledby="facts-heading">
+      <h2 id="facts-heading">Facts</h2>
+      <ul id="fact-list" class="fact-list"></ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>surface:dashboard — every read goes through the enforced core boundary.</p>
+  </footer>
+</body>
+</html>
