@@ -88,14 +88,20 @@ story; SB-074 re-run inside SB-077.
 ## Decide before Phase 5 implementation (Surfaces, EPIC-CORE-010)
 
 Filed 2026-06-11 during the Phase 5 refinement (SB-078..084 — see
-[`phase_5_story_map.md`](phase_5_story_map.md)). **PENDING human review** — SB-078 goes `Ready`
-only after these are approved (or amended). Epic-wide guardrails fixed by the authorization (not
-open): surfaces call core only through the enforced boundary; read-only/confirmation-gated first;
-Phase 4 proposal patterns for writes; no secret exposure anywhere (dashboard omits secure_refs
-entirely); no broker leakage; fixed least-privilege caller identities, never `cli`; stories ≤3
-pts; stop after refinement.
+[`phase_5_story_map.md`](phase_5_story_map.md)).
+**ALL FOUR RESOLVED (2026-06-11): human approved exactly as leaned, with ONE AMENDMENT — the
+no-auth-v1 dashboard requires a same-origin write guard on EVERY mutating endpoint:** a
+server-issued nonce delivered to the dashboard page and echoed back as `X-SB-CSRF`; cross-site or
+missing-token POSTs fail with ZERO filesystem writes (applies to `POST /api/capture` and any later
+review-queue accept endpoint). Epic-wide guardrails fixed by the authorization: surfaces never
+bypass the resolver/enforcer; least-privilege `surface:*` grants only; `127.0.0.1` binding only;
+security headers on every response; secure_refs locators/sentinels never in helper output,
+dashboard JSON/HTML, logs, tests, snapshots, or errors; templates domain-neutral + never
+overwrite; capture = exactly one L0 note + one capture event (draft byte-untouched for the
+bridge); review queue explicit-confirmation over unchanged accept paths; no broker leakage; one
+atomic commit per story; SB-074 + SB-077 re-run inside SB-084.
 
-| # | Question | Lean |
+| # | Question | Decision (2026-06-11, approved as leaned + CSRF amendment) |
 |---|---|---|
 | 32 | **Surface caller identity** — run as `cli`, config grants, or first-party registry entries? | **First-party in-code registry entries** (these apps are first-party, in-repo — OQ #26's registry is exactly for them): `surface:obsidian-helper` = `write:capture`+`read:notes`; `surface:dashboard` = `read:notes`+`read:facts`+`read:index`+`write:capture` (SB-083 later adds `write:distill`+`write:facts`). Same resolver as everyone; invocation = programmatic `main(argv, io, "surface:…")` (one boundary, mirrors OQ #30); config grants stay reserved for external `domain-app:*` callers. |
 | 33 | **Dashboard runtime shape** — framework/bundler vs zero-dep? | **Zero-runtime-dependency `node:http` server**, bound `127.0.0.1` only; no-build static UI (plain HTML/CSS/ES modules); strict headers (CSP `default-src 'self'`, nosniff, frame DENY); structured JSON error envelopes; no auth in v1 (local single-user — binding is the boundary, documented). Tests = `node:test` HTTP round-trips; root `pnpm test` stays browser-free. |

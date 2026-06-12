@@ -172,7 +172,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-078 | Story | Surface caller grants (`surface:obsidian-helper`, `surface:dashboard`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-069, SB-076 (`Done`) |
+| SB-078 | Story | Surface caller grants (`surface:obsidian-helper`, `surface:dashboard`) | EPIC-CORE-010 | P2 | In Progress | 2 | SB-069, SB-076 (`Done`) |
 | SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Backlog | 2 | SB-078 |
 | SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Backlog | 3 | SB-079 |
 | SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-078 |

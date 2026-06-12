@@ -7,8 +7,12 @@ decomposed into ≤3-pt atomic stories, per the split rule). Companion to
 [`domain_boundary_story_map.md`](domain_boundary_story_map.md) (EPIC-CORE-012 — the integration
 model surfaces follow).
 
-**Status (2026-06-11): REFINED — ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #32–#35).**
-No implementation has started; all 7 stories are `Backlog` per the Ready rule.
+**Status (2026-06-11): DECISION REVIEW PASSED — OQ #32–#35 approved exactly as leaned** (recorded
+in [`open_questions.md`](open_questions.md)) **with one amendment: a same-origin write guard on
+every mutating dashboard endpoint** — a server-issued nonce echoed back as `X-SB-CSRF`;
+cross-site or missing-token POSTs fail with zero filesystem writes (`POST /api/capture` and any
+later accept endpoint). Implementation authorized in dependency order SB-078 → 079 → 080 → 081 →
+082 → 083 → 084, one atomic commit per story; SB-074 + SB-077 re-run inside SB-084.
 
 ## Objective
 

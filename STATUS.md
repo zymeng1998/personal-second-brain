@@ -2,6 +2,19 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## PHASE 5 — DECISION REVIEW PASSED (2026-06-11); autonomous implementation session STARTED
+- **Human approved OQ #32–#35 exactly as leaned, with one amendment:** every mutating dashboard
+  HTTP endpoint requires a same-origin write guard — a server-issued nonce the page echoes back
+  as **`X-SB-CSRF`**; cross-site or missing-token POSTs fail with ZERO filesystem writes
+  (applies to `POST /api/capture` and any later accept endpoint).
+- **Session authorization:** SB-078 → 079 → 080 → 081 → 082 → 083 → 084, one atomic commit per
+  story; guardrails: never bypass the resolver/enforcer; least-privilege `surface:*` grants;
+  `127.0.0.1` only; security headers on every response; no locator/sentinel bytes anywhere;
+  templates domain-neutral + never overwrite; capture = exactly one L0 + one event (draft
+  byte-untouched); review queue = explicit confirmation over unchanged accept paths; no broker
+  leakage; SB-074 + SB-077 re-run inside SB-084.
+- **SB-078 → `In Progress`** (deps SB-069/076 `Done`; decision gate cleared).
+
 ## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
 - **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT
   started) with guardrails: surfaces only through the enforced boundary (never bypassing
