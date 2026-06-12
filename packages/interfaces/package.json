@@ -9,7 +9,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/scope.test.ts test/grants.test.ts test/grant-config.test.ts test/resolve-grant.test.ts"
+    "test": "node --import tsx --test test/scope.test.ts test/grants.test.ts test/grant-config.test.ts test/resolve-grant.test.ts test/surface-grants.test.ts"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
