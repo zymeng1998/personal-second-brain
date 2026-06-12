@@ -27,7 +27,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Done | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). All 10 stories (SB-020/034/023/035/036/021/037/022/038/039) `Done`. Drop-`db/`-and-replay reproduces identical projections (SB-039 gate). |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Done | Python DuckDB FTS+VSS retrieval over stdio JSONL (bge-small embeddings — OQ #9 fallback). **Gate met 2026-06-10** (SB-054): delete-`indexes/`-rebuild lossless. **All 9 stories `Done` incl. the SB-055 graph/temporal stretch** (query `filters:{near,from,to}`). |
-| EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
+| EPIC-CORE-010 | Surfaces | 5 | P2 | Refined | Obsidian helper (companion CLI, no plugin) + local zero-dep web dashboard, both under fixed `surface:*` least-privilege identities through the ONE enforced dispatch. **REFINED 2026-06-11** into SB-078..084 (≤3 pts each; SB-040/041 split) — see [`phase_5_story_map.md`](phase_5_story_map.md). Blocked on the OQ #32–#35 review. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Done | secure_refs pointer primitive + `sb secref` + validation pass; `grantAllows` resolver + first-party grants registry + enforcement at the CLI operations boundary (no env bypass). **Gate met 2026-06-10** (SB-074): under-privileged callers denied on every write op; `ALWAYS_DENIED_SCOPES` unobtainable; secure-ref round-trip leak-free. **All 6 stories `Done`** (SB-050/067/068/069/073/074). |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Done | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, deep-frozen, absolute first-party precedence) + generic read-only `domain-apps/example-readonly/` binding template. **Gate met 2026-06-11** (SB-077): privileged/shadowing/malformed/duplicate configs all fail closed with zero writes; SB-074 invariants re-asserted with config present. **All 5 stories `Done`** (SB-060/075/076/061/077) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
@@ -163,12 +163,29 @@ fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 
 | SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Done | 3 | SB-015 (`Done`), SB-076 |
 | SB-077 | Story | Domain-boundary epic gate (config cannot bypass security) | EPIC-CORE-012 | P1 | Done | 2 | SB-061, SB-074 (`Done`) |
 
+### Phase 5 — Surfaces (EPIC-CORE-010, refined; see [`phase_5_story_map.md`](phase_5_story_map.md))
+
+Refined 2026-06-11: SB-040 (`5→split`) → SB-079+080; SB-041 (`8→split`) → SB-081+082+083; plus
+the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Detailed cards below
+("Phase 5 story cards"). **Blocked on the OQ #32–#35 decision review** — stories promote to
+`Ready` only after the human confirms (or amends) the leans.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-078 | Story | Surface caller grants (`surface:obsidian-helper`, `surface:dashboard`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-069, SB-076 (`Done`) |
+| SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Backlog | 2 | SB-078 |
+| SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Backlog | 3 | SB-079 |
+| SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-078 |
+| SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-081 |
+| SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-082 |
+| SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-080, SB-082 |
+
 ### Later phases (coarse; refine before implementation)
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-040 | Story | Obsidian helper (optional surface) | EPIC-CORE-010 | P2 | Backlog | 5→split | SB-010 |
-| SB-041 | Story | Web dashboard (capture/review) | EPIC-CORE-010 | P2 | Backlog | 8→split | SB-010 |
+| SB-040 | Story | ~~Obsidian helper (optional surface)~~ **SPLIT (2026-06-11)** → SB-079 + SB-080 | EPIC-CORE-010 | P2 | Split | 5→split | — |
+| SB-041 | Story | ~~Web dashboard (capture/review)~~ **SPLIT (2026-06-11)** → SB-081 + SB-082 + SB-083 | EPIC-CORE-010 | P2 | Split | 8→split | — |
 | SB-050 | Story | secure_refs pointer primitive (schema + writer/reader) | EPIC-CORE-011 | P0 | Done | 3 | SB-010 |
 | SB-051 | Story | ~~Permission/scope model in interfaces~~ **SPLIT (2026-06-10)** → SB-068 + SB-069 | EPIC-CORE-011 | P1 | Split | 5→split | — |
 | SB-052 | Story | ~~Scope enforcement at the interfaces boundary~~ **SPLIT (2026-06-10)** → SB-073 + SB-074 | EPIC-CORE-011 | P1 | Split | 5→split | — |
@@ -1728,6 +1745,154 @@ app is **read-only**; all callers keep going through the same `grantFor`/`grantA
 
 ---
 
+# Phase 5 story cards (Surfaces, EPIC-CORE-010)
+
+Refined 2026-06-11 — see [`phase_5_story_map.md`](phase_5_story_map.md) for the objective, fixed
+guardrails, architecture, and the OQ #32–#35 decision review (required before SB-078 goes
+`Ready`). Epic-wide invariants every card inherits: surfaces reach the core ONLY through the
+enforced dispatch (`main(argv, io, "surface:…")`) under a fixed least-privilege identity — never
+`cli`, never importing core packages directly; read-only / confirmation-gated first; Phase 4
+proposal patterns for every write beyond capture; no secret bytes in UI/logs/fixtures/errors
+(secure_refs absent from the dashboard by design); no broker/domain vocabulary; EPIC-CORE-011/012
+invariants untouched; one atomic commit per story.
+
+## SB-078 — Surface caller grants registry entries
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-069, SB-076 (both `Done`)
+- **Scope (OQ #32):** add to the first-party registry: `surface:obsidian-helper` =
+  [`write:capture`, `read:notes`]; `surface:dashboard` = [`read:notes`, `read:facts`,
+  `read:index`, `write:capture`] (SB-083 extends with `write:distill` + `write:facts` when it
+  lands — documented now, granted then). Least-privilege rationale per surface in `grants.ts`
+  comments, mirroring the existing entries. Frozen like the rest of the registry.
+- **AC:** interfaces tests — exact grant tables (allowed scopes pass, EVERYTHING else denied per
+  surface); ALWAYS_DENIED unobtainable; `surface:*` never consults config (registry precedence);
+  zero behavior change for `cli`/`sidecar:retrieval`/domain apps (existing tests green,
+  unmodified). **Validation:** interfaces tests; root `pnpm test`.
+- **Files:** `packages/interfaces/src/grants.ts`, interfaces tests, docs, `STATUS.md`.
+- **Out of Scope:** the apps themselves; any new scope strings; config-grant changes.
+
+## SB-079 — obsidian-helper skeleton + read-only `check`
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-078
+- **Scope (OQ #34):** `apps/obsidian-helper` package (workspace-wired, pattern =
+  `domain-apps/example-readonly`): fixed `surface:obsidian-helper` identity; `check
+  [--workspace]` — READ-ONLY Obsidian-compat report over the vault: frontmatter validity
+  (reuse the `validate_notes` pass), unresolvable `[[wikilinks]]` (exact-title resolution,
+  mirroring the SB-055 sidecar rule), expected folder layout present; structured JSON report
+  (counts + per-file findings); reads go through the enforced dispatch (`note list`/`note get`).
+- **AC:** report correct on a fixture vault (clean + seeded defects: bad frontmatter, dangling
+  wikilink, missing folder); workspace byte-identical after `check` (snapshot); denial: the
+  helper cannot run any op outside its grant. **Validation:** new package tests in root
+  `pnpm test`.
+- **Files:** `apps/obsidian-helper/{package.json,tsconfig.json,src/,test/,README.md}` (new),
+  docs, `STATUS.md`.
+- **Out of Scope:** templates + capture bridge (SB-080); any Obsidian plugin/API; vault mutation.
+
+## SB-080 — Templates install + draft capture bridge
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-079
+- **Scope (OQ #34):** (a) `templates install [--workspace]` — domain-neutral note templates
+  (working note, daily note, entity stub) into `vault/90_System/templates/`; EXCLUSIVE create —
+  existing files never overwritten, skipped + reported; (b) `capture --file <draft.md>
+  [--workspace]` — read a draft written in Obsidian (or anywhere), route it through the enforced
+  `capture` op (one L0 raw note + one capture event; title/tags lifted from the draft's
+  frontmatter when present; body captured verbatim); the draft file stays BYTE-UNTOUCHED (the
+  human deletes/keeps it — the helper never does). Obsidian remains never-the-writer-of-record:
+  the helper writes nothing into the vault except via the capture op + the 90_System templates.
+- **AC:** install is idempotent-safe (second run skips, byte-identical files); capture round-trip
+  (draft → L0 + event, draft bytes unchanged, raw immutability preserved); denial sweep — the
+  helper is `scope_denied` on distill/fact/output/secref/promote/rebuild/index forms with zero
+  writes. **Validation:** package tests; root `pnpm test`.
+- **Files:** `apps/obsidian-helper/src/*`, templates content, tests, README, docs, `STATUS.md`.
+- **Out of Scope:** watching/auto-sweep of drafts; deleting drafts; distillation prompts (a
+  future story if wanted).
+
+## SB-081 — Read-only dashboard server (localhost, zero-dep)
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-078
+- **Scope (OQ #33):** `apps/dashboard` package: zero-runtime-dependency `node:http` server bound
+  to `127.0.0.1` (port configurable, never `0.0.0.0`); JSON API fronting the enforced dispatch as
+  `surface:dashboard` — `GET /api/notes[?type=]`, `GET /api/notes/:id`, `GET /api/facts`;
+  minimal no-build static UI (plain HTML/CSS/ES modules served from the package: note list by
+  layer/type, note view, facts table); strict headers on every response (CSP `default-src
+  'self'`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`); structured JSON errors
+  (the CLI error envelope passed through, payload-free). `secure_refs` endpoints deliberately
+  absent.
+- **AC:** HTTP round-trip tests (`node:test`, real server on an ephemeral port): list/get/facts
+  return the fixture workspace's content; unknown route → 404 envelope; headers asserted on
+  every response; the server process performs ZERO workspace writes (snapshot); denial: a
+  request that would need an ungranted scope surfaces the `scope_denied` envelope, not a crash.
+  **Validation:** package tests; root `pnpm test`.
+- **Files:** `apps/dashboard/{package.json,tsconfig.json,src/,static/,test/,README.md}` (new),
+  docs, `STATUS.md`.
+- **Out of Scope:** capture (SB-082); review (SB-083); auth/TLS/remote binding; frameworks,
+  bundlers, Playwright.
+
+## SB-082 — Dashboard capture form
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-081
+- **Scope (OQ #35):** `POST /api/capture` `{content, source, title?, tags?}` → the enforced
+  `capture` op under `surface:dashboard` (one L0 raw note + one capture event per submit); input
+  validated at the boundary (non-empty content, known source kind — fail fast, structured
+  errors); UI capture form with success/error feedback showing the new note id. This story makes
+  the roadmap gate ("capture+read via another surface") true for the dashboard.
+- **AC:** HTTP capture round-trip (POST → 200 + note id → note appears in `GET /api/notes` and
+  on disk as immutable L0 + schema-valid capture event); invalid input → 4xx envelope, zero
+  writes; raw immutability untouched (existing L0 bytes unchanged across captures).
+  **Validation:** package tests; root `pnpm test`.
+- **Files:** `apps/dashboard/src/*`, `static/*`, tests, docs, `STATUS.md`.
+- **Out of Scope:** any non-capture write; file uploads; editing existing notes.
+
+## SB-083 — Confirmation-gated review queue (deferrable)
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-082
+- **Scope (OQ #35):** read-only candidates view (`GET /api/distill/candidates` fronting
+  `distill propose`); `POST /api/distill/accept` + `POST /api/fact/accept` accepting a
+  HUMAN-REVIEWED proposal JSON pasted/uploaded in the UI, passed VERBATIM into the unchanged
+  whole-file-validated accept paths (invalid proposal ⇒ structured error, nothing written —
+  exactly the Phase 4 contract, re-asserted over HTTP). The explicit button-press on a reviewed
+  proposal is the confirmation. Grant extension (documented in SB-078): `surface:dashboard`
+  gains `write:distill` + `write:facts` in this story's commit. No server-side proposal
+  generation or editing; no AI.
+- **AC:** accept round-trip (valid reviewed proposal → L2 note / facts + memory events, sources
+  resolvable, provenance intact); invalid/garbled proposal over HTTP writes NOTHING (snapshot);
+  candidates view is read-only (snapshot); without this story's grant extension the endpoints
+  are `scope_denied` (tested against the SB-078 baseline grant). **Validation:** package tests;
+  root `pnpm test`. **Deferrable:** the epic gate (SB-084) does not depend on this story.
+- **Files:** `apps/dashboard/src/*`, `static/*`, `packages/interfaces/src/grants.ts` (the
+  documented extension), tests, docs, `STATUS.md`.
+- **Out of Scope:** output/compose review; fact supersede UI; proposal editing; auto-accept.
+
+## SB-084 — Surfaces epic gate (capture+read via contracts only)
+
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-080, SB-082 (SB-083 may land before or after — the gate is independent
+  of it)
+- **Scope:** the roadmap "Done when" automated (one gate test, Node-only, in root `pnpm test`):
+  (a) BOTH surfaces perform capture+read end-to-end through the enforced dispatch under their
+  own identities (helper: draft → L0 + event → read back; dashboard: HTTP POST → L0 + event →
+  read back over HTTP); (b) full denial sweep per surface — every command/endpoint outside the
+  grant ⇒ `scope_denied`, workspace byte-identical; (c) secret-leak scan: on a workspace with a
+  secref pointer + sentinel locator, no HTTP response and no helper stdout/stderr ever contains
+  the locator/sentinel bytes; (d) domain-term grep extended over `apps/dashboard` +
+  `apps/obsidian-helper` sources; (e) SB-074 + SB-077 invariants re-asserted in-suite (both gate
+  files already run in root `pnpm test` — plus an explicit config-present + surface-identity
+  cross-check here).
+- **AC:** gate green in root `pnpm test`; roadmap Phase 5 "Done when" marked met; coverage
+  baseline (92.58% lines) held; story map + epics table updated. **Validation:** root
+  `pnpm test` + `test:coverage`.
+- **Files:** gate test (home: `apps/dashboard/test/` or `apps/cli/test/` — wherever both
+  surfaces import cleanly), docs, `STATUS.md`.
+- **Out of Scope:** performance/Lighthouse work; browser E2E; mobile.
+
+---
+
 # Later-epic notes (coarse)
 
 These remain `Backlog`/`Deferred`. Refine (split to ≤3 points + add AC/validation/files) before any
@@ -1744,7 +1909,11 @@ implementation. Detailed cards will be written when each phase is reached.
   above and detailed cards, plus [`phase_3_story_map.md`](phase_3_story_map.md). Python sidecar over stdio
   JSONL, DuckDB FTS+VSS, BGE-M3 (design ported, not copied, from sspaeti — reference only), TS facade +
   CLI, delete-`indexes/`-and-rebuild lossless gate.
-- **EPIC-CORE-010 Surfaces (SB-040–041):** optional Obsidian helper, then dashboard. All via interfaces.
+- **EPIC-CORE-010 Surfaces:** **REFINED** (2026-06-11) into ≤3-pt stories — see the Phase 5 table
+  above and detailed cards, plus [`phase_5_story_map.md`](phase_5_story_map.md). Obsidian helper
+  companion CLI (no plugin) + zero-dep localhost dashboard, both under fixed `surface:*`
+  least-privilege registry identities through the one enforced dispatch. Blocked on the
+  OQ #32–#35 review.
 - **EPIC-CORE-011 Security & Privacy (SB-050–052):** secure_refs pointer impl (P0 when sensitive material
   appears), permission/scope model in interfaces, then enforcement at the boundary.
 - **EPIC-CORE-012 Domain App Boundary:** **REFINED** (2026-06-11) into ≤3-pt stories — see the

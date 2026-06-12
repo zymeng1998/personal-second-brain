@@ -85,6 +85,23 @@ story; SB-074 re-run inside SB-077.
 | 30 | Domain-app invocation boundary | **RESOLVED:** domain apps invoke core operations only through the existing enforced CLI dispatch — programmatic `main(argv, io, caller)` with a fixed `domain-app:<name>` identity; config consulted only for non-first-party callers; **no second enforcing facade**. Cooperative-enforcement honesty note documented. (Refines OQ #13/#14.) |
 | 31 | Config rejection semantics + caller namespace | **RESOLVED:** fail-closed **whole-file rejection** as `grant_config_invalid` for ANY invalid content (unknown scope, privileged scope, reserved app id, schema violation, **duplicate app entry**); missing file = valid empty config (default-deny); only `^domain-app:[a-z0-9][a-z0-9-]*$` apps representable. |
 
+## Decide before Phase 5 implementation (Surfaces, EPIC-CORE-010)
+
+Filed 2026-06-11 during the Phase 5 refinement (SB-078..084 — see
+[`phase_5_story_map.md`](phase_5_story_map.md)). **PENDING human review** — SB-078 goes `Ready`
+only after these are approved (or amended). Epic-wide guardrails fixed by the authorization (not
+open): surfaces call core only through the enforced boundary; read-only/confirmation-gated first;
+Phase 4 proposal patterns for writes; no secret exposure anywhere (dashboard omits secure_refs
+entirely); no broker leakage; fixed least-privilege caller identities, never `cli`; stories ≤3
+pts; stop after refinement.
+
+| # | Question | Lean |
+|---|---|---|
+| 32 | **Surface caller identity** — run as `cli`, config grants, or first-party registry entries? | **First-party in-code registry entries** (these apps are first-party, in-repo — OQ #26's registry is exactly for them): `surface:obsidian-helper` = `write:capture`+`read:notes`; `surface:dashboard` = `read:notes`+`read:facts`+`read:index`+`write:capture` (SB-083 later adds `write:distill`+`write:facts`). Same resolver as everyone; invocation = programmatic `main(argv, io, "surface:…")` (one boundary, mirrors OQ #30); config grants stay reserved for external `domain-app:*` callers. |
+| 33 | **Dashboard runtime shape** — framework/bundler vs zero-dep? | **Zero-runtime-dependency `node:http` server**, bound `127.0.0.1` only; no-build static UI (plain HTML/CSS/ES modules); strict headers (CSP `default-src 'self'`, nosniff, frame DENY); structured JSON error envelopes; no auth in v1 (local single-user — binding is the boundary, documented). Tests = `node:test` HTTP round-trips; root `pnpm test` stays browser-free. |
+| 34 | **Obsidian helper shape** — real plugin vs companion CLI? | **No plugin this phase** (ADR-003: plugins stay optional; headless-testable). `apps/obsidian-helper` companion CLI: `check` (read-only compat report: frontmatter validity, dangling wikilinks, folder layout), `templates install` (domain-neutral, `vault/90_System/`, never overwrites), `capture --file <draft.md>` (draft → enforced capture op, L0 + event, draft byte-untouched). Obsidian remains never-the-writer-of-record. |
+| 35 | **Dashboard v1 write surface** — which writes, gated how? | **Capture only** (SB-082) for the roadmap gate; the review queue (SB-083, deferrable) is a confirmation-gated front over the UNCHANGED Phase 4 accept paths: read-only candidates + paste/upload of a human-reviewed proposal JSON passed verbatim into whole-file-validated `distill accept`/`fact accept` (invalid ⇒ nothing written). Explicit button-press = the confirmation; no server-side proposal generation/editing; no auto-accept; no AI in surfaces. |
+
 ## Decide later
 
 | # | Question | Lean |

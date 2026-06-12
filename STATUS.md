@@ -2,6 +2,34 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
+- **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT
+  started) with guardrails: surfaces only through the enforced boundary (never bypassing
+  resolver/enforcer); read-only/confirmation-gated first; no secret exposure in
+  UI/logs/snapshots/fixtures/errors; no broker leakage; Phase 4 confirmation/provenance patterns
+  for writes; fixed caller identity + config-grant style over ad hoc privileges; ≤3-pt atomic
+  stories; stop after refinement for OQ approval.
+- **Refinement only — no implementation.** SB-040 (`5→split`) + SB-041 (`8→split`) decomposed
+  into **7 stories ≤3 pts, 17 pts total**: SB-078 (surface caller grants:
+  `surface:obsidian-helper` = write:capture+read:notes; `surface:dashboard` =
+  read:notes/facts/index+write:capture) → SB-079 (obsidian-helper skeleton + read-only `check`
+  compat report) → SB-080 (domain-neutral templates install [never overwrite] + draft→capture
+  bridge, draft byte-untouched) → SB-081 (zero-dep `node:http` localhost dashboard, read-only
+  JSON API + no-build static UI, strict headers, secure_refs absent by design) → SB-082
+  (dashboard capture form — makes the roadmap gate true) → SB-083 (confirmation-gated review
+  queue over the UNCHANGED Phase 4 accept paths; grant extension write:distill+write:facts;
+  **deferrable** — the gate doesn't depend on it) → SB-084 (epic gate: both surfaces
+  capture+read via contracts only; denial sweeps byte-identical; secret-leak scan over HTTP +
+  helper output; domain-term grep over both apps; SB-074/077 re-asserted). Map:
+  **`phase_5_story_map.md`** (new); cards + tables in `story_backlog.md`; epic → `Refined`.
+- **⏸ STOPPED at the decision review: OQ #32–#35 filed** (#32 first-party `surface:*` registry
+  identities, programmatic `main(argv, io, caller)`, never `cli`; #33 zero-dep localhost
+  `node:http` dashboard, no-build UI, strict headers, no auth v1; #34 no Obsidian plugin —
+  companion CLI [check / templates / draft capture]; #35 capture-only writes v1, review queue =
+  confirmation-gated front over unchanged accept paths). **Human confirms (or amends) → SB-078
+  `Ready`** → implement SB-078 → 079 → 080 → 081 → 082 → 083 → 084, one atomic commit each.
+  All 7 stories `Backlog` per the Ready rule.
+
 ## ✅ EPIC-CORE-012 (DOMAIN APP BOUNDARY) COMPLETE — GATE MET (2026-06-11, one autonomous session)
 - **All 5 stories `Done` + pushed** (SB-060 → 075 → 076 → 061 → 077, one atomic commit each).
   **SB-077 gate green in root `pnpm test`:** (a) privileged-scope configs (`write:raw`,
