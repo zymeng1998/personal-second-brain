@@ -47,6 +47,17 @@
   across the whole HTTP session + identity denial probes (rebuild/distill accept/fact add/secref
   add ⇒ `scope_denied`). Root `pnpm test` exit 0 — **277 tests**, 0 fail. Next: SB-082 (capture
   form + X-SB-CSRF).
+- **SB-082 `Done`** — `POST /api/capture` behind the **amendment write guard**: per-start
+  `randomBytes(32)` nonce via `GET /api/session` (same-origin readable only — no CORS anywhere),
+  echoed as `X-SB-CSRF`, verified BEFORE body parse/dispatch; present-but-foreign `Origin`
+  rejected (loopback self-origins allowed: 127.0.0.1 + localhost); failures ⇒ 403
+  `csrf_rejected` with ZERO writes (snapshot-asserted). Valid capture = exactly one L0 note +
+  one capture event (counted), readable back over the API; input validated at the boundary
+  (empty/non-string content, missing source, unknown source kind, malformed JSON → 4xx zero
+  writes; 1MB cap → 413); dispatch validation codes mapped to 4xx. UI capture form (CSP-clean,
+  token fetched at load, notes refresh on success). dashboard **5/5 new** (7 total); root
+  `pnpm test` exit 0 — **280 tests**, 0 fail. **The roadmap gate condition (capture+read via a
+  non-CLI surface) is now true for the dashboard.** Next: SB-083 (review queue).
 
 ## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
 - **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT

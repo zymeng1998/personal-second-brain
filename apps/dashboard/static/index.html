@@ -41,6 +41,24 @@
       <h2 id="facts-heading">Facts</h2>
       <ul id="fact-list" class="fact-list"></ul>
     </section>
+
+    <section class="panel panel-span" aria-labelledby="capture-heading">
+      <h2 id="capture-heading">Capture</h2>
+      <form id="capture-form" class="capture-form">
+        <label>
+          title <span class="optional">(optional)</span>
+          <input id="capture-title" name="title" type="text" autocomplete="off" />
+        </label>
+        <label>
+          content
+          <textarea id="capture-content" name="content" rows="4" required></textarea>
+        </label>
+        <div class="capture-actions">
+          <button type="submit">Capture → L0</button>
+          <output id="capture-status" class="capture-status"></output>
+        </div>
+      </form>
+    </section>
   </main>
 
   <footer class="foot">

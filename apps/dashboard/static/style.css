@@ -134,3 +134,46 @@ body {
 }
 
 .error { color: #8c2f1b; font-family: var(--mono); font-size: 0.8rem; }
+
+.panel-span { grid-column: 1 / -1; }
+
+.capture-form { display: grid; gap: 0.6rem; }
+
+.capture-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.capture-form .optional { color: #b3ab9c; }
+
+.capture-form input, .capture-form textarea {
+  font: inherit;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fffdf9;
+  color: var(--ink);
+}
+
+.capture-form textarea { font-family: var(--mono); font-size: 0.85rem; resize: vertical; }
+
+.capture-actions { display: flex; align-items: center; gap: 0.8rem; }
+
+.capture-form button {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.capture-form button:hover { background: #1e4b3b; }
+.capture-form button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.capture-status { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); }
+.capture-status.error { color: #8c2f1b; }

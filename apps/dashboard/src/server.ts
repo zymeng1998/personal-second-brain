@@ -1,11 +1,20 @@
 /**
- * Dashboard HTTP server (SB-081, OQ #33): zero-runtime-dependency
- * `node:http`, bound to 127.0.0.1 ONLY (never 0.0.0.0 — the localhost
- * binding is the documented v1 boundary; no auth). Every response — JSON,
- * static, and errors alike — carries the strict security headers. All core
- * access flows through the enforced dispatch as `surface:dashboard`.
- * secure_refs have no endpoint by design: nothing to render, nothing to leak.
+ * Dashboard HTTP server (SB-081/082, OQ #33/#35 + the approved amendment):
+ * zero-runtime-dependency `node:http`, bound to 127.0.0.1 ONLY (never
+ * 0.0.0.0 — the localhost binding is the documented v1 boundary; no auth).
+ * Every response — JSON, static, and errors alike — carries the strict
+ * security headers. All core access flows through the enforced dispatch as
+ * `surface:dashboard`. secure_refs have no endpoint by design.
+ *
+ * Same-origin write guard (amendment): every MUTATING endpoint requires the
+ * server-issued per-start nonce echoed back as `X-SB-CSRF`. The page obtains
+ * it from `GET /api/session`; with no CORS headers anywhere, a cross-site
+ * script can never read that response, so it can never present the token.
+ * A present-but-foreign `Origin` header is rejected as well (belt and
+ * braces). Missing/wrong token ⇒ 403 `csrf_rejected`, ZERO filesystem
+ * writes — the request is refused before any dispatch happens.
  */
+import { randomBytes } from "node:crypto";
 import { createServer } from "node:http";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
@@ -44,7 +53,8 @@ interface ErrorEnvelope {
 function statusFor(code: string): number {
   if (code === "scope_denied") return 403;
   if (code === "not_found") return 404;
-  if (code === "bad_arguments" || code === "invalid_ulid") return 400;
+  // caller-input rejections from the dispatch (validation codes) are 4xx
+  if (/^(bad_|invalid_|empty_|missing_|unsupported_)/.test(code)) return 400;
   return 500;
 }
 
@@ -85,14 +95,121 @@ function parseNoteList(stdout: string): ListedNote[] {
     .filter((note) => note.id.length > 0);
 }
 
+const BODY_LIMIT_BYTES = 1024 * 1024;
+
+async function readBody(req: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req) {
+    const buf = typeof chunk === "string" ? Buffer.from(chunk) : (chunk as Buffer);
+    size += buf.length;
+    if (size > BODY_LIMIT_BYTES) throw new Error("body_too_large");
+    chunks.push(buf);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+/**
+ * The same-origin write guard (approved amendment). Returns true when the
+ * request may proceed; otherwise responds 403 `csrf_rejected` itself.
+ * Checked BEFORE any body parsing or dispatch — a rejected request performs
+ * zero filesystem writes by construction.
+ */
+function writeGuardPasses(
+  req: IncomingMessage,
+  res: ServerResponse,
+  csrfToken: string,
+  selfOrigins: ReadonlySet<string>,
+): boolean {
+  const token = req.headers["x-sb-csrf"];
+  const origin = req.headers.origin;
+  const tokenOk = typeof token === "string" && token === csrfToken;
+  // Origin is absent for same-machine tools (curl); when PRESENT it must be us
+  // (both loopback spellings count — browsers may use localhost or 127.0.0.1).
+  const originOk = origin === undefined || selfOrigins.has(origin);
+  if (tokenOk && originOk) return true;
+  sendJson(res, 403, {
+    ok: false,
+    error: {
+      code: "csrf_rejected",
+      message: "mutating requests require the server-issued X-SB-CSRF token from a same-origin page",
+    },
+  });
+  return false;
+}
+
+interface CaptureBody {
+  content?: unknown;
+  source?: unknown;
+  title?: unknown;
+  tags?: unknown;
+}
+
+async function handleCapture(
+  req: IncomingMessage,
+  res: ServerResponse,
+  workspace: string,
+): Promise<void> {
+  let body: CaptureBody;
+  try {
+    body = JSON.parse(await readBody(req)) as CaptureBody;
+  } catch (error: unknown) {
+    const tooLarge = error instanceof Error && error.message === "body_too_large";
+    sendJson(res, tooLarge ? 413 : 400, {
+      ok: false,
+      error: { code: tooLarge ? "body_too_large" : "bad_arguments", message: tooLarge ? "request body exceeds 1MB" : "body must be valid JSON" },
+    });
+    return;
+  }
+  // fail fast at the boundary; the capture op re-validates source kinds etc.
+  if (typeof body.content !== "string" || body.content.trim().length === 0) {
+    sendJson(res, 400, { ok: false, error: { code: "bad_arguments", message: "content must be a non-empty string" } });
+    return;
+  }
+  if (typeof body.source !== "string" || body.source.length === 0) {
+    sendJson(res, 400, { ok: false, error: { code: "bad_arguments", message: "source is required" } });
+    return;
+  }
+  const argv = ["capture", "--content", body.content, "--source", body.source];
+  if (typeof body.title === "string" && body.title.length > 0) argv.push("--title", body.title);
+  if (Array.isArray(body.tags)) {
+    const tags = body.tags.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
+    if (tags.length > 0) argv.push("--tag", tags.join(","));
+  }
+  argv.push("--workspace", workspace);
+
+  const result = await invoke(argv);
+  if (result.exitCode !== 0) return sendDispatchError(res, result.stderr);
+  send(res, 200, "application/json; charset=utf-8", result.stdout);
+}
+
 async function handleApi(
   req: IncomingMessage,
   res: ServerResponse,
   url: URL,
   workspace: string,
+  csrfToken: string,
+  selfOrigins: ReadonlySet<string>,
 ): Promise<void> {
+  // session: hands the page the write-guard token (same-origin readable only)
+  if (url.pathname === "/api/session" && req.method === "GET") {
+    sendJson(res, 200, { ok: true, csrf: csrfToken });
+    return;
+  }
+
+  // the ONLY mutating endpoint in v1 — guarded BEFORE anything else happens
+  if (url.pathname === "/api/capture") {
+    if (req.method !== "POST") {
+      sendJson(res, 405, { ok: false, error: { code: "method_not_allowed", message: "capture is POST-only" } });
+      return;
+    }
+    if (!writeGuardPasses(req, res, csrfToken, selfOrigins)) return;
+    await handleCapture(req, res, workspace);
+    return;
+  }
+
   if (req.method !== "GET") {
-    sendJson(res, 405, { ok: false, error: { code: "method_not_allowed", message: "read-only v1 endpoint" } });
+    sendJson(res, 405, { ok: false, error: { code: "method_not_allowed", message: "read-only endpoint" } });
     return;
   }
 
@@ -142,10 +259,14 @@ async function handleStatic(res: ServerResponse, pathname: string): Promise<bool
  * ephemeral port. The returned server is the caller's to close.
  */
 export async function startDashboard(workspace: string, port = 8765): Promise<DashboardServer> {
+  // per-server-start nonce for the same-origin write guard (amendment)
+  const csrfToken = randomBytes(32).toString("hex");
+  const selfOrigins = new Set<string>();
+
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     const route = url.pathname.startsWith("/api/")
-      ? handleApi(req, res, url, workspace)
+      ? handleApi(req, res, url, workspace, csrfToken, selfOrigins)
       : handleStatic(res, url.pathname).then((served) => {
           if (!served) {
             sendJson(res, 404, { ok: false, error: { code: "not_found", message: "unknown route" } });
@@ -164,5 +285,7 @@ export async function startDashboard(workspace: string, port = 8765): Promise<Da
   });
   const address = server.address();
   const boundPort = typeof address === "object" && address !== null ? address.port : port;
+  selfOrigins.add(`http://127.0.0.1:${boundPort}`);
+  selfOrigins.add(`http://localhost:${boundPort}`);
   return { server, port: boundPort, url: `http://127.0.0.1:${boundPort}/` };
 }

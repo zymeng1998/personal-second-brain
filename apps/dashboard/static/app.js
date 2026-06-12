@@ -88,6 +88,49 @@ async function loadFacts() {
   }
 }
 
+// --- capture (SB-082): same-origin write guard ---------------------------
+// The server hands this page a per-start nonce via /api/session; every
+// mutating request echoes it back as X-SB-CSRF. Cross-site pages can never
+// read the session response (no CORS), so they can never present the token.
+
+const captureForm = document.getElementById("capture-form");
+const captureStatus = document.getElementById("capture-status");
+let csrfToken = null;
+
+async function loadSession() {
+  try {
+    const { csrf } = await getJson("/api/session");
+    csrfToken = csrf;
+  } catch {
+    captureStatus.textContent = "session unavailable — capture disabled";
+    captureStatus.classList.add("error");
+  }
+}
+
+captureForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  captureStatus.classList.remove("error");
+  captureStatus.textContent = "capturing…";
+  const content = document.getElementById("capture-content").value;
+  const title = document.getElementById("capture-title").value.trim();
+  try {
+    const res = await fetch("/api/capture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-SB-CSRF": csrfToken ?? "" },
+      body: JSON.stringify({ content, source: "paste", ...(title ? { title } : {}) }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body?.error?.code ?? `http_${res.status}`);
+    captureStatus.textContent = `captured → ${body.note_id}`;
+    captureForm.reset();
+    void loadNotes();
+  } catch (err) {
+    captureStatus.textContent = `capture failed: ${err.message}`;
+    captureStatus.classList.add("error");
+  }
+});
+
 typeFilter.addEventListener("change", loadNotes);
+void loadSession();
 void loadNotes();
 void loadFacts();

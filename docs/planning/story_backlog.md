@@ -176,7 +176,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 | SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Done | 2 | SB-078 |
 | SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Done | 3 | SB-079 |
 | SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Done | 3 | SB-078 |
-| SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-081 |
+| SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Done | 2 | SB-081 |
 | SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-082 |
 | SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-080, SB-082 |
 
@@ -1853,7 +1853,12 @@ invariants untouched; one atomic commit per story.
 
 ## SB-082 — Dashboard capture form
 
-- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Done
+  (2026-06-11 — autonomous session; the approved CSRF amendment implemented: per-server-start
+  nonce from `GET /api/session`, echoed as `X-SB-CSRF`, checked BEFORE body parsing/dispatch;
+  Origin (when present) must be a loopback self-origin [127.0.0.1 AND localhost spellings];
+  missing/wrong token or foreign Origin ⇒ 403 `csrf_rejected`, zero writes — snapshot-asserted;
+  1MB body cap [413])
 - **Dependencies:** SB-081
 - **Scope (OQ #35):** `POST /api/capture` `{content, source, title?, tags?}` → the enforced
   `capture` op under `surface:dashboard` (one L0 raw note + one capture event per submit); input
