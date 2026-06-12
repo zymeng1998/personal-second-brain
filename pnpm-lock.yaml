@@ -67,6 +67,22 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  domain-apps/example-readonly:
+    dependencies:
+      '@sb/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
+      '@sb/interfaces':
+        specifier: workspace:*
+        version: link:../../packages/interfaces
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.22.4
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/entity-graph:
     dependencies:
       '@sb/event-log':

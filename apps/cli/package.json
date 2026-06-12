@@ -4,6 +4,9 @@
   "private": true,
   "description": "MVP command-line surface. SB-013 capture; SB-015 note; SB-026 distill; SB-038 rebuild. Domain-neutral.",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "capture": "tsx src/index.ts capture",
     "note": "tsx src/index.ts note",

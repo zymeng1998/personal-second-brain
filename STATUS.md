@@ -49,6 +49,19 @@
   (byte-identical behavior); grants don't leak across apps. interfaces **19/19** (6 new), cli
   **77/77** (4 new, existing tests unmodified); root `pnpm test` exit 0 — **254 tests**, 0 fail.
   Next: SB-061 (example read-only domain app).
+- **SB-061 `Done`** — `domain-apps/example-readonly/` (`@sb-domain/example-readonly`): generic,
+  domain-neutral, READ-ONLY binding template — fixed `domain-app:example-readonly` identity
+  (load-validated vs `DOMAIN_APP_ID_PATTERN`), grants only via workspace `config/grants.json`,
+  invocation ONLY through programmatic `main(argv, io, caller)` (`@sb/cli` gained an `exports`
+  entry — enabling change); README documents the binding pattern + the cooperative-enforcement
+  honesty note. Smoke test (in root `pnpm test`): (a) with the CHECKED-IN sample config copied
+  into the workspace, note list/get + fact list succeed under the app identity; (b) all 9 write
+  forms + the ungranted `query` ⇒ `scope_denied` naming the caller, workspace BYTE-IDENTICAL
+  (base64 snapshot, zero writes) — and `distill propose` (contractually `read:notes`+readOnly)
+  correctly succeeds while writing nothing; (c) ADR-001 domain-term grep of production
+  `packages/`+`schemas/` sources clean (guard lines = negative mentions recognized). Validation:
+  app build exit 0, smoke 3/3; root `pnpm test` exit 0 — **257 tests**, 0 fail. Next: SB-077
+  (epic gate).
 
 ## EPIC-CORE-012 (Domain App Boundary) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #29–#31 REVIEW
 - **Human chose EPIC-CORE-012 next** (over Phase 5 Surfaces — explicitly not started) with fixed

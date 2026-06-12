@@ -1,0 +1,22 @@
+{
+  "name": "@sb-domain/example-readonly",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GENERIC read-only example domain app (SB-061). The binding template for every future domain app: fixed domain-app:<name> identity, grants only via the workspace config/grants.json, invocation only through the enforced CLI dispatch. Domain-neutral by design.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/example-readonly.test.ts"
+  },
+  "dependencies": {
+    "@sb/cli": "workspace:*",
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}
