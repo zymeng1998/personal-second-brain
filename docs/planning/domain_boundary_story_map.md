@@ -5,8 +5,11 @@ stories, per the split rule). Companion to [`story_backlog.md`](story_backlog.md
 [`security_story_map.md`](security_story_map.md) (the security model this epic extends —
 EPIC-CORE-011 is `Done` and MUST NOT be weakened here).
 
-**Status (2026-06-11): REFINED — ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #29–#31).**
-No implementation has started; all 5 stories are `Backlog` per the Ready rule.
+**Status (2026-06-11): DECISION REVIEW PASSED — OQ #29–#31 approved exactly as leaned** (recorded
+in [`open_questions.md`](open_questions.md)) with one additional guardrail: **duplicate
+`domain-app:*` entries fail closed** (whole-file rejection, never merge/last-write-wins).
+Implementation authorized in dependency order SB-060 → SB-075 → SB-076 → SB-061 → SB-077, one
+atomic commit per story; SB-074 re-run inside SB-077.
 
 ## Objective
 

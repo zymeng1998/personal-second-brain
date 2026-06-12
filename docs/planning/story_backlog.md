@@ -152,12 +152,12 @@ SB-070–072 (EPIC-CORE-013). Cards below.
 
 Refined 2026-06-11: the coarse SB-060/061 decomposed into 5 atomic stories (≤3 pts; 12 pts total).
 SB-060/061 ids retained with narrowed scope; SB-075–077 are new. Detailed cards below
-("EPIC-CORE-012 story cards"). **Blocked on the OQ #29–#31 decision review** — stories promote to
-`Ready` only after the human confirms (or amends) the leans.
+("EPIC-CORE-012 story cards"). **OQ #29–#31 APPROVED as leaned (2026-06-11)** + duplicate-entry
+fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 → 077.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-068, SB-069 (`Done`) |
+| SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | In Progress | 2 | SB-068, SB-069 (`Done`) |
 | SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Backlog | 3 | SB-060 |
 | SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-075 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015 (`Done`), SB-076 |

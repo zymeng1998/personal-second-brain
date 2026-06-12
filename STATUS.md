@@ -2,6 +2,18 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## EPIC-CORE-012 — DECISION REVIEW PASSED (2026-06-11); autonomous implementation session STARTED
+- **Human approved OQ #29–#31 exactly as leaned** (schema-as-contract + dependency-free TS
+  validator with Ajv test-only parity; domain apps invoke only via the enforced CLI dispatch
+  `main(argv, io, caller)` with fixed `domain-app:<name>` identity, no second facade; fail-closed
+  whole-file `grant_config_invalid` rejection, missing file = valid empty config) **plus one new
+  guardrail: duplicate `domain-app:*` entries fail closed** (never merge / last-write-wins).
+- **Session authorization:** SB-060 → SB-075 → SB-076 → SB-061 → SB-077, one atomic commit per
+  story; all prior guardrails hold (no weakening EPIC-CORE-011; absolute first-party precedence;
+  ALWAYS_DENIED + privileged scopes structurally ungrantable; generic read-only domain-neutral
+  example app; same resolver/enforcer path; SB-074 re-run inside SB-077).
+- **SB-060 → `In Progress`** (deps SB-068/069 `Done`; decision gate cleared).
+
 ## EPIC-CORE-012 (Domain App Boundary) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #29–#31 REVIEW
 - **Human chose EPIC-CORE-012 next** (over Phase 5 Surfaces — explicitly not started) with fixed
   guardrails: `config/grants.json` must not weaken the completed Security epic; external grants

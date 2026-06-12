@@ -69,18 +69,21 @@ secret values.
 ## Decide before EPIC-CORE-012 implementation (domain app boundary)
 
 Filed 2026-06-11 during the EPIC-CORE-012 refinement (SB-060/075/076/061/077 — see
-[`domain_boundary_story_map.md`](domain_boundary_story_map.md)). **PENDING human review** — SB-060
-goes `Ready` only after these are approved (or amended). Epic-wide guardrails already fixed by the
-authorization (not open): external grants default-deny; `ALWAYS_DENIED_SCOPES` ungrantable even
-through config; config never overrides the first-party registry; fail closed on unknown caller /
-unknown scope / malformed config / privileged-scope attempts; read-only example app; one atomic
-commit per story.
+[`domain_boundary_story_map.md`](domain_boundary_story_map.md)).
+**ALL THREE RESOLVED (2026-06-11): human approved exactly as leaned**, with one additional
+guardrail: **duplicate `domain-app:*` entries in `config/grants.json` fail closed** (whole-file
+rejection — never merge, never last-write-wins). Epic-wide guardrails fixed by the authorization:
+external grants default-deny; `ALWAYS_DENIED_SCOPES` ungrantable even through config; config never
+overrides/shadows/mutates the first-party registry; fail closed on unknown caller / unknown scope /
+malformed config / duplicate app entry / reserved caller identity / privileged-scope attempts;
+read-only generic example app; same resolver/enforcer path for all CLI ops; one atomic commit per
+story; SB-074 re-run inside SB-077.
 
-| # | Question | Lean |
+| # | Question | Decision (2026-06-11, approved as leaned) |
 |---|---|---|
-| 29 | **Grant config validation mechanism** — Ajv at runtime vs dependency-free TS validator? | `grant_config.schema.json` is the published contract; runtime validation is a **strict dependency-free TS validator in `@sb/interfaces`** (the package has zero runtime deps today — keep it that way). Ajv stays test-only: a lock-step test runs the same accept+reject fixtures through both the schema and the TS validator and asserts identical verdicts (no drift). Mirrors the existing note-vault pattern. |
-| 30 | **Domain-app invocation boundary** — new enforcing facade vs the existing CLI dispatch? | Domain apps reach core operations **only through the existing enforced CLI dispatch** — programmatic `main(argv, io, caller)` with the app's own `domain-app:<name>` identity; `enforceScope` gains an optional grant-config parameter, consulted **only** for non-first-party callers. No second enforcement path. Honesty note: this is cooperative architectural enforcement (test-locked), not adversarial sandboxing — documented as such in the example app README. (Refines OQ #13/#14.) |
-| 31 | **Config rejection semantics + caller namespace** — skip bad entries vs whole-file rejection? | **Whole-file rejection**: any invalid entry (unknown scope, privileged scope, reserved app id, schema violation, duplicate app) ⇒ structured `grant_config_invalid`, nothing loads, all config-dependent callers denied — fail closed and loud, never partial grants. Config may only declare `^domain-app:[a-z0-9][a-z0-9-]*$` apps (reserved identities unrepresentable in the schema AND re-rejected by the loader). Missing file = valid empty config (default-deny). |
+| 29 | Grant config validation mechanism | **RESOLVED:** `grant_config.schema.json` is the published contract; runtime validation is a strict dependency-free TS validator in `@sb/interfaces` (zero runtime deps preserved). Ajv stays test-only: a lock-step test proves schema/runtime verdict parity on shared fixtures. |
+| 30 | Domain-app invocation boundary | **RESOLVED:** domain apps invoke core operations only through the existing enforced CLI dispatch — programmatic `main(argv, io, caller)` with a fixed `domain-app:<name>` identity; config consulted only for non-first-party callers; **no second enforcing facade**. Cooperative-enforcement honesty note documented. (Refines OQ #13/#14.) |
+| 31 | Config rejection semantics + caller namespace | **RESOLVED:** fail-closed **whole-file rejection** as `grant_config_invalid` for ANY invalid content (unknown scope, privileged scope, reserved app id, schema violation, **duplicate app entry**); missing file = valid empty config (default-deny); only `^domain-app:[a-z0-9][a-z0-9-]*$` apps representable. |
 
 ## Decide later
 
