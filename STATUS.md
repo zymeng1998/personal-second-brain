@@ -2,6 +2,31 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ PHASE 5 (SURFACES, EPIC-CORE-010) COMPLETE — GATE MET (2026-06-11, one autonomous session)
+- **All 7 stories `Done` + pushed** (SB-078 → 079 → 080 → 081 → 082 → 083 → 084, one atomic
+  commit each). **SB-084 gate green in root `pnpm test`:** (a) BOTH surfaces capture+read
+  end-to-end via contracts only (helper: draft → enforced capture → read back; dashboard: HTTP
+  POST behind X-SB-CSRF → L0 + event → read over HTTP; exactly one event per capture); (b)
+  per-surface denial sweeps outside each grant ⇒ `scope_denied`, workspace byte-identical;
+  (c) the secref locator sentinel appears in NO dashboard HTTP response and NO helper output;
+  (d) ADR-001 domain-term grep clean over both apps; (e) SB-074/SB-077 invariants re-asserted
+  with surface identities + config present (both prior gate files run in the same suite).
+- **Final counts:** root `pnpm test` exit 0 — **290 tests** by per-package sum (interfaces 23,
+  cli 82, dashboard 15, obsidian-helper 9, example-readonly 3, scripts 25; others unchanged),
+  0 fail; **coverage 92.98% lines (baseline 92.58% — improved)**; roadmap Phase 5 "Done when"
+  marked **met**; CLAUDE.md current-phase updated.
+- **Guardrails honored:** one enforced dispatch for everything (no resolver/enforcer bypass);
+  least-privilege `surface:*` registry grants (helper: capture+read-notes; dashboard: reads +
+  capture + the SB-083 distill/fact accepts — never outputs/notes/secref); 127.0.0.1 binding
+  only; strict headers on every response; **X-SB-CSRF amendment implemented** (per-start nonce,
+  checked before body/dispatch; cross-site/missing-token ⇒ 403, zero writes); templates
+  domain-neutral, body-only, never overwrite; capture = exactly one L0 + one event everywhere
+  (drafts byte-untouched); review queue = explicit confirmation over the UNCHANGED accept paths;
+  no broker leakage; no AI in surfaces.
+- **Next:** EPIC-CORE-013 (media transcription intake, P2 — needs refinement) or EPIC-DOMAIN-001
+  (broker, P3 — Deferred until explicitly authorized). **Stopped per authorization: the approved
+  Phase 5 chain is complete; the next decision review is the human's.**
+
 ## PHASE 5 — DECISION REVIEW PASSED (2026-06-11); autonomous implementation session STARTED
 - **Human approved OQ #32–#35 exactly as leaned, with one amendment:** every mutating dashboard
   HTTP endpoint requires a same-origin write guard — a server-issued nonce the page echoes back

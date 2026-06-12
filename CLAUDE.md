@@ -128,6 +128,19 @@ template** (programmatic `main(argv, io, caller)` — OQ #30; reads succeed, all
 `scope_denied` with a byte-identical workspace; ADR-001 grep in-test). The SB-077 gate is green.
 **Root suite 262 tests; coverage 92.58% lines.**
 
-**Next:** Phase 5 (Surfaces, EPIC-CORE-010) refinement (SB-040/041 need splitting), or
-EPIC-CORE-013 (media intake, P2). Always follow the backlog workflow above: confirm the story is
+**Phase 5 (EPIC-CORE-010, Surfaces) is COMPLETE (2026-06-11)** — OQ #32–#35 approved (+ the
+X-SB-CSRF amendment): **surface caller grants** (`surface:obsidian-helper` =
+write:capture+read:notes; `surface:dashboard` = reads + capture + the SB-083 distill/fact
+accepts), the **Obsidian companion CLI** (`apps/obsidian-helper`: read-only `check`, body-only
+domain-neutral `templates install` [never overwrites; templates excluded from note enumeration +
+validation], `capture --file` draft bridge — one L0 + one event, draft byte-untouched, Obsidian
+never the writer of record), and the **localhost dashboard** (`apps/dashboard`: zero-dep
+`node:http` on 127.0.0.1 only, strict headers everywhere, no-build static UI, capture +
+confirmation-gated review queue behind the per-start **X-SB-CSRF** same-origin write guard —
+cross-site/missing-token POSTs fail with zero writes; secure_refs unsurfaced). The SB-084 gate
+(both surfaces capture+read via contracts only; denial sweeps byte-identical; locator sentinel
+never leaks; SB-074/077 re-asserted) is green. **Root suite 290 tests; coverage 92.98% lines.**
+
+**Next:** EPIC-CORE-013 (media transcription intake, P2 — needs refinement) or EPIC-DOMAIN-001
+(broker, P3 — stays Deferred). Always follow the backlog workflow above: confirm the story is
 `Ready`, implement in-scope only, validate, stop at `In Review`.

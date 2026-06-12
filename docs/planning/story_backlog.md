@@ -27,7 +27,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-007 | Human-Confirmed Distillation Workflow | 1H | P1 | Done | Minimal human-confirmed L1→L2 (SB-019/024/025/026/027 Done). Phase 1H complete. L3 facts moved to Phase 2. |
 | EPIC-CORE-008 | Structured Projections | 2 | P1 | Done | fact-store / entity-graph / task-store + replay (SQLite, rebuildable). All 10 stories (SB-020/034/023/035/036/021/037/022/038/039) `Done`. Drop-`db/`-and-replay reproduces identical projections (SB-039 gate). |
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Done | Python DuckDB FTS+VSS retrieval over stdio JSONL (bge-small embeddings — OQ #9 fallback). **Gate met 2026-06-10** (SB-054): delete-`indexes/`-rebuild lossless. **All 9 stories `Done` incl. the SB-055 graph/temporal stretch** (query `filters:{near,from,to}`). |
-| EPIC-CORE-010 | Surfaces | 5 | P2 | Refined | Obsidian helper (companion CLI, no plugin) + local zero-dep web dashboard, both under fixed `surface:*` least-privilege identities through the ONE enforced dispatch. **REFINED 2026-06-11** into SB-078..084 (≤3 pts each; SB-040/041 split) — see [`phase_5_story_map.md`](phase_5_story_map.md). Blocked on the OQ #32–#35 review. |
+| EPIC-CORE-010 | Surfaces | 5 | P2 | Done | Obsidian helper companion CLI (check / templates / draft→capture bridge) + zero-dep localhost dashboard (read views, X-SB-CSRF-guarded capture, confirmation-gated review queue), both under fixed `surface:*` least-privilege identities through the ONE enforced dispatch. **Gate met 2026-06-11** (SB-084): both surfaces capture+read via contracts only; denial sweeps byte-identical; locator sentinel never leaks; SB-074/077 re-asserted. **All 7 stories `Done`** (SB-078..084) — see [`phase_5_story_map.md`](phase_5_story_map.md). |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Done | secure_refs pointer primitive + `sb secref` + validation pass; `grantAllows` resolver + first-party grants registry + enforcement at the CLI operations boundary (no env bypass). **Gate met 2026-06-10** (SB-074): under-privileged callers denied on every write op; `ALWAYS_DENIED_SCOPES` unobtainable; secure-ref round-trip leak-free. **All 6 stories `Done`** (SB-050/067/068/069/073/074). |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Done | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, deep-frozen, absolute first-party precedence) + generic read-only `domain-apps/example-readonly/` binding template. **Gate met 2026-06-11** (SB-077): privileged/shadowing/malformed/duplicate configs all fail closed with zero writes; SB-074 invariants re-asserted with config present. **All 5 stories `Done`** (SB-060/075/076/061/077) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
@@ -178,7 +178,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 | SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Done | 3 | SB-078 |
 | SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Done | 2 | SB-081 |
 | SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Done | 3 | SB-082 |
-| SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-080, SB-082 |
+| SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Done | 2 | SB-080, SB-082 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -1902,7 +1902,11 @@ invariants untouched; one atomic commit per story.
 
 ## SB-084 — Surfaces epic gate (capture+read via contracts only)
 
-- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Done
+  — **the epic gate is MET (2026-06-11)**: `apps/dashboard/test/surfaces-gate.test.ts` (Node-only,
+  in root `pnpm test`; `@sb/obsidian-helper` added as a dashboard devDep so one file exercises
+  both surfaces; the ADR-001 scanner excludes itself by name). Coverage 92.98% lines (baseline
+  92.58% — improved).
 - **Dependencies:** SB-080, SB-082 (SB-083 may land before or after — the gate is independent
   of it)
 - **Scope:** the roadmap "Done when" automated (one gate test, Node-only, in root `pnpm test`):

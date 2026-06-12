@@ -61,7 +61,7 @@ braindump/distill/review; L5 outputs citing sources.
 ## Phase 5 — Surfaces
 
 `obsidian-helper`, then `dashboard`; later mobile capture / browser clipper. All via `interfaces`.
-- **Done when:** at least one extra surface performs capture+read via contracts only.
+- **Done when:** at least one extra surface performs capture+read via contracts only. **MET 2026-06-11** (SB-084 gate: BOTH the obsidian-helper and the dashboard capture+read through the enforced dispatch under their own `surface:*` identities).
 
 ## Phase 6 — First domain app (broker)
 

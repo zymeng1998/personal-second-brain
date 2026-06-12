@@ -7,12 +7,15 @@ decomposed into ≤3-pt atomic stories, per the split rule). Companion to
 [`domain_boundary_story_map.md`](domain_boundary_story_map.md) (EPIC-CORE-012 — the integration
 model surfaces follow).
 
-**Status (2026-06-11): DECISION REVIEW PASSED — OQ #32–#35 approved exactly as leaned** (recorded
-in [`open_questions.md`](open_questions.md)) **with one amendment: a same-origin write guard on
-every mutating dashboard endpoint** — a server-issued nonce echoed back as `X-SB-CSRF`;
-cross-site or missing-token POSTs fail with zero filesystem writes (`POST /api/capture` and any
-later accept endpoint). Implementation authorized in dependency order SB-078 → 079 → 080 → 081 →
-082 → 083 → 084, one atomic commit per story; SB-074 + SB-077 re-run inside SB-084.
+**Status (2026-06-11): DECISION REVIEW PASSED — OQ #32–#35 approved exactly as leaned, with the
+X-SB-CSRF same-origin write-guard amendment** (recorded in [`open_questions.md`](open_questions.md)).
+**EPIC GATE MET — all 7 stories `Done` (2026-06-11, one autonomous session):** SB-078 → 079 →
+080 → 081 → 082 → 083 → 084, one atomic commit each. The SB-084 gate (both surfaces capture+read
+via contracts only; per-surface denial sweeps with byte-identical workspaces; the secref locator
+sentinel never appears in any dashboard HTTP response or helper output; ADR-001 grep over both
+apps; SB-074/SB-077 invariants re-asserted with surface identities + config present) is green in
+root `pnpm test`; coverage 92.98% lines (baseline 92.58% — improved). The roadmap Phase 5
+"Done when" is marked met.
 
 ## Objective
 

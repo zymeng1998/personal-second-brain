@@ -76,6 +76,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/interfaces
     devDependencies:
+      '@sb/obsidian-helper':
+        specifier: workspace:*
+        version: link:../obsidian-helper
       tsx:
         specifier: ^4.0.0
         version: 4.22.4
