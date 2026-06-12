@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 import { argv as processArgv } from "node:process";
 import type { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
-import { CaptureCliError, runCapture } from "./capture-command.js";
+import { CaptureCliError, resolveSafeWorkspace, runCapture } from "./capture-command.js";
 import { runNoteGet, runNoteList } from "./note-command.js";
 import { runNotePromote } from "./promote-command.js";
 import { DistillCliError, runDistillAccept, runDistillPropose } from "./distill-command.js";
@@ -18,7 +18,8 @@ import { runQuery } from "./query-command.js";
 import { FactCliError, runFactAccept, runFactAdd, runFactList } from "./fact-command.js";
 import { OutputCliError, runOutputCreate } from "./output-command.js";
 import { SecrefCliError, runSecrefAdd, runSecrefList } from "./secref-command.js";
-import { enforceScope } from "@sb/interfaces";
+import { DOMAIN_APP_ID_PATTERN, enforceScope, loadGrantConfig } from "@sb/interfaces";
+import type { GrantConfig } from "@sb/interfaces";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -138,6 +139,14 @@ function parseCaptureArgs(args: string[]): ParsedCaptureArgs {
   return parsed;
 }
 
+/** First `--workspace <path>` override in argv, if any (dispatch-level config load). */
+function workspaceOverrideOf(argv: string[]): string | undefined {
+  for (let i = 0; i < argv.length - 1; i++) {
+    if (argv[i] === "--workspace") return argv[i + 1];
+  }
+  return undefined;
+}
+
 function errorEnvelope(err: unknown): { ok: false; error: { code: string; message: string; details?: Record<string, unknown> } } {
   const code = typeof err === "object" && err !== null && "code" in err ? String((err as { code: unknown }).code) : "error";
   const message = err instanceof Error ? err.message : String(err);
@@ -174,29 +183,45 @@ export async function main(argv: string[], io: Partial<CliIO> = {}, caller = "cl
     out(USAGE);
     return 0;
   }
+
+  // SB-076 (OQ #30): the workspace grant config is loaded ONLY for
+  // `domain-app:*` callers — first-party callers (cli, sidecar:*, skill:*)
+  // never read it; the in-code registry has absolute precedence. A config
+  // that fails to load or validate fails CLOSED: the command performs
+  // nothing and the structured `grant_config_invalid` error is reported.
+  let config: GrantConfig | undefined;
+  if (DOMAIN_APP_ID_PATTERN.test(caller)) {
+    try {
+      config = await loadGrantConfig(resolveSafeWorkspace(workspaceOverrideOf(argv)));
+    } catch (e) {
+      err(`${JSON.stringify(errorEnvelope(e))}\n`);
+      return 1;
+    }
+  }
+
   if (command === "note") {
-    return handleNote(argv.slice(1), out, err, caller);
+    return handleNote(argv.slice(1), out, err, caller, config);
   }
   if (command === "distill") {
-    return handleDistill(argv.slice(1), out, err, stdin, caller);
+    return handleDistill(argv.slice(1), out, err, stdin, caller, config);
   }
   if (command === "fact") {
-    return handleFact(argv.slice(1), out, err, caller);
+    return handleFact(argv.slice(1), out, err, caller, config);
   }
   if (command === "output") {
-    return handleOutput(argv.slice(1), out, err, caller);
+    return handleOutput(argv.slice(1), out, err, caller, config);
   }
   if (command === "secref") {
-    return handleSecref(argv.slice(1), out, err, caller);
+    return handleSecref(argv.slice(1), out, err, caller, config);
   }
   if (command === "rebuild") {
-    return handleRebuild(argv.slice(1), out, err, caller);
+    return handleRebuild(argv.slice(1), out, err, caller, config);
   }
   if (command === "index") {
-    return handleIndex(argv.slice(1), out, err, caller);
+    return handleIndex(argv.slice(1), out, err, caller, config);
   }
   if (command === "query") {
-    return handleQuery(argv.slice(1), out, err, caller);
+    return handleQuery(argv.slice(1), out, err, caller, config);
   }
   if (command !== "capture") {
     err(`${JSON.stringify(errorEnvelope(new CaptureCliError("bad_arguments", `unknown command: ${command}`)))}\n`);
@@ -225,7 +250,7 @@ export async function main(argv: string[], io: Partial<CliIO> = {}, caller = "cl
   }
 
   try {
-    enforceScope(caller, "capture");
+    enforceScope(caller, "capture", config);
     const result = await runCapture({
       content: content ?? "",
       source: parsed.source ?? "",
@@ -276,7 +301,7 @@ function parseNoteArgs(args: string[]): ParsedNoteArgs {
   return parsed;
 }
 
-async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: string) => void, caller = "cli"): Promise<number> {
+async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: string) => void, caller = "cli", config?: GrantConfig): Promise<number> {
   // Drop standalone `--` separators (also forwarded by `pnpm run ... --`).
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -294,7 +319,7 @@ async function handleNote(rawArgs: string[], out: (t: string) => void, err: (t: 
   }
 
   try {
-    enforceScope(caller, sub === "promote" ? "write:notes" : sub === "get" ? "getNote" : "listNotes");
+    enforceScope(caller, sub === "promote" ? "write:notes" : sub === "get" ? "getNote" : "listNotes", config);
     if (sub === "list") {
       const result = await runNoteList({
         ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
@@ -439,6 +464,7 @@ async function handleFact(
   out: (t: string) => void,
   err: (t: string) => void,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -450,13 +476,13 @@ async function handleFact(
   try {
     const parsed = parseFactArgs(args.slice(1));
     if (sub === "list") {
-      enforceScope(caller, "listFacts");
+      enforceScope(caller, "listFacts", config);
     } else {
       // accept is the batch fact-writing path: it requires the full fact
       // capability (add + supersede); plain add needs supersedeFact only
       // when --supersedes is given
-      enforceScope(caller, "addFact");
-      if (sub === "accept" || parsed.supersedes !== undefined) enforceScope(caller, "supersedeFact");
+      enforceScope(caller, "addFact", config);
+      if (sub === "accept" || parsed.supersedes !== undefined) enforceScope(caller, "supersedeFact", config);
     }
     if (sub === "add") {
       if (parsed.statement === undefined || parsed.sourceRef === undefined) {
@@ -521,6 +547,7 @@ async function handleSecref(
   out: (t: string) => void,
   err: (t: string) => void,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -550,7 +577,7 @@ async function handleSecref(
       else throw new SecrefCliError("bad_arguments", `unknown secref argument: ${arg}`);
     }
     if (sub === "add") {
-      enforceScope(caller, "write:secure_refs"); // pointer METADATA; external docs stay hard-denied
+      enforceScope(caller, "write:secure_refs", config); // pointer METADATA; external docs stay hard-denied
       const result = await runSecrefAdd({
         kind: kind ?? "",
         locator: locator ?? "",
@@ -562,7 +589,7 @@ async function handleSecref(
       return 0;
     }
     if (sub === "list") {
-      enforceScope(caller, "read:notes"); // listing pointer metadata, never external contents
+      enforceScope(caller, "read:notes", config); // listing pointer metadata, never external contents
       const result = await runSecrefList({
         ...(workspace !== undefined ? { workspace } : {}),
       });
@@ -582,6 +609,7 @@ async function handleOutput(
   out: (t: string) => void,
   err: (t: string) => void,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -594,7 +622,7 @@ async function handleOutput(
     if (sub !== "create") {
       throw new OutputCliError("bad_arguments", `unknown output subcommand: ${sub}`);
     }
-    enforceScope(caller, "composeOutput");
+    enforceScope(caller, "composeOutput", config);
     let file: string | undefined;
     let workspace: string | undefined;
     const rest = args.slice(1);
@@ -644,6 +672,7 @@ async function handleDistill(
   err: (t: string) => void,
   stdin: Readable | NodeJS.ReadStream,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   const sub = args[0];
@@ -661,7 +690,7 @@ async function handleDistill(
   }
 
   try {
-    enforceScope(caller, sub === "accept" ? "acceptDistillation" : "proposeDistillation");
+    enforceScope(caller, sub === "accept" ? "acceptDistillation" : "proposeDistillation", config);
     if (sub === "propose") {
       const result = await runDistillPropose({
         ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
@@ -716,6 +745,7 @@ async function handleRebuild(
   out: (t: string) => void,
   err: (t: string) => void,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   if (args[0] === "--help" || args[0] === "-h") {
@@ -733,7 +763,7 @@ async function handleRebuild(
     return 1;
   }
   try {
-    enforceScope(caller, "rebuildProjections");
+    enforceScope(caller, "rebuildProjections", config);
     const result = await runRebuild(workspace !== undefined ? { workspace } : {});
     out(`${JSON.stringify(result)}\n`);
     return 0;
@@ -748,6 +778,7 @@ async function handleIndex(
   out: (t: string) => void,
   err: (t: string) => void,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   if (args[0] === "--help" || args[0] === "-h") {
@@ -765,7 +796,7 @@ async function handleIndex(
     return 1;
   }
   try {
-    enforceScope(caller, "indexVault");
+    enforceScope(caller, "indexVault", config);
     const result = await runIndex(workspace !== undefined ? { workspace } : {});
     out(`${JSON.stringify(result)}\n`);
     return 0;
@@ -780,6 +811,7 @@ async function handleQuery(
   out: (t: string) => void,
   err: (t: string) => void,
   caller = "cli",
+  config?: GrantConfig,
 ): Promise<number> {
   const args = rawArgs.filter((a) => a !== "--");
   if (args[0] === "--help" || args[0] === "-h") {
@@ -824,7 +856,7 @@ async function handleQuery(
     return 1;
   }
   try {
-    enforceScope(caller, "queryMemory");
+    enforceScope(caller, "queryMemory", config);
     const result = await runQuery({
       q: q ?? "",
       ...(k !== undefined ? { k } : {}),

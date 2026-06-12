@@ -35,6 +35,20 @@
   inexpressible in JSON Schema) asserted as schema-accepts/loader-rejects per the duplicate
   fail-closed guardrail. interfaces **13/13** (6 new); typecheck exit 0; root `pnpm test`
   exit 0 — **244 tests**, 0 fail. Next: SB-076 (config-aware resolution).
+- **SB-076 `Done`** — `@sb/interfaces` `resolveGrant(caller, config?)`: first-party registry
+  consulted FIRST and `config` ignored entirely for registry callers (proven byte-identical vs
+  hostile in-memory shadowing entries that try to strip `cli` / widen `sidecar:retrieval`);
+  `domain-app:*` callers resolve from validated config (scope lists COPIED — no aliasing of the
+  frozen config); everyone else (incl. `skill:*`) empty grant, config never consulted.
+  `grantFor` now delegates to `resolveGrant` (one resolution path); registry grants deep-frozen.
+  `enforceScope(caller, op, config?)` threads it; CLI dispatch (`main`) loads the workspace
+  config ONLY when the caller matches `DOMAIN_APP_ID_PATTERN` (load/validate failure ⇒ structured
+  error, exit 1, nothing runs) and threads it into all 8 handlers / 12 enforce sites. CLI tests:
+  config-granted app reads (note list/get, fact list) succeed, writes `scope_denied`; missing
+  config ⇒ default-deny; malformed config fails closed for the app AND is invisible to `cli`
+  (byte-identical behavior); grants don't leak across apps. interfaces **19/19** (6 new), cli
+  **77/77** (4 new, existing tests unmodified); root `pnpm test` exit 0 — **254 tests**, 0 fail.
+  Next: SB-061 (example read-only domain app).
 
 ## EPIC-CORE-012 (Domain App Boundary) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #29–#31 REVIEW
 - **Human chose EPIC-CORE-012 next** (over Phase 5 Surfaces — explicitly not started) with fixed

@@ -159,7 +159,7 @@ fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 
 |---|---|---|---|---|---|---|---|
 | SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | Done | 2 | SB-068, SB-069 (`Done`) |
 | SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Done | 3 | SB-060 |
-| SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-075 |
+| SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Done | 2 | SB-075 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015 (`Done`), SB-076 |
 | SB-077 | Story | Domain-boundary epic gate (config cannot bypass security) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-061, SB-074 (`Done`) |
 
@@ -1652,7 +1652,11 @@ app is **read-only**; all callers keep going through the same `grantFor`/`grantA
 
 ## SB-076 — Config-aware grant resolution (first-party precedence absolute)
 
-- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-11 — autonomous session; notes: `grantFor` now delegates to `resolveGrant` so ONE code
+  path resolves every caller; registry grants deep-frozen; `resolveGrant` copies config scope
+  lists so even the returned grant never aliases the frozen config; dispatch loads config only
+  when `DOMAIN_APP_ID_PATTERN` matches the caller — reserved/unknown identities never consult it)
 - **Dependencies:** SB-075
 - **Scope:** `@sb/interfaces` `resolveGrant(caller, config?)`: (1) first-party registry consulted
   FIRST and is non-overridable — for a registry caller the config is **ignored entirely**, even if

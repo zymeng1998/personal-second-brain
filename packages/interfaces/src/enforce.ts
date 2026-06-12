@@ -8,9 +8,10 @@
  */
 import { OPERATION_CONTRACTS } from "./operations.js";
 import type { CoreOperations } from "./operations.js";
-import { grantFor } from "./grants.js";
+import { resolveGrant } from "./grants.js";
 import { grantAllows } from "./scope.js";
 import type { PermissionScope } from "./scope.js";
+import type { GrantConfig } from "./grant-config.js";
 
 export class ScopeDeniedError extends Error {
   readonly code = "scope_denied";
@@ -29,11 +30,14 @@ export class ScopeDeniedError extends Error {
  * `operation` is either a `CoreOperations` key (its contract supplies the
  * scope) or a raw `PermissionScope` (for write paths without a descriptor,
  * e.g. the promote path's `write:notes`). An unknown operation name is
- * DENIED, never silently allowed.
+ * DENIED, never silently allowed. `config` (SB-076, OQ #30) is the validated
+ * workspace grant config and is consulted ONLY for `domain-app:*` callers —
+ * first-party callers keep absolute registry precedence with or without it.
  */
 export function enforceScope(
   caller: string,
   operation: keyof CoreOperations | PermissionScope,
+  config?: GrantConfig,
 ): void {
   let scope: PermissionScope;
   if ((operation as string).includes(":")) {
@@ -45,7 +49,7 @@ export function enforceScope(
     }
     scope = contract.scope;
   }
-  if (!grantAllows(grantFor(caller), scope)) {
+  if (!grantAllows(resolveGrant(caller, config), scope)) {
     throw new ScopeDeniedError(caller, scope);
   }
 }
