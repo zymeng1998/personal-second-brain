@@ -158,7 +158,7 @@ fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | Done | 2 | SB-068, SB-069 (`Done`) |
-| SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Backlog | 3 | SB-060 |
+| SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Done | 3 | SB-060 |
 | SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-075 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015 (`Done`), SB-076 |
 | SB-077 | Story | Domain-boundary epic gate (config cannot bypass security) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-061, SB-074 (`Done`) |
@@ -1627,7 +1627,12 @@ app is **read-only**; all callers keep going through the same `grantFor`/`grantA
 
 ## SB-075 — Fail-closed `config/grants.json` loader
 
-- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 3 · **Status:** Done
+  (2026-06-11 — autonomous session; notes: parsed configs are DEEP-FROZEN [mutation-proof by
+  construction]; `app_reserved` vs `app_invalid` distinguished for the audit trail; the lock-step
+  test runs 30 shared fixtures through Ajv + `parseGrantConfig` asserting identical verdicts, with
+  the ONE documented divergence — duplicate app, different payloads — asserted as
+  schema-accepts/loader-rejects [loader strictly stricter, never looser])
 - **Dependencies:** SB-060
 - **Scope (OQ #29/#31):** `@sb/interfaces` pure `parseGrantConfig(text): GrantConfig` —
   dependency-free strict TS validation mirroring the schema exactly (interfaces stays

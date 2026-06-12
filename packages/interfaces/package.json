@@ -9,9 +9,10 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/scope.test.ts test/grants.test.ts"
+    "test": "node --import tsx --test test/scope.test.ts test/grants.test.ts test/grant-config.test.ts"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "typescript": "^5.4.0",
     "tsx": "^4.0.0"
   }

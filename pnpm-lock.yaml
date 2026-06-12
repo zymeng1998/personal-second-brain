@@ -123,6 +123,9 @@ importers:
 
   packages/interfaces:
     devDependencies:
+      ajv:
+        specifier: ^8.17.1
+        version: 8.20.0
       tsx:
         specifier: ^4.0.0
         version: 4.22.4

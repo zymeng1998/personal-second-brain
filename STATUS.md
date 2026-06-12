@@ -24,6 +24,17 @@
   app ids rejected; 8 structural rejections). Validation: interfaces build exit 0; root
   `pnpm test` exit 0 — 238 tests by per-package sum, 0 fail (scripts 25 = +4). Next: SB-075
   (fail-closed loader).
+- **SB-075 `Done`** — `@sb/interfaces` `parseGrantConfig(text)` (pure, dependency-free, mirrors
+  the schema exactly + the duplicate-app semantic check JSON Schema can't express) +
+  `loadGrantConfig(workspace)` (missing file = valid `EMPTY_GRANT_CONFIG`; ENOENT only — any
+  other read failure = `unreadable`, fail closed) + `GrantConfigError("grant_config_invalid",
+  {reason, path})` (14 reason codes; messages name reason + KEY PATH only, payload values never
+  echoed — leak-asserted). Parsed configs **deep-frozen** (mutation throws). **OQ #29 lock-step
+  test:** 30 shared fixtures through Ajv (test-only devDep) + `parseGrantConfig`, identical
+  verdicts asserted; the ONE documented divergence (duplicate app, different payloads —
+  inexpressible in JSON Schema) asserted as schema-accepts/loader-rejects per the duplicate
+  fail-closed guardrail. interfaces **13/13** (6 new); typecheck exit 0; root `pnpm test`
+  exit 0 — **244 tests**, 0 fail. Next: SB-076 (config-aware resolution).
 
 ## EPIC-CORE-012 (Domain App Boundary) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #29–#31 REVIEW
 - **Human chose EPIC-CORE-012 next** (over Phase 5 Surfaces — explicitly not started) with fixed
