@@ -2,6 +2,35 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ EPIC-CORE-012 (DOMAIN APP BOUNDARY) COMPLETE — GATE MET (2026-06-11, one autonomous session)
+- **All 5 stories `Done` + pushed** (SB-060 → 075 → 076 → 061 → 077, one atomic commit each).
+  **SB-077 gate green in root `pnpm test`:** (a) privileged-scope configs (`write:raw`,
+  `delete:*`/`delete:notes`, `read:secure_refs` — allow AND deny) ⇒ whole file rejected, the
+  requesting app denied on ALL 15 command forms with the workspace byte-identical; (b)
+  first-party-shadowing configs rejected + registry resolution proven config-blind (identical
+  with/without benign AND hostile configs) + `cli` untouched by a hostile file on disk; (c)
+  malformed configs (bad JSON, unknown scope, wrong version, extra property, **duplicate app**)
+  fail closed for every domain app, zero writes; (d) unknown caller/operation denied with and
+  without config; (e) SB-074 invariants re-asserted WITH config present (and the full SB-074
+  file runs in the same suite).
+- **Final counts:** root `pnpm test` exit 0 — **262 tests** by per-package sum (interfaces 19,
+  cli 82, example-readonly 3, scripts 25; others unchanged), 0 fail; **coverage 92.58% lines
+  (baseline 92.08% — improved)**; `test:sidecar` untouched this epic.
+- **Guardrails honored:** EPIC-CORE-011 not weakened (gate-proven); external grants default-deny;
+  `ALWAYS_DENIED_SCOPES` + privileged scopes structurally ungrantable (schema) AND hard-denied
+  (resolver); first-party registry non-overridable (parser-unrepresentable + resolution
+  config-blind + deep-frozen); duplicate app entries fail closed; example app generic/read-only/
+  domain-neutral (ADR-001 grep in the smoke test); all CLI ops through the one resolver/enforcer
+  path; one atomic commit per story.
+- **Shipped:** `grant_config.schema.json` + `GrantConfig` types (SB-060); dependency-free
+  `parseGrantConfig`/`loadGrantConfig` + `GrantConfigError`, Ajv lock-step parity test (SB-075);
+  `resolveGrant(caller, config?)` + `enforceScope(…, config?)` + dispatch-level config loading
+  for `domain-app:*` callers only (SB-076); `domain-apps/example-readonly/` binding template +
+  smoke test (SB-061); the epic gate (SB-077).
+- **Next:** Phase 5 (Surfaces, EPIC-CORE-010 — needs refinement/split: SB-040 `5→split`,
+  SB-041 `8→split`) or EPIC-CORE-013 (media intake, P2). **Stopped per authorization: the
+  approved EPIC-CORE-012 chain is complete; the next decision review is the human's.**
+
 ## EPIC-CORE-012 — DECISION REVIEW PASSED (2026-06-11); autonomous implementation session STARTED
 - **Human approved OQ #29–#31 exactly as leaned** (schema-as-contract + dependency-free TS
   validator with Ajv test-only parity; domain apps invoke only via the enforced CLI dispatch

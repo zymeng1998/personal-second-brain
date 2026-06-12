@@ -116,6 +116,18 @@ environment-blind), the first-party grants registry (`cli` = all operational sco
 nothing), and **enforcement at the CLI operations boundary with no env bypass**. The SB-074 gate
 is green. **Root suite 229 tests; coverage 92.08% lines.**
 
-**Next:** Phase 5 (Surfaces, EPIC-CORE-010) refinement, or EPIC-CORE-012 (domain app boundary —
-SB-060/061, now unblocked by the scope model). Always follow the backlog workflow above: confirm
-the story is `Ready`, implement in-scope only, validate, stop at `In Review`.
+**EPIC-CORE-012 (Domain App Boundary) is COMPLETE (2026-06-11)** — OQ #29–#31 approved (+ the
+duplicate-entry fail-closed guardrail): the **`config/grants.json` contract**
+(`grant_config.schema.json` — strict, versioned, `domain-app:*` namespace only, privileged scopes
+structurally absent), the **fail-closed dependency-free loader** (`parseGrantConfig`/
+`loadGrantConfig`, whole-file `grant_config_invalid` rejection incl. duplicate apps, deep-frozen
+results, Ajv test-only lock-step parity), **config-aware resolution with absolute first-party
+precedence** (`resolveGrant`; registry config-blind and frozen; dispatch loads config only for
+`domain-app:*` callers), and the **generic read-only `domain-apps/example-readonly/` binding
+template** (programmatic `main(argv, io, caller)` — OQ #30; reads succeed, all write forms
+`scope_denied` with a byte-identical workspace; ADR-001 grep in-test). The SB-077 gate is green.
+**Root suite 262 tests; coverage 92.58% lines.**
+
+**Next:** Phase 5 (Surfaces, EPIC-CORE-010) refinement (SB-040/041 need splitting), or
+EPIC-CORE-013 (media intake, P2). Always follow the backlog workflow above: confirm the story is
+`Ready`, implement in-scope only, validate, stop at `In Review`.

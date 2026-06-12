@@ -8,8 +8,11 @@ EPIC-CORE-011 is `Done` and MUST NOT be weakened here).
 **Status (2026-06-11): DECISION REVIEW PASSED — OQ #29–#31 approved exactly as leaned** (recorded
 in [`open_questions.md`](open_questions.md)) with one additional guardrail: **duplicate
 `domain-app:*` entries fail closed** (whole-file rejection, never merge/last-write-wins).
-Implementation authorized in dependency order SB-060 → SB-075 → SB-076 → SB-061 → SB-077, one
-atomic commit per story; SB-074 re-run inside SB-077.
+**EPIC GATE MET — all 5 stories `Done` (2026-06-11, one autonomous session):** SB-060 → 075 →
+076 → 061 → 077, one atomic commit each. The SB-077 gate (privileged-scope, first-party-shadowing,
+malformed, and duplicate-app configs all fail closed with zero filesystem writes; registry
+resolution config-blind; SB-074 invariants re-asserted with config present) is green in root
+`pnpm test`; coverage 92.58% lines (baseline 92.08% — improved).
 
 ## Objective
 

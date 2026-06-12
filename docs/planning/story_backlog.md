@@ -29,7 +29,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-009 | Retrieval Sidecar | 3 | P1 | Done | Python DuckDB FTS+VSS retrieval over stdio JSONL (bge-small embeddings — OQ #9 fallback). **Gate met 2026-06-10** (SB-054): delete-`indexes/`-rebuild lossless. **All 9 stories `Done` incl. the SB-055 graph/temporal stretch** (query `filters:{near,from,to}`). |
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Backlog | Obsidian helper, then dashboard. |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Done | secure_refs pointer primitive + `sb secref` + validation pass; `grantAllows` resolver + first-party grants registry + enforcement at the CLI operations boundary (no env bypass). **Gate met 2026-06-10** (SB-074): under-privileged callers denied on every write op; `ALWAYS_DENIED_SCOPES` unobtainable; secure-ref round-trip leak-free. **All 6 stories `Done`** (SB-050/067/068/069/073/074). |
-| EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Refined | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, never weakening EPIC-CORE-011) + generic `domain-apps/example-readonly/` smoke test. **REFINED 2026-06-11** into SB-060/075/076/061/077 (≤3 pts each) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
+| EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Done | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, deep-frozen, absolute first-party precedence) + generic read-only `domain-apps/example-readonly/` binding template. **Gate met 2026-06-11** (SB-077): privileged/shadowing/malformed/duplicate configs all fail closed with zero writes; SB-074 invariants re-asserted with config present. **All 5 stories `Done`** (SB-060/075/076/061/077) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
 | EPIC-CORE-014 | AI Workflows | 4 | P1 | Done | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H) + `sb fact` / L5 `sb output create` confirmed write paths. **Gate met 2026-06-10** (SB-066): propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable. **All 9 stories `Done`** (SB-056..059 + SB-062..066, one autonomous session). |
 | EPIC-DOMAIN-001 | Broker Domain App | 6+ | P3 | **Deferred** | Broker tool, docs-only until core is stable. **Not planned in detail.** |
@@ -161,7 +161,7 @@ fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 
 | SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Done | 3 | SB-060 |
 | SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Done | 2 | SB-075 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Done | 3 | SB-015 (`Done`), SB-076 |
-| SB-077 | Story | Domain-boundary epic gate (config cannot bypass security) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-061, SB-074 (`Done`) |
+| SB-077 | Story | Domain-boundary epic gate (config cannot bypass security) | EPIC-CORE-012 | P1 | Done | 2 | SB-061, SB-074 (`Done`) |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -1706,7 +1706,12 @@ app is **read-only**; all callers keep going through the same `grantFor`/`grantA
 
 ## SB-077 — Domain-boundary epic gate (config cannot bypass security)
 
-- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  — **the epic gate is MET (2026-06-11)**: `apps/cli/test/domain-boundary-gate.test.ts`
+  (Node-only, in `pnpm test`). Notes: gate (e) uses an in-memory `write:facts` fixture grant —
+  deliberately NOT the example app — to prove granted-write vs ALWAYS_DENIED separation at the
+  resolution level; the full SB-074 file also runs in the same suite (re-run requirement met
+  twice over). Coverage baseline held + improved: 92.58% lines (was 92.08%).
 - **Dependencies:** SB-061, SB-074 (`Done`)
 - **Scope:** the epic "Done when" automated (`apps/cli/test/domain-boundary-gate.test.ts`, Node-only,
   in root `pnpm test`): (a) configs granting `write:raw` / `delete:*` / `read:secure_refs` (each,
