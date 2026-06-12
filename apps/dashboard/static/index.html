@@ -59,6 +59,31 @@
         </div>
       </form>
     </section>
+
+    <section class="panel panel-span" aria-labelledby="review-heading">
+      <h2 id="review-heading">Review queue</h2>
+      <div class="review-grid">
+        <div>
+          <button id="load-candidates" type="button" class="secondary">Load distill candidates</button>
+          <ul id="candidate-list" class="fact-list"></ul>
+        </div>
+        <form id="review-form" class="capture-form">
+          <label>
+            reviewed proposal JSON (pasted verbatim — the dashboard never edits it)
+            <textarea id="proposal-json" rows="6" spellcheck="false" required></textarea>
+          </label>
+          <label class="confirm-line">
+            <input id="review-confirm" type="checkbox" required />
+            I have reviewed this proposal myself
+          </label>
+          <div class="capture-actions">
+            <button type="submit" data-kind="distill">Accept distillation</button>
+            <button type="submit" data-kind="fact">Accept facts</button>
+            <output id="review-status" class="capture-status"></output>
+          </div>
+        </form>
+      </div>
+    </section>
   </main>
 
   <footer class="foot">

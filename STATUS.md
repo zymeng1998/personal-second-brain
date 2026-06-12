@@ -58,6 +58,18 @@
   token fetched at load, notes refresh on success). dashboard **5/5 new** (7 total); root
   `pnpm test` exit 0 — **280 tests**, 0 fail. **The roadmap gate condition (capture+read via a
   non-CLI surface) is now true for the dashboard.** Next: SB-083 (review queue).
+- **SB-083 `Done`** — review queue over the UNCHANGED accept paths: `GET /api/distill/candidates`
+  (read-only `distill propose` passthrough, snapshot-asserted), `POST /api/distill/accept` +
+  `POST /api/fact/accept` — human-reviewed proposal JSON passed VERBATIM via a tmp file OUTSIDE
+  the workspace into `--file` whole-file validation (invalid/garbled/missing-provenance ⇒ ≥400,
+  ZERO writes — snapshot-asserted over HTTP); both behind the same X-SB-CSRF guard
+  (missing token / cross-site Origin ⇒ 403, zero writes). Grant extension landed as documented:
+  `surface:dashboard` += `write:distill`+`write:facts` (never outputs/notes/secref). UI:
+  candidates list + paste box + REQUIRED "I have reviewed this proposal" checkbox + explicit
+  accept buttons. Happy paths: L2 + `distillation_accepted` memory event with provenance; facts
+  visible via `/api/facts`. Ripple: two pre-extension denial assertions updated to
+  still-ungranted scopes. dashboard **10/10** (5 new); root `pnpm test` exit 0 — **285 tests**,
+  0 fail. Next: SB-084 (epic gate).
 
 ## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
 - **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT

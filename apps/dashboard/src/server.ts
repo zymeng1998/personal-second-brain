@@ -17,7 +17,8 @@
 import { randomBytes } from "node:crypto";
 import { createServer } from "node:http";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { invoke } from "./invoke.js";
@@ -183,6 +184,50 @@ async function handleCapture(
   send(res, 200, "application/json; charset=utf-8", result.stdout);
 }
 
+/**
+ * Review-queue accepts (SB-083, OQ #35): the HUMAN-REVIEWED proposal JSON is
+ * passed VERBATIM into the unchanged whole-file-validated accept paths —
+ * written to a tmp file OUTSIDE the workspace and handed to
+ * `distill accept --file` / `fact accept --file`. Invalid proposal ⇒ the
+ * core writes nothing (exactly the Phase 4 contract, surfaced over HTTP).
+ * The dashboard never generates or edits proposals.
+ */
+async function handleAccept(
+  req: IncomingMessage,
+  res: ServerResponse,
+  workspace: string,
+  kind: "distill" | "fact",
+): Promise<void> {
+  let proposalText: string;
+  try {
+    proposalText = await readBody(req);
+    JSON.parse(proposalText); // fail fast; the core re-validates the whole file
+  } catch (error: unknown) {
+    const tooLarge = error instanceof Error && error.message === "body_too_large";
+    sendJson(res, tooLarge ? 413 : 400, {
+      ok: false,
+      error: { code: tooLarge ? "body_too_large" : "invalid_proposal", message: tooLarge ? "request body exceeds 1MB" : "proposal must be valid JSON" },
+    });
+    return;
+  }
+  const tmpPath = join(tmpdir(), `sb-dashboard-proposal-${randomBytes(8).toString("hex")}.json`);
+  try {
+    await writeFile(tmpPath, proposalText, "utf8");
+    const result = await invoke([kind, "accept", "--file", tmpPath, "--workspace", workspace]);
+    if (result.exitCode !== 0) {
+      // fact accept reports per-item runtime failures on stdout with exit 1
+      if (result.stderr.trim().length === 0 && result.stdout.trim().length > 0) {
+        send(res, 422, "application/json; charset=utf-8", result.stdout);
+        return;
+      }
+      return sendDispatchError(res, result.stderr);
+    }
+    send(res, 200, "application/json; charset=utf-8", result.stdout);
+  } finally {
+    await rm(tmpPath, { force: true });
+  }
+}
+
 async function handleApi(
   req: IncomingMessage,
   res: ServerResponse,
@@ -194,6 +239,23 @@ async function handleApi(
   // session: hands the page the write-guard token (same-origin readable only)
   if (url.pathname === "/api/session" && req.method === "GET") {
     sendJson(res, 200, { ok: true, csrf: csrfToken });
+    return;
+  }
+
+  // review queue (SB-083): read-only candidates + guarded accepts
+  if (url.pathname === "/api/distill/candidates" && req.method === "GET") {
+    const result = await invoke(["distill", "propose", "--workspace", workspace]);
+    if (result.exitCode !== 0) return sendDispatchError(res, result.stderr);
+    send(res, 200, "application/json; charset=utf-8", result.stdout);
+    return;
+  }
+  if (url.pathname === "/api/distill/accept" || url.pathname === "/api/fact/accept") {
+    if (req.method !== "POST") {
+      sendJson(res, 405, { ok: false, error: { code: "method_not_allowed", message: "accept is POST-only" } });
+      return;
+    }
+    if (!writeGuardPasses(req, res, csrfToken, selfOrigins)) return;
+    await handleAccept(req, res, workspace, url.pathname === "/api/distill/accept" ? "distill" : "fact");
     return;
   }
 

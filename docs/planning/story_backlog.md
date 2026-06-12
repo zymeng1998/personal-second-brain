@@ -177,7 +177,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 | SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Done | 3 | SB-079 |
 | SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Done | 3 | SB-078 |
 | SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Done | 2 | SB-081 |
-| SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-082 |
+| SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Done | 3 | SB-082 |
 | SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-080, SB-082 |
 
 ### Later phases (coarse; refine before implementation)
@@ -1874,7 +1874,14 @@ invariants untouched; one atomic commit per story.
 
 ## SB-083 — Confirmation-gated review queue (deferrable)
 
-- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Done
+  (2026-06-11 — autonomous session; notes: proposals are written VERBATIM to a tmp file OUTSIDE
+  the workspace and handed to the unchanged `--file` accept paths; both accept endpoints sit
+  behind the SAME X-SB-CSRF write guard as capture; the baseline-grant denial check is realized
+  as another surface identity (`surface:obsidian-helper`) being scope_denied on the same op —
+  the registry can't be un-extended at runtime; ripple: two pre-extension denial assertions
+  (dashboard distill-accept/fact-add probes; the hostile-config write:facts probe) updated to
+  still-ungranted scopes [write:outputs / write:notes / secref])
 - **Dependencies:** SB-082
 - **Scope (OQ #35):** read-only candidates view (`GET /api/distill/candidates` fronting
   `distill propose`); `POST /api/distill/accept` + `POST /api/fact/accept` accepting a

@@ -21,7 +21,7 @@ const ALL_OPERATIONAL: string[] = [
 
 const SURFACE_TABLES: Record<string, string[]> = {
   "surface:obsidian-helper": ["write:capture", "read:notes"],
-  "surface:dashboard": ["read:notes", "read:facts", "read:index", "write:capture"],
+  "surface:dashboard": ["read:notes", "read:facts", "read:index", "write:capture", "write:distill", "write:facts"], // SB-083 review-queue extension
 };
 
 test("surface grants match the documented least-privilege tables EXACTLY", () => {
@@ -54,8 +54,8 @@ test("surfaces are first-party: config is never consulted, hostile entries ignor
   const hostile = {
     version: 1,
     grants: [
-      { app: "surface:dashboard", allow: ["write:facts", "write:distill"] },
-      { app: "surface:obsidian-helper", allow: [] },
+      { app: "surface:dashboard", allow: ["write:outputs", "write:secure_refs"] }, // attempt to WIDEN
+      { app: "surface:obsidian-helper", allow: [] }, // attempt to STRIP
     ],
   } as unknown as GrantConfig;
   for (const caller of Object.keys(SURFACE_TABLES)) {
@@ -65,7 +65,7 @@ test("surfaces are first-party: config is never consulted, hostile entries ignor
       `${caller} resolution must be config-blind`,
     );
   }
-  assert.equal(grantAllows(resolveGrant("surface:dashboard", hostile), scope("write:facts")), false);
+  assert.equal(grantAllows(resolveGrant("surface:dashboard", hostile), scope("write:outputs")), false);
   assert.equal(
     grantAllows(resolveGrant("surface:obsidian-helper", hostile), scope("write:capture")),
     true,

@@ -130,6 +130,61 @@ captureForm.addEventListener("submit", async (event) => {
   }
 });
 
+// --- review queue (SB-083): confirmation-gated front over the unchanged ---
+// accept paths. The human pastes a REVIEWED proposal; the explicit button
+// press (plus the review checkbox) is the confirmation. Nothing is
+// generated or edited here; invalid proposals write nothing server-side.
+
+const reviewForm = document.getElementById("review-form");
+const reviewStatus = document.getElementById("review-status");
+const candidateList = document.getElementById("candidate-list");
+
+document.getElementById("load-candidates").addEventListener("click", async () => {
+  candidateList.textContent = "";
+  try {
+    const result = await getJson("/api/distill/candidates");
+    const candidates = result.candidates ?? [];
+    if (candidates.length === 0) {
+      candidateList.append(li("no L1 candidates — promote a raw note first", "error"));
+      return;
+    }
+    for (const candidate of candidates) {
+      const item = document.createElement("li");
+      item.textContent = candidate.title ?? candidate.id;
+      const meta = document.createElement("span");
+      meta.className = "conf";
+      meta.textContent = candidate.id;
+      item.append(meta);
+      candidateList.append(item);
+    }
+  } catch (err) {
+    candidateList.append(li(`failed to load candidates: ${err.message}`, "error"));
+  }
+});
+
+reviewForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const kind = event.submitter?.dataset?.kind ?? "distill";
+  reviewStatus.classList.remove("error");
+  reviewStatus.textContent = "accepting…";
+  try {
+    const res = await fetch(`/api/${kind}/accept`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-SB-CSRF": csrfToken ?? "" },
+      body: document.getElementById("proposal-json").value,
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body?.error?.code ?? `http_${res.status}`);
+    reviewStatus.textContent = `accepted (${kind})`;
+    reviewForm.reset();
+    void loadNotes();
+    void loadFacts();
+  } catch (err) {
+    reviewStatus.textContent = `accept failed: ${err.message}`;
+    reviewStatus.classList.add("error");
+  }
+});
+
 typeFilter.addEventListener("change", loadNotes);
 void loadSession();
 void loadNotes();

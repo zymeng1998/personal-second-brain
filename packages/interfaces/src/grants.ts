@@ -18,10 +18,12 @@
  *   capture op. Capture + read ONLY — Obsidian is never the writer of record
  *   for distillation/facts/outputs, so none of those scopes exist here.
  * - `surface:dashboard` (SB-078, OQ #32/#33/#35) — the localhost web
- *   dashboard: read views (notes/facts/index) + the capture form. v1 writes
- *   are capture-only; SB-083 (review queue) extends this grant with
- *   `write:distill` + `write:facts` when it lands — not before. secure_refs
- *   are not surfaced at all (no scope, nothing to leak).
+ *   dashboard: read views (notes/facts/index), the capture form, and (SB-083)
+ *   the confirmation-gated review queue — `write:distill` + `write:facts`
+ *   exist ONLY for the unchanged whole-file-validated accept paths fronted
+ *   by explicit human confirmation; never `write:outputs`/`write:notes`/
+ *   secref scopes. secure_refs are not surfaced at all (no scope, nothing
+ *   to leak).
  * - `domain-app:*` — resolved ONLY from a validated workspace
  *   `config/grants.json` (SB-075: strict, fail-closed, deep-frozen). No
  *   config entry ⇒ empty grant (default-deny).
@@ -62,7 +64,7 @@ const FIRST_PARTY_GRANTS: ReadonlyArray<CapabilityGrant> = Object.freeze([
   freezeGrant({ app: "surface:obsidian-helper", allow: ["write:capture", "read:notes"] }),
   freezeGrant({
     app: "surface:dashboard",
-    allow: ["read:notes", "read:facts", "read:index", "write:capture"],
+    allow: ["read:notes", "read:facts", "read:index", "write:capture", "write:distill", "write:facts"],
   }),
 ]);
 

@@ -150,10 +150,11 @@ test("binds to 127.0.0.1 only and serves the API + static UI with strict headers
 test("the dashboard identity is enforced: ungranted operations are scope_denied", async () => {
   const ws = await mkdtemp(join(tmpdir(), "sb-dashboard-denial-"));
   tmpDirs.push(ws);
+  // ops OUTSIDE the dashboard grant (post-SB-083: distill/fact accepts are granted)
   for (const argv of [
     ["rebuild", "--workspace", ws],
-    ["distill", "accept", "--file", join(ws, "none.json"), "--workspace", ws],
-    ["fact", "add", "--statement", "x", "--source-ref", "01ARZ3NDEKTSV4RRFFQ69G5FAV", "--workspace", ws],
+    ["note", "promote", "01ARZ3NDEKTSV4RRFFQ69G5FAV", "--workspace", ws],
+    ["output", "create", "--file", join(ws, "none.json"), "--workspace", ws],
     ["secref", "add", "--kind", "k", "--locator", "external://x", "--workspace", ws],
   ]) {
     const result = await invoke(argv);

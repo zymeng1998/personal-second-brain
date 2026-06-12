@@ -177,3 +177,32 @@ body {
 
 .capture-status { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); }
 .capture-status.error { color: #8c2f1b; }
+
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 960px) { .review-grid { grid-template-columns: 1fr; } }
+
+.secondary {
+  font: inherit;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  margin-bottom: 0.6rem;
+}
+
+.secondary:hover { background: #f0ebe1; }
+
+.confirm-line {
+  flex-direction: row;
+  display: flex !important;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--ink) !important;
+}
