@@ -1,0 +1,23 @@
+{
+  "name": "@sb/obsidian-helper",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Obsidian companion CLI (SB-079/080, OQ #34). NOT a plugin: vault compat check, domain-neutral template install, draft->capture bridge. Runs as surface:obsidian-helper through the one enforced dispatch; Obsidian is never the writer of record.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/check-command.test.ts"
+  },
+  "dependencies": {
+    "@sb/cli": "workspace:*",
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -173,7 +173,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-078 | Story | Surface caller grants (`surface:obsidian-helper`, `surface:dashboard`) | EPIC-CORE-010 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
-| SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Backlog | 2 | SB-078 |
+| SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Done | 2 | SB-078 |
 | SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Backlog | 3 | SB-079 |
 | SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-078 |
 | SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-081 |
@@ -1777,7 +1777,13 @@ invariants untouched; one atomic commit per story.
 
 ## SB-079 — obsidian-helper skeleton + read-only `check`
 
-- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 2 · **Status:** Done
+  (2026-06-11 — autonomous session; deviation from the refinement lean, guardrail-driven: the
+  frontmatter pass does NOT call `validateWorkspaceNotes` [direct vault fs reads would bypass the
+  dispatch] — `check` reads all note content via `note list`/`note get` under its own identity
+  and runs structural diagnostics [fence, required keys, dangling wikilinks]; full Ajv depth
+  stays with `pnpm validate:notes`; folder presence = read-only `existsSync` on directory paths
+  [structure, not note data])
 - **Dependencies:** SB-078
 - **Scope (OQ #34):** `apps/obsidian-helper` package (workspace-wired, pattern =
   `domain-apps/example-readonly`): fixed `surface:obsidian-helper` identity; `check

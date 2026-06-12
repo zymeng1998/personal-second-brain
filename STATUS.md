@@ -13,7 +13,19 @@
   templates domain-neutral + never overwrite; capture = exactly one L0 + one event (draft
   byte-untouched); review queue = explicit confirmation over unchanged accept paths; no broker
   leakage; SB-074 + SB-077 re-run inside SB-084.
-- **SB-078 → `In Progress`** (deps SB-069/076 `Done`; decision gate cleared).
+- **SB-078 `Done`** — registry entries `surface:obsidian-helper` (write:capture+read:notes) +
+  `surface:dashboard` (read:notes/facts/index+write:capture; SB-083 will extend), frozen,
+  documented rationale; tests: exact tables, ALWAYS_DENIED unobtainable, config-blind vs hostile
+  shadowing, unregistered surface fails closed. interfaces 23/23 (+4); root 266 exit 0.
+- **SB-079 `Done`** — `apps/obsidian-helper` (`@sb/obsidian-helper`): `check [--workspace]`
+  read-only compat report — ALL note content via the enforced dispatch (`note list`/`note get`
+  as `surface:obsidian-helper`; guardrail-driven deviation: no `validateWorkspaceNotes` call,
+  structural diagnostics instead — fence/required-keys, dangling `[[wikilinks]]` vs id+title,
+  missing PARA folders via read-only `existsSync`); JSON report, exit 1 on findings. Tests 4/4:
+  dangling-link fixture + clean-after-repair + seeded defects (key-less frontmatter via ULID
+  filename fallback; removed folder) + denial probes (fact list/promote/rebuild/secref/query all
+  `scope_denied`); byte-identical snapshot across `check`. Root **270 tests** exit 0. Next:
+  SB-080 (templates + capture bridge).
 
 ## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
 - **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT
