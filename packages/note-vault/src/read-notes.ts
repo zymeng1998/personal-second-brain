@@ -8,7 +8,7 @@
  * Out of scope (per card): search/retrieval (Phase 3); facts query.
  */
 import { readFile, readdir } from "node:fs/promises";
-import { basename, isAbsolute, join } from "node:path";
+import { basename, isAbsolute, join, sep } from "node:path";
 import { isUlid } from "@sb/interfaces";
 import { NoteReadError } from "./errors.js";
 
@@ -100,7 +100,13 @@ async function vaultMarkdownFiles(workspace: string): Promise<string[]> {
       cause: (err as NodeJS.ErrnoException).code ?? String(err),
     });
   }
-  return entries.filter((e) => e.endsWith(".md")).map((e) => join(vault, e));
+  // vault/90_System/templates/ holds Obsidian template SOURCE files (system
+  // assets per obsidian_compatibility.md) — scaffolding, not notes; excluded
+  // from note enumeration (SB-080).
+  const templatesPrefix = join("90_System", "templates") + sep;
+  return entries
+    .filter((e) => e.endsWith(".md") && !e.startsWith(templatesPrefix))
+    .map((e) => join(vault, e));
 }
 
 /** List vault notes (sorted by id, which is time-sortable for ULIDs). Read-only. */

@@ -174,7 +174,7 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 |---|---|---|---|---|---|---|---|
 | SB-078 | Story | Surface caller grants (`surface:obsidian-helper`, `surface:dashboard`) | EPIC-CORE-010 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
 | SB-079 | Story | obsidian-helper skeleton + read-only `check` | EPIC-CORE-010 | P2 | Done | 2 | SB-078 |
-| SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Backlog | 3 | SB-079 |
+| SB-080 | Story | Templates install + draft capture bridge | EPIC-CORE-010 | P2 | Done | 3 | SB-079 |
 | SB-081 | Story | Read-only dashboard server (localhost, zero-dep) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-078 |
 | SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Backlog | 2 | SB-081 |
 | SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Backlog | 3 | SB-082 |
@@ -1801,7 +1801,13 @@ invariants untouched; one atomic commit per story.
 
 ## SB-080 — Templates install + draft capture bridge
 
-- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-010 · **Priority:** P2 · **Points:** 3 · **Status:** Done
+  (2026-06-11 — autonomous session; design note: templates are BODY-ONLY scaffolds (no
+  frontmatter — frontmatter is core-owned; copying a template can never smuggle a stale id);
+  two enabling changes outside the card's file list, both tested: `vault/90_System/templates/`
+  excluded from note enumeration (`@sb/note-vault` read-notes) AND from the `validate_notes`
+  vault pass — system assets, not notes; without these, installed templates would break
+  `note list` and `pnpm validate:notes`)
 - **Dependencies:** SB-079
 - **Scope (OQ #34):** (a) `templates install [--workspace]` — domain-neutral note templates
   (working note, daily note, entity stub) into `vault/90_System/templates/`; EXCLUSIVE create —

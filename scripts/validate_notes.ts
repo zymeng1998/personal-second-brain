@@ -15,7 +15,7 @@
 import { readFileSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ErrorObject, ValidateFunction } from "ajv";
 import { parseFrontmatter } from "@sb/note-vault";
@@ -180,7 +180,14 @@ async function vaultMarkdownFiles(vault: string): Promise<string[]> {
     }
     throw new OperationalError("vault_unreadable", `cannot read vault: ${vault} (${code ?? String(err)})`);
   }
-  return entries.filter((e) => e.endsWith(".md")).map((e) => join(vault, e)).sort();
+  // vault/90_System/templates/ holds Obsidian template SOURCE files (system
+  // assets, not notes — SB-080); they are scaffolding and are not validated
+  // against the note frontmatter schema.
+  const templatesPrefix = join("90_System", "templates") + sep;
+  return entries
+    .filter((e) => e.endsWith(".md") && !e.startsWith(templatesPrefix))
+    .map((e) => join(vault, e))
+    .sort();
 }
 
 function formatAjvError(error: ErrorObject): string {

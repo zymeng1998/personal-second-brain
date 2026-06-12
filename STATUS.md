@@ -26,6 +26,16 @@
   filename fallback; removed folder) + denial probes (fact list/promote/rebuild/secref/query all
   `scope_denied`); byte-identical snapshot across `check`. Root **270 tests** exit 0. Next:
   SB-080 (templates + capture bridge).
+- **SB-080 `Done`** — `templates install`: 3 domain-neutral BODY-ONLY scaffolds (working-note /
+  daily-note / entity-stub; no frontmatter — core-owned; HTML-comment usage header) →
+  `vault/90_System/templates/`, exclusive create (`wx` flag), re-run skips + reports, customized
+  files never overwritten. **Enabling changes (tested):** the templates folder is excluded from
+  note enumeration (read-notes) and the `validate_notes` vault pass (system assets, not notes).
+  `capture --file <draft.md>`: draft → enforced capture op as `surface:obsidian-helper` (source
+  `import`; `title:`/inline `tags:` lifted from the draft fence; body captured; empty body fails
+  closed `empty_draft`); EXACTLY one capture event per run (counted); draft byte-untouched;
+  prior L0 bytes unchanged across runs. helper **9/9** (5 new); root `pnpm test` exit 0 —
+  **275 tests**, 0 fail. Next: SB-081 (read-only dashboard server).
 
 ## PHASE 5 (SURFACES, EPIC-CORE-010) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #32–#35 REVIEW
 - **Human chose Phase 5 Surfaces refinement next** (EPIC-CORE-013 media intake explicitly NOT
