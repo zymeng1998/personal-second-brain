@@ -157,7 +157,7 @@ fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | In Progress | 2 | SB-068, SB-069 (`Done`) |
+| SB-060 | Story | Grant config contract (`grant_config.schema.json` + types) | EPIC-CORE-012 | P1 | Done | 2 | SB-068, SB-069 (`Done`) |
 | SB-075 | Story | Fail-closed `config/grants.json` loader | EPIC-CORE-012 | P1 | Backlog | 3 | SB-060 |
 | SB-076 | Story | Config-aware grant resolution (first-party precedence absolute) | EPIC-CORE-012 | P1 | Backlog | 2 | SB-075 |
 | SB-061 | Story | Generic `domain-apps/example-readonly/` app + smoke test | EPIC-CORE-012 | P1 | Backlog | 3 | SB-015 (`Done`), SB-076 |
@@ -1602,7 +1602,11 @@ app is **read-only**; all callers keep going through the same `grantFor`/`grantA
 
 ## SB-060 — Grant config contract (schema + types)
 
-- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-012 · **Priority:** P1 · **Points:** 2 · **Status:** Done
+  (2026-06-11 — autonomous session; notes: grantable set = the 12 operational `CLI_SCOPES` +
+  `read:notes:<sub>` pattern, locked to `PermissionScope` via `satisfies`; duplicate-app rejection
+  documented in the schema description as a loader-level check — JSON Schema cannot express it,
+  so the schema test deliberately does not assert it [SB-075 does])
 - **Dependencies:** SB-068, SB-069 (both `Done`)
 - **Scope:** `schemas/json/grant_config.schema.json` (draft 2020-12, strict:
   `additionalProperties:false` at every level): `{ version: 1 (const), grants: [{ app, allow[],

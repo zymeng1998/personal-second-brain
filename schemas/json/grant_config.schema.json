@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://second-brain.local/schemas/json/grant_config.schema.json",
+  "title": "Domain App Grant Config v1",
+  "version": "1.0.0",
+  "description": "The workspace `config/grants.json` contract (EPIC-CORE-012, OQ #29/#31). Declares capability grants for DOMAIN APPS ONLY: `app` must match `domain-app:<name>` — first-party identities (`cli`, `sidecar:*`, `skill:*`) are unrepresentable here and their in-code registry can never be overridden by config. The grantable scope set structurally excludes `ALWAYS_DENIED_SCOPES` (`write:raw`, `delete:*`, `read:secure_refs`): no schema-valid document can name them, and the runtime resolver hard-denies them anyway (defense in depth). Loading is FAIL-CLOSED whole-file (OQ #31): any invalid content — including DUPLICATE `app` entries, which JSON Schema cannot express and the loader rejects additionally — rejects the entire file as `grant_config_invalid` and no external grants load. A missing config file is valid and means no external grants (default-deny).",
+  "type": "object",
+  "required": ["version", "grants"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1,
+      "description": "Config version. Breaking changes bump this."
+    },
+    "grants": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/grantEntry" },
+      "description": "One entry per domain app. Duplicate `app` values are additionally rejected by the loader (fail closed — never merged, never last-write-wins)."
+    }
+  },
+  "$defs": {
+    "domainAppId": {
+      "type": "string",
+      "pattern": "^domain-app:[a-z0-9][a-z0-9-]*$",
+      "description": "Domain-app caller identity. Reserved first-party identities (cli, sidecar:*, skill:*) do not match this pattern by construction."
+    },
+    "grantableScope": {
+      "description": "Exactly the operational scopes a domain app may be granted or denied. `write:raw`, `delete:*`, and `read:secure_refs` are deliberately absent and cannot be expressed.",
+      "anyOf": [
+        {
+          "enum": [
+            "write:capture",
+            "write:distill",
+            "write:facts",
+            "write:outputs",
+            "write:notes",
+            "write:secure_refs",
+            "read:facts",
+            "rebuild:projections",
+            "write:index",
+            "read:index",
+            "append:events",
+            "read:notes"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^read:notes:[a-z0-9_-]+$"
+        }
+      ]
+    },
+    "grantEntry": {
+      "type": "object",
+      "required": ["app", "allow"],
+      "additionalProperties": false,
+      "properties": {
+        "app": { "$ref": "#/$defs/domainAppId" },
+        "allow": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/grantableScope" },
+          "uniqueItems": true,
+          "description": "Scopes granted to the app (default-deny: anything not listed is denied). An empty list is valid and grants nothing."
+        },
+        "deny": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/grantableScope" },
+          "uniqueItems": true,
+          "description": "Optional explicit denies; deny overrides allow in the resolver."
+        }
+      }
+    }
+  }
+}

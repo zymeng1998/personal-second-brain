@@ -89,6 +89,13 @@ export { ALWAYS_DENIED_SCOPES, grantAllows } from "./scope.js";
 export { grantFor } from "./grants.js";
 export { enforceScope, ScopeDeniedError } from "./enforce.js";
 
+export type { DomainAppId, GrantableScope, GrantConfigEntry, GrantConfig } from "./grant-config.js";
+export {
+  DOMAIN_APP_ID_PATTERN,
+  SCOPED_READ_NOTES_PATTERN,
+  GRANTABLE_SCOPES,
+} from "./grant-config.js";
+
 export type {
   GetNoteInput,
   NoteFilter,

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "grants": [
+    {
+      "app": "domain-app:example-readonly",
+      "allow": ["read:notes", "read:facts"]
+    }
+  ]
+}

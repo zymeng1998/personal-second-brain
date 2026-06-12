@@ -12,7 +12,18 @@
   story; all prior guardrails hold (no weakening EPIC-CORE-011; absolute first-party precedence;
   ALWAYS_DENIED + privileged scopes structurally ungrantable; generic read-only domain-neutral
   example app; same resolver/enforcer path; SB-074 re-run inside SB-077).
-- **SB-060 → `In Progress`** (deps SB-068/069 `Done`; decision gate cleared).
+- **SB-060 `Done`** — `grant_config.schema.json` (strict draft-2020-12: `version:1` const,
+  `app` pattern `^domain-app:[a-z0-9][a-z0-9-]*$` [reserved identities unrepresentable],
+  allow/deny restricted to the 12 operational scopes + `read:notes:<sub>` — `write:raw`/
+  `delete:*`/`read:secure_refs` structurally absent; duplicate-app rejection documented as the
+  SB-075 loader check) + `@sb/interfaces` `grant-config.ts` (types only: `GrantConfig`/
+  `GrantConfigEntry`/`GrantableScope`, `GRANTABLE_SCOPES satisfies readonly PermissionScope[]`
+  compile-time lock, `DOMAIN_APP_ID_PATTERN`) + `examples/grants/grants.sample.json` (read-only
+  example grant) + `scripts/grant_config_schema.test.ts` wired into `test:scripts` (4 tests:
+  sample + benign variants accepted; privileged scopes rejected in allow AND deny; reserved
+  app ids rejected; 8 structural rejections). Validation: interfaces build exit 0; root
+  `pnpm test` exit 0 — 238 tests by per-package sum, 0 fail (scripts 25 = +4). Next: SB-075
+  (fail-closed loader).
 
 ## EPIC-CORE-012 (Domain App Boundary) REFINED (2026-06-11); ⏸ STOPPED FOR THE OQ #29–#31 REVIEW
 - **Human chose EPIC-CORE-012 next** (over Phase 5 Surfaces — explicitly not started) with fixed
