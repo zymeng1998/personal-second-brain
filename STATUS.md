@@ -2,6 +2,38 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ CORE v0.1 — USABLE CHECKPOINT PASSED (2026-06-13, dogfood pass)
+- **Goal:** validate the completed core is usable end-to-end by a real user **before** any broker
+  logic. **Result: PASS** — every documented command was run live against a throwaway workspace;
+  no product gaps; only stale docs needed fixing.
+- **Verified workflow (live, this session):** `init:workspace` (env) → `capture` → `note list`/`get`
+  → `validate:notes` → **media-intake `ingest`** (artifact-dir, public `--media-ref`) → idempotent
+  re-ingest (zero writes) → **`ingest --review`** (L1 working-note bridge) → **obsidian-helper
+  `check`** → **dashboard** start + `GET /api/notes` + UI 200 + CSP/X-Frame headers. All green.
+- **Test/coverage gates (green):** `pnpm test` exit 0 — **321 tests** (cli 85, media-intake 24,
+  dashboard 15, obsidian-helper 9, interfaces 23, note-vault 52, retrieval 19, others); coverage
+  **93.23% lines / 80.1% branches**; `pnpm run test:sidecar` **3/3** vs the real Python sidecar
+  (retrieval 1 + cli 2; `uv` present).
+- **Deliverables added (atomic, no new product features):**
+  - [`docs/CORE_V0.1_QUICKSTART.md`](docs/CORE_V0.1_QUICKSTART.md) — the canonical end-to-end
+    workflow (8 steps incl. media-intake, surfaces, retrieval).
+  - [`scripts/smoke_core_v0.1.sh`](scripts/smoke_core_v0.1.sh) + `pnpm run smoke` — scripted smoke
+    test proving the quickstart from a clean clone/workspace (18 assertions, PASS). Not wired into
+    `pnpm test` (spawns a server); it is the manual release gate.
+  - Roadmap "Core v0.1 — usable checkpoint" section + ✅ on Phase 3/4/5 headings + a cross-phase
+    core-epics summary (EPIC-CORE-011/012/013).
+- **Doc fixes (stale references corrected):**
+  - README Repository map (apps/packages/sidecars/domain-apps/scripts all updated to ✅ reality;
+    media-intake + example-readonly added; "stubs"/"post-MVP"/"Phase 0 only" removed).
+  - README `--workspace` claim corrected: `init_workspace` is **env-var only** (not `--workspace`);
+    `validate_notes` + CLI apps accept `--workspace` after `--`. (Caught live: `init:workspace
+    -- --workspace` errors.)
+  - README + roadmap now point to the quickstart; `domain-apps/broker` marked Deferred.
+- **No product gaps found** — nothing required implementing to make the workflow runnable. The only
+  open core item remains **EPIC-DOMAIN-001 (broker), Deferred**.
+- **⏸ STOPPED per authorization: checkpoint complete — awaiting approval before refining
+  EPIC-DOMAIN-001.**
+
 ## ✅ EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) COMPLETE — GATE MET (2026-06-12, one autonomous session)
 - **All 7 stories `Done` + pushed** (SB-070 → 071 → 072 → 085 → 086 → 087 → 088, one atomic
   commit each). **SB-087 gate green in root `pnpm test`:** media_id idempotency (double ingest =

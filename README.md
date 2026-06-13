@@ -51,15 +51,18 @@ The event log (`workspace/events/*.jsonl`) is also **source of truth** (audit + 
 
 ```
 docs/         product, research, architecture, methodology, workflows, decisions, planning, prompts
-apps/         cli (MVP), dashboard, obsidian-helper (post-MVP)
+apps/         cli ✅, dashboard ✅, obsidian-helper ✅, media-intake ✅
 packages/     interfaces ✅, note-vault ✅, event-log ✅, memory-kernel ✅, fact-store ✅,
-              entity-graph ✅, task-store ✅, retrieval, adapters, surfaces, ai
-sidecars/     retrieval, ai  (Python — boundary docs only in Phase 0)
-domain-apps/  broker (docs-only)
+              entity-graph ✅, task-store ✅, retrieval ✅; adapters/surfaces/ai (reserved)
+sidecars/     retrieval ✅ (Python: DuckDB FTS+VSS, stdio JSONL), ai (boundary docs only)
+domain-apps/  example-readonly ✅ (generic interface smoke test); broker (docs-only, Deferred)
 schemas/      markdown, json, sql
-examples/     notes, captures, entities, projects, outputs
-scripts/      init_workspace ✅, validate_notes ✅, index_vault, query_memory (stubs)
+examples/     notes, captures, entities, projects, outputs, grants, media
+scripts/      init_workspace ✅, validate_notes ✅, index_vault ✅, query_memory ✅, smoke_core_v0.1 ✅
 ```
+
+**All core epics are complete (Core v0.1 — usable).** End-to-end quickstart:
+[`docs/CORE_V0.1_QUICKSTART.md`](docs/CORE_V0.1_QUICKSTART.md) (`pnpm run smoke` exercises it).
 
 ## Data lives outside this repo
 
@@ -120,8 +123,14 @@ sidecars (`*.mjs`), and `node_modules` are excluded (see the `c8` key in `packag
 Python sidecar tests are separate (`uv run pytest` in `sidecars/retrieval`; env-gated TS↔Python
 E2E via `pnpm run test:sidecar`).
 
-`init_workspace` and `validate_notes` also accept `--workspace <path>` (and `--dry-run` /
-`--help` where applicable) instead of the environment variable.
+`validate_notes` and the CLI apps also accept `--workspace <path>` (after a `--` separator)
+instead of the environment variable. `init_workspace` is **env-var only** (it takes `--dry-run` /
+`--verify` / `--help`, not `--workspace`).
+
+The full Core v0.1 workflow — including **media-intake** transcript ingest, the **obsidian-helper**,
+and the local **dashboard** read path — is documented and verified in
+[`docs/CORE_V0.1_QUICKSTART.md`](docs/CORE_V0.1_QUICKSTART.md). Run it end-to-end against a
+throwaway workspace with `pnpm run smoke`.
 
 ## License
 

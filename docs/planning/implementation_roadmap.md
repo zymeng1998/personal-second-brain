@@ -37,7 +37,7 @@ ADD-only facts; `memory-kernel` projector + store; full **replay** from the even
 - **Done when:** dropping `db/` and replaying events + re-deriving from L0–L2 reproduces projections —
   **met** (SB-039 row-identical reproducibility gate, wired into `pnpm test`).
 
-## Phase 3 — Retrieval sidecar (Python)
+## Phase 3 — Retrieval sidecar (Python) ✅
 
 `sidecars/retrieval` (DuckDB VSS + FTS + bge-small embeddings — OQ #9 fallback; BGE-M3 unloadable on
 this machine), TS `packages/retrieval` facade over **stdio JSONL**; rebuildable indexes.
@@ -46,7 +46,7 @@ this machine), TS `packages/retrieval` facade over **stdio JSONL**; rebuildable 
   lexical/vector/hybrid, L0 + capture/memory streams byte-unchanged; wired into `test:sidecar`).
   Graph/temporal indexes remain the optional P2 stretch (SB-055).
 
-## Phase 4 — AI workflows
+## Phase 4 — AI workflows ✅
 
 `sidecars/ai` extraction/distillation suggestions (human-confirmed); Claude-Code skills for
 braindump/distill/review; L5 outputs citing sources.
@@ -58,10 +58,32 @@ braindump/distill/review; L5 outputs citing sources.
 - **Done when:** AI proposes facts/notes with provenance; nothing is mutated without confirmation.
   (Automated as SB-066 — **met**, green in root `pnpm test`.)
 
-## Phase 5 — Surfaces
+## Phase 5 — Surfaces ✅
 
 `obsidian-helper`, then `dashboard`; later mobile capture / browser clipper. All via `interfaces`.
 - **Done when:** at least one extra surface performs capture+read via contracts only. **MET 2026-06-11** (SB-084 gate: BOTH the obsidian-helper and the dashboard capture+read through the enforced dispatch under their own `surface:*` identities).
+
+## Cross-phase core epics ✅
+
+Cross-cutting epics that ship alongside the phases above, all **Complete**:
+- **EPIC-CORE-011 Security & Privacy Hardening** — secure_refs pointer primitive + the real
+  permission model (`grantAllows` resolver, first-party grants registry, enforcement at the
+  operations boundary, no env bypass). Gate met (SB-074).
+- **EPIC-CORE-012 Domain App Boundary** — strict fail-closed `config/grants.json` for external
+  `domain-app:*` callers + the generic `domain-apps/example-readonly/`. Gate met (SB-077).
+- **EPIC-CORE-013 Media Transcription Intake** — `apps/media-intake` (`surface:media-intake`):
+  transcript text → L0 with auditable media-reference provenance, strict `media_id` idempotency,
+  never the media binary. Gate met (SB-087).
+
+## Core v0.1 — usable checkpoint ✅ (2026-06-13)
+
+**All core epics are complete; the core is usable end-to-end before any domain logic.** The full
+workflow — init → capture → read → validate → media-intake ingest (+`--review` L1 bridge) →
+distill → projections → retrieval → obsidian-helper + dashboard read paths — is documented in
+[`../CORE_V0.1_QUICKSTART.md`](../CORE_V0.1_QUICKSTART.md) and proven reproducible by
+`pnpm run smoke` ([`../../scripts/smoke_core_v0.1.sh`](../../scripts/smoke_core_v0.1.sh)).
+Green at the checkpoint: `pnpm test` **321 tests**, coverage **93.23% lines**, `test:sidecar`
+**3/3** (real Python sidecar). **Next:** EPIC-DOMAIN-001 broker — still Deferred until authorized.
 
 ## Phase 6 — First domain app (broker)
 

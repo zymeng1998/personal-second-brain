@@ -7,10 +7,12 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 > uses a **scannable summary table** (ID/Type/Title/Epic/Priority/Status/Points/Deps) followed by
 > **detailed story cards** carrying the long fields (Scope, Acceptance Criteria, Definition of Done,
 > Validation, Files Expected to Change, Out of Scope, Notes). Phase 1 stories are fully detailed;
-> later-epic stories are coarse and remain `Backlog`/`Deferred` until refined.
+> historical cards are retained for traceability.
 
-> **Status snapshot.** Phase 0 (scaffold) is `Done`. Phase 1 stories below are `Ready` only where their
-> dependencies permit; the rest are `Backlog`. `EPIC-DOMAIN-001` (broker) is `Deferred`.
+> **Status snapshot (Core v0.1 — usable, 2026-06-13).** ALL core epics are `Done`
+> (EPIC-CORE-001..014, across Phases 0–5 + the cross-phase Security/Domain-Boundary/Media-Intake
+> epics). The core is usable end-to-end — see [`../CORE_V0.1_QUICKSTART.md`](../CORE_V0.1_QUICKSTART.md)
+> (`pnpm run smoke`). The only open item is **`EPIC-DOMAIN-001` (broker), `Deferred`** until authorized.
 
 ---
 
@@ -132,9 +134,8 @@ Cards below.
 
 ### Phase 4 — AI Workflows (EPIC-CORE-014, refined; see [`phase_4_story_map.md`](phase_4_story_map.md))
 
-Refined 2026-06-10. **`Backlog` until the open-decision review (OQ #21–#25) passes** — then stories
-promote to `Ready` as their dependencies complete. Ids skip SB-060/061 (EPIC-CORE-012) and
-SB-070–072 (EPIC-CORE-013). Cards below.
+Refined 2026-06-10. **✅ COMPLETE** — OQ #21–#25 approved; all 9 stories `Done` (SB-066 gate
+green). Ids skip SB-060/061 (EPIC-CORE-012) and SB-070–072 (EPIC-CORE-013). Cards below.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
@@ -167,8 +168,8 @@ fail-closed guardrail; implementation authorized SB-060 → 075 → 076 → 061 
 
 Refined 2026-06-11: SB-040 (`5→split`) → SB-079+080; SB-041 (`8→split`) → SB-081+082+083; plus
 the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Detailed cards below
-("Phase 5 story cards"). **Blocked on the OQ #32–#35 decision review** — stories promote to
-`Ready` only after the human confirms (or amends) the leans.
+("Phase 5 story cards"). **✅ COMPLETE (2026-06-11)** — OQ #32–#35 approved (+ CSRF amendment);
+all 7 stories `Done`, SB-084 gate green.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
@@ -184,8 +185,8 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 
 Refined 2026-06-12: the coarse SB-070/071/072 decomposed into 7 atomic stories (≤3 pts; 16 pts
 total). SB-070/071/072 ids retained with narrowed scope; SB-085–088 are new (SB-088 deferrable).
-Detailed cards below ("EPIC-CORE-013 story cards"). **Blocked on the OQ #36–#40 decision review** —
-stories promote to `Ready` only after the human confirms (or amends) the leans.
+Detailed cards below ("EPIC-CORE-013 story cards"). **✅ COMPLETE (2026-06-12)** — OQ #36–#40
+approved (+ amendments); all 7 stories `Done`, SB-087 gate green.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
@@ -811,7 +812,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ---
 
-# Phase 2 story cards (EPIC-CORE-008 — refined; `Backlog` until open decisions confirmed)
+# Phase 2 story cards (EPIC-CORE-008 — ✅ COMPLETE; all stories `Done`)
 
 > Sequencing, dependency graph, and the open decisions are in [`phase_2_story_map.md`](phase_2_story_map.md).
 > Project-wide DoD still applies (no domain leakage; no real data committed; raw L0 never overwritten;
@@ -1121,7 +1122,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ---
 
-# Phase 3 story cards (EPIC-CORE-009 — refined; `Backlog` until open decisions confirmed)
+# Phase 3 story cards (EPIC-CORE-009 — ✅ COMPLETE; all stories `Done`)
 
 > Sequencing, dependency graph, and the open decisions (OQ #9–12, #17–20) are in
 > [`phase_3_story_map.md`](phase_3_story_map.md). Project-wide DoD still applies (no domain leakage; no
@@ -1313,7 +1314,7 @@ distillation path; events append-only; AC met; validation green; `git diff` limi
 
 ---
 
-# Phase 4 story cards (EPIC-CORE-014 — refined; `Backlog` until OQ #21–#25 confirmed)
+# Phase 4 story cards (EPIC-CORE-014 — ✅ COMPLETE; all stories `Done`)
 
 Refined 2026-06-10 — see [`phase_4_story_map.md`](phase_4_story_map.md) for objective, architecture,
 open decisions, and sequencing. Shared constraints for every card: skills never write directly (CLI
@@ -1523,7 +1524,7 @@ TS-emitted; no new event kinds or schema changes; no `sidecars/ai` code (OQ #21 
 
 ---
 
-# Security story cards (EPIC-CORE-011 — refined 2026-06-10; `Backlog` until OQ #26–#28 confirmed)
+# Security story cards (EPIC-CORE-011 — ✅ COMPLETE 2026-06-10; all stories `Done`)
 
 See [`security_story_map.md`](security_story_map.md) for objective, open decisions (OQ #26–#28),
 and the dependency graph. Shared constraints: raw sensitive bytes NEVER enter the workspace;
@@ -2153,7 +2154,7 @@ implementation. Detailed cards will be written when each phase is reached.
   [`domain_boundary_story_map.md`](domain_boundary_story_map.md). Strict fail-closed
   `config/grants.json` (schema + loader + config-aware resolution, first-party precedence
   absolute, ALWAYS_DENIED ungrantable) + a **generic** `domain-apps/example-readonly/` read-only
-  smoke test (never broker) proving interface-only access. Blocked on the OQ #29–#31 review.
+  smoke test (never broker) proving interface-only access. **✅ COMPLETE** — OQ #29–#31 approved; all 5 stories `Done` (SB-077 gate green).
 - **EPIC-CORE-013 Media Transcription Intake:** **REFINED** (2026-06-12) into ≤3-pt stories — see the
   EPIC-CORE-013 table above and detailed cards, plus
   [`media_intake_story_map.md`](media_intake_story_map.md). Optional CLI adapter (`apps/media-intake`,

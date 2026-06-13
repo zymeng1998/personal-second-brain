@@ -18,7 +18,8 @@
     "test:scripts": "node --import tsx --test scripts/validate_notes.test.ts scripts/init_workspace.test.ts scripts/proposal_schema.test.ts scripts/grant_config_schema.test.ts scripts/media_reference_schema.test.ts",
     "test:sidecar": "pnpm --filter @sb/retrieval run test:sidecar && pnpm --filter @sb/cli run test:sidecar",
     "typecheck:scripts": "tsc -p scripts/tsconfig.json",
-    "test:coverage": "c8 --reporter=text-summary --reporter=text pnpm test"
+    "test:coverage": "c8 --reporter=text-summary --reporter=text pnpm test",
+    "smoke": "bash scripts/smoke_core_v0.1.sh"
   },
   "devDependencies": {
     "@sb/note-vault": "workspace:*",
