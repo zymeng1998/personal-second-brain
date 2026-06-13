@@ -15,6 +15,7 @@ import { RAW_SOURCE_KINDS, writeRawNote } from "@sb/note-vault";
 import type { RawSourceKind } from "@sb/note-vault";
 import { appendCaptureEvent } from "@sb/event-log";
 import { ulid } from "@sb/interfaces";
+import type { MediaReference } from "@sb/interfaces";
 import {
   resolveWorkspaceConfig,
   WorkspaceConfigError,
@@ -48,6 +49,12 @@ export interface CaptureOptions {
   title?: string;
   tags?: string[];
   ref?: string;
+  /**
+   * Optional auditable media provenance (EPIC-CORE-013). Validated by
+   * `parseMediaReference`; written to the note `media:` block + event payload.
+   * Carries no raw locator by construction.
+   */
+  media?: MediaReference;
   slug?: string;
   /** Absolute workspace override; otherwise SECOND_BRAIN_WORKSPACE / .env is used. */
   workspace?: string;
@@ -154,6 +161,7 @@ export async function runCapture(opts: CaptureOptions): Promise<CaptureCliResult
     ...(opts.title !== undefined ? { title: opts.title } : {}),
     ...(opts.tags !== undefined ? { tags: opts.tags } : {}),
     ...(opts.ref !== undefined ? { ref: opts.ref } : {}),
+    ...(opts.media !== undefined ? { media: opts.media } : {}),
     ...(opts.slug !== undefined ? { slug: opts.slug } : {}),
   });
 
@@ -174,6 +182,7 @@ export async function runCapture(opts: CaptureOptions): Promise<CaptureCliResult
         ...(opts.title !== undefined ? { title: opts.title } : {}),
         ...(opts.tags !== undefined && opts.tags.length > 0 ? { tags: opts.tags } : {}),
         ...(opts.ref !== undefined ? { ref: opts.ref } : {}),
+        ...(opts.media !== undefined ? { media: opts.media } : {}),
       },
     });
   } catch (err) {

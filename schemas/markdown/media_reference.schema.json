@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://second-brain.local/schemas/markdown/media_reference.schema.json",
+  "title": "Media Reference v1",
+  "version": "1.0.0",
+  "description": "The auditable, NON-LEAKING media-provenance block (EPIC-CORE-013) carried by a transcript capture — in the L0 raw note frontmatter (`media:`) and the capture event payload. It records the transcriber's content hash (`media_id`), the sha256 of the captured transcript text (`transcript_sha256`, for strict idempotency + conflict detection), the classification of the original-media pointer (`ref_class` — WHY it was treated public/private), and exactly one handle: a non-sensitive public `ref`, or a `secref_…` id whose opaque locator lives only inside the secure_ref pointer file. By construction (additionalProperties:false) there is NO field for a raw URL/path/locator, so a private locator can never be smuggled into a note or event.",
+  "type": "object",
+  "required": ["media_id", "transcript_sha256", "ref_class"],
+  "additionalProperties": false,
+  "properties": {
+    "media_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{8,128}$",
+      "description": "The transcriber's content hash for the source media (stable across rename). Opaque, non-secret; the idempotency/conflict key."
+    },
+    "transcript_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Lowercase hex sha256 of the captured transcript text. Re-ingesting the same media_id with a different value is a media_id_conflict."
+    },
+    "ref_class": {
+      "type": "string",
+      "enum": [
+        "public_ref",
+        "signed_url_detected",
+        "token_detected",
+        "local_private_path",
+        "ambiguous_default_private"
+      ],
+      "description": "Classification of the original-media pointer. Only the class is stored — NEVER the raw URL/path/locator value."
+    },
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Present iff ref_class is public_ref: a non-sensitive external pointer (e.g. a public URL or a non-private path). Metadata only."
+    },
+    "secref": {
+      "type": "string",
+      "pattern": "^secref_[A-Za-z0-9_-]+$",
+      "description": "Present iff ref_class is NOT public_ref: a secure_ref id. The opaque locator lives only inside secure_refs/<id>.md; it never appears here."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "ref_class": { "const": "public_ref" } } },
+      "then": { "required": ["ref"], "not": { "required": ["secref"] } },
+      "else": { "required": ["secref"], "not": { "required": ["ref"] } }
+    }
+  ]
+}

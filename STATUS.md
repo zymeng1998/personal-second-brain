@@ -21,8 +21,15 @@
   queryable idempotency/conflict ledger, scanned via the enforced `note list`/`note get`; capture
   event carries it for audit). The block is strict `additionalProperties:false` so a raw locator
   field is unrepresentable by construction; private locators live only inside the secref pointer.
-- **SB-070 → `In Progress`** (dep SB-010 `Done`; decision gate cleared). Scope grew to include the
-  capture-carries-media plumbing so the contract is coherent + independently tested (3 pts).
+- **SB-070 `Done`** — `"transcript"` source kind (capture.ts/.schema.json/RAW_SOURCE_KINDS) +
+  `media_reference.schema.json` + `@sb/interfaces` `MediaReference`/`MediaIngestInput` types +
+  dependency-free `parseMediaReference` (auditable, leak-free, class↔handle invariant; frozen
+  result) + the capture-carries-media plumbing (`--media <json>` flag → runCapture → note `media:`
+  frontmatter block + capture event payload). `media` block strict in all 3 schemas (no raw-locator
+  field representable). Tests: schema parity (16 shared fixtures, scripts) 4/4 + cli capture-media
+  3/3 (public block in note+event; private stores class+secref id only, no signed-url artifacts;
+  malformed `--media` fails closed zero writes). Root `pnpm test` exit 0 — **297 tests**, 0 fail.
+  Next: SB-071 (`surface:media-intake` grant).
 
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with

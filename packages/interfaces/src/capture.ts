@@ -5,6 +5,7 @@
  */
 import type { Ulid } from "./ids.js";
 import type { IsoDateTime } from "./note.js";
+import type { MediaReference } from "./media-reference.js";
 
 export type CaptureSource =
   | "paste"
@@ -13,7 +14,8 @@ export type CaptureSource =
   | "ocr"
   | "voice"
   | "clip"
-  | "import";
+  | "import"
+  | "transcript";
 
 export interface CaptureRequest {
   /** Verbatim content stored byte-faithfully in vault/00_Raw/. */
@@ -25,6 +27,12 @@ export interface CaptureRequest {
   tags?: string[];
   /** Optional external reference (URL, message id). Metadata only. */
   ref?: string;
+  /**
+   * Optional auditable, non-leaking media provenance (EPIC-CORE-013): set by
+   * the media-intake adapter on `source: "transcript"` captures. Never carries
+   * a raw locator (see `MediaReference`).
+   */
+  media?: MediaReference;
   /** Optional client capture time; defaults to now. */
   captured_at?: IsoDateTime;
 }

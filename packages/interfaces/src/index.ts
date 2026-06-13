@@ -36,6 +36,20 @@ export type {
 export type { CaptureSource, CaptureRequest, CaptureResult } from "./capture.js";
 
 export type {
+  MediaRefClass,
+  MediaReference,
+  MediaIngestInput,
+  MediaReferenceInvalidReason,
+} from "./media-reference.js";
+export {
+  MEDIA_ID_PATTERN,
+  TRANSCRIPT_SHA256_PATTERN,
+  MEDIA_REF_CLASSES,
+  MediaReferenceError,
+  parseMediaReference,
+} from "./media-reference.js";
+
+export type {
   ProposeDistillationInput,
   DistillationProposal,
   DistillationResult,

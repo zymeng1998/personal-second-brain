@@ -88,6 +88,22 @@
       "type": "string",
       "pattern": "^secref_[A-Za-z0-9_-]+$",
       "description": "Pointer to external secure storage. Never inline sensitive content in the note."
+    },
+    "media": {
+      "type": "object",
+      "description": "Auditable, non-leaking media provenance on a transcript L0 note (EPIC-CORE-013). Mirrors media_reference.schema.json; no raw-locator field is representable.",
+      "required": ["media_id", "transcript_sha256", "ref_class"],
+      "additionalProperties": false,
+      "properties": {
+        "media_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{8,128}$" },
+        "transcript_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "ref_class": {
+          "type": "string",
+          "enum": ["public_ref", "signed_url_detected", "token_detected", "local_private_path", "ambiguous_default_private"]
+        },
+        "ref": { "type": "string", "minLength": 1 },
+        "secref": { "type": "string", "pattern": "^secref_[A-Za-z0-9_-]+$" }
+      }
     }
   },
   "allOf": [

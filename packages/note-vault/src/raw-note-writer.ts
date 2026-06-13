@@ -20,7 +20,15 @@ import { rawDir, rawNotePath } from "./raw-paths.js";
  * schemas/json/capture.schema.json (and `CaptureSource` in @sb/interfaces),
  * kept here as a runtime list for validation. Domain-neutral.
  */
-export type RawSourceKind = "paste" | "email" | "wechat" | "ocr" | "voice" | "clip" | "import";
+export type RawSourceKind =
+  | "paste"
+  | "email"
+  | "wechat"
+  | "ocr"
+  | "voice"
+  | "clip"
+  | "import"
+  | "transcript";
 
 export const RAW_SOURCE_KINDS: readonly RawSourceKind[] = [
   "paste",
@@ -30,7 +38,21 @@ export const RAW_SOURCE_KINDS: readonly RawSourceKind[] = [
   "voice",
   "clip",
   "import",
+  "transcript",
 ];
+
+/**
+ * Auditable, non-leaking media provenance written into a transcript L0 note's
+ * `media:` frontmatter block (EPIC-CORE-013). Mirrors `MediaReference` in
+ * `@sb/interfaces`; carries no raw locator by construction.
+ */
+export interface RawMediaReference {
+  media_id: string;
+  transcript_sha256: string;
+  ref_class: string;
+  ref?: string;
+  secref?: string;
+}
 
 /** Filename-safe slug: starts alphanumeric, then alphanumerics / `.`/`_`/`-`. No path separators or `..`. */
 const SLUG_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -53,6 +75,8 @@ export interface WriteRawNoteInput {
   tags?: string[];
   /** Optional external reference (URL, message id). Metadata only — never sensitive content. */
   ref?: string;
+  /** Optional media provenance block (EPIC-CORE-013); written under `media:`. Never a raw locator. */
+  media?: RawMediaReference;
   /** Optional human-readable, NON-canonical filename slug. May change later; the id never does. */
   slug?: string;
 }
@@ -81,6 +105,15 @@ function buildFrontmatter(input: WriteRawNoteInput): string {
   lines.push("source:");
   lines.push(`  kind: ${yamlScalar(input.source)}`);
   if (input.ref !== undefined) lines.push(`  ref: ${yamlScalar(input.ref)}`);
+  if (input.media !== undefined) {
+    const media = input.media;
+    lines.push("media:");
+    lines.push(`  media_id: ${yamlScalar(media.media_id)}`);
+    lines.push(`  transcript_sha256: ${yamlScalar(media.transcript_sha256)}`);
+    lines.push(`  ref_class: ${yamlScalar(media.ref_class)}`);
+    if (media.ref !== undefined) lines.push(`  ref: ${yamlScalar(media.ref)}`);
+    if (media.secref !== undefined) lines.push(`  secref: ${yamlScalar(media.secref)}`);
+  }
   if (input.tags !== undefined && input.tags.length > 0) {
     lines.push("tags:");
     for (const tag of input.tags) lines.push(`  - ${yamlScalar(tag)}`);

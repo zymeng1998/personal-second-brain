@@ -18,8 +18,8 @@ import { runQuery } from "./query-command.js";
 import { FactCliError, runFactAccept, runFactAdd, runFactList } from "./fact-command.js";
 import { OutputCliError, runOutputCreate } from "./output-command.js";
 import { SecrefCliError, runSecrefAdd, runSecrefList } from "./secref-command.js";
-import { DOMAIN_APP_ID_PATTERN, enforceScope, loadGrantConfig } from "@sb/interfaces";
-import type { GrantConfig } from "@sb/interfaces";
+import { DOMAIN_APP_ID_PATTERN, enforceScope, loadGrantConfig, parseMediaReference } from "@sb/interfaces";
+import type { GrantConfig, MediaReference } from "@sb/interfaces";
 
 export interface CliIO {
   stdin: Readable | NodeJS.ReadStream;
@@ -39,6 +39,7 @@ Flags:
   --title <title>      Optional human title.
   --tag <tag>          Optional tag; repeatable, or comma-separated.
   --ref <ref>          Optional non-sensitive external reference (URL, message id).
+  --media <json>       Optional auditable media provenance (EPIC-CORE-013; media-intake adapter). Never a raw locator.
   --slug <slug>        Optional human-readable filename slug (non-canonical).
   --workspace <path>   Absolute workspace override; else SECOND_BRAIN_WORKSPACE / .env.
   --help               Show this help.
@@ -80,6 +81,7 @@ interface ParsedCaptureArgs {
   source?: string;
   title?: string;
   ref?: string;
+  media?: MediaReference;
   slug?: string;
   workspace?: string;
   tags: string[];
@@ -118,6 +120,26 @@ function parseCaptureArgs(args: string[]): ParsedCaptureArgs {
       case "--ref":
         parsed.ref = requireValue(args, ++i, arg);
         break;
+      case "--media": {
+        // Auditable media provenance as JSON (EPIC-CORE-013). Strictly validated;
+        // a malformed/leaky block fails closed before any write.
+        const raw = requireValue(args, ++i, arg);
+        let value: unknown;
+        try {
+          value = JSON.parse(raw);
+        } catch {
+          throw new CaptureCliError("bad_arguments", "--media must be valid JSON");
+        }
+        try {
+          parsed.media = parseMediaReference(value);
+        } catch (e) {
+          throw new CaptureCliError(
+            "bad_arguments",
+            e instanceof Error ? e.message : "invalid --media reference",
+          );
+        }
+        break;
+      }
       case "--slug":
         parsed.slug = requireValue(args, ++i, arg);
         break;
@@ -257,6 +279,7 @@ export async function main(argv: string[], io: Partial<CliIO> = {}, caller = "cl
       ...(parsed.title !== undefined ? { title: parsed.title } : {}),
       ...(parsed.tags.length > 0 ? { tags: parsed.tags } : {}),
       ...(parsed.ref !== undefined ? { ref: parsed.ref } : {}),
+      ...(parsed.media !== undefined ? { media: parsed.media } : {}),
       ...(parsed.slug !== undefined ? { slug: parsed.slug } : {}),
       ...(parsed.workspace !== undefined ? { workspace: parsed.workspace } : {}),
     });

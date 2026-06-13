@@ -15,8 +15,8 @@
     },
     "source": {
       "type": "string",
-      "enum": ["paste", "email", "wechat", "ocr", "voice", "clip", "import"],
-      "description": "Adapter/source kind. MVP implements `paste` only; the others are reserved for later adapters."
+      "enum": ["paste", "email", "wechat", "ocr", "voice", "clip", "import", "transcript"],
+      "description": "Adapter/source kind. MVP implements `paste` only; the others are reserved for later adapters. `transcript` is the media-intake adapter (EPIC-CORE-013)."
     },
     "title": {
       "type": "string",
@@ -33,6 +33,29 @@
       "type": "string",
       "minLength": 1,
       "description": "Optional external reference (URL, message id). Metadata only — never sensitive content."
+    },
+    "media": {
+      "type": "object",
+      "description": "Optional auditable, non-leaking media provenance (EPIC-CORE-013). Strict shape mirrors media_reference.schema.json; no raw-locator field is representable. Set by the media-intake adapter on `source: transcript` captures.",
+      "required": ["media_id", "transcript_sha256", "ref_class"],
+      "additionalProperties": false,
+      "properties": {
+        "media_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{8,128}$" },
+        "transcript_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "ref_class": {
+          "type": "string",
+          "enum": ["public_ref", "signed_url_detected", "token_detected", "local_private_path", "ambiguous_default_private"]
+        },
+        "ref": { "type": "string", "minLength": 1 },
+        "secref": { "type": "string", "pattern": "^secref_[A-Za-z0-9_-]+$" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "ref_class": { "const": "public_ref" } } },
+          "then": { "required": ["ref"], "not": { "required": ["secref"] } },
+          "else": { "required": ["secref"], "not": { "required": ["ref"] } }
+        }
+      ]
     },
     "captured_at": {
       "type": "string",
