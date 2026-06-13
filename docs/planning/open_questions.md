@@ -111,22 +111,30 @@ atomic commit per story; SB-074 + SB-077 re-run inside SB-084.
 ## Decide before EPIC-CORE-013 implementation (Media Transcription Intake)
 
 Filed 2026-06-12 during the EPIC-CORE-013 refinement (SB-070/071/072 + SB-085/086/087, deferrable
-SB-088 — see [`media_intake_story_map.md`](media_intake_story_map.md)). **PENDING human review** —
-SB-070 goes `Ready` only after these are approved (or amended). Epic-wide guardrails fixed by the
-authorization (not open): the core never stores media binaries (transcript text + references only);
-private media pointers (signed URLs, tokens, private paths) use secure_ref (opaque, never echoed);
-no secret/signed-URL/locator leak in notes/events/logs/snapshots/errors; intake reuses the enforced
-dispatch under a fixed least-privilege `surface:*` identity (never `cli`); re-ingest idempotent on
-`media_id`; the transcriber's artifact store is read-only and its layout + organize-by-name
-preserved; domain-neutral; one atomic commit per story; SB-074/077/084 re-run inside SB-087.
+SB-088 — see [`media_intake_story_map.md`](media_intake_story_map.md)).
+**ALL FIVE RESOLVED (2026-06-12): human approved exactly as leaned, with TWO AMENDMENTS:**
+**(A) Strict idempotency** — re-ingesting the same `media_id` with the same transcript hash AND the
+same media reference is idempotent (no-op, reports the existing note); re-ingesting the same
+`media_id` with a different transcript content/hash OR a different media reference **fails closed as
+`media_id_conflict` with ZERO writes**. **(B) Auditable-but-non-leaking classification** — store
+only non-sensitive classification metadata (`public_ref`, `signed_url_detected`, `token_detected`,
+`local_private_path`, `ambiguous_default_private`); **never** store or echo the raw private
+URL/path/locator in notes, events, logs, snapshots, fixtures, HTTP responses, CLI output, or errors.
+Epic-wide guardrails: core never stores media binaries (transcript text + references only); private
+media pointers use secure_ref (opaque, never echoed; `read:secure_refs` hard-denied); intake reuses
+the enforced dispatch under `surface:media-intake` (never `cli`, no resolver/enforcer bypass);
+least-privilege grant (capture, read/promote notes, write secure_ref metadata); `media_id`
+deterministic from the artifact-dir name unless overridden, strictly validated; v1 does NOT parse
+`source-metadata.json`/`manifest.json` (pointer via explicit flag); L1 reuses `note promote` (no
+new writer path); domain-neutral; one atomic commit per story; SB-074/077/084 re-run inside SB-087.
 
-| # | Question | Lean |
+| # | Question | Decision (2026-06-12, approved as leaned + amendments A/B) |
 |---|---|---|
-| 36 | **Minimal transcript input format for v1** — `.txt`, `.srt`/`.vtt`, or both? | **`.txt` + `.md` captured verbatim** (the transcriber already emits prose `transcript.md` — the canonical input). `.srt`/`.vtt` cue-index/timestamp stripping is a distinct parsing concern handled by a dedicated **gate-independent SB-088** (deferrable) that normalizes to prose. Minimal core path = text/markdown verbatim; timed-caption support is a separate optional story. |
-| 37 | **Transcripts only, or also register media before a transcript exists?** | **Transcripts only for v1.** The media reference is recorded **together with** the transcript at ingest (provenance), not standalone — an L0 raw requires real content; a bodiless "media stub" adds little value. Pre-registering media before a transcript exists is deferred. |
-| 38 | **L0 only, or also a distillation/review path?** | **L0 raw (verbatim) + a thin L1 review bridge.** Ingest always writes L0; SB-086 seeds an L1 working note in `00_Inbox` by **reusing the existing `note promote`**, so the transcript enters the existing capture → distill / review pipeline. No new distillation logic — Phase 1H/Phase 4 handle L2+ unchanged. |
-| 39 | **Media reference: external path/link metadata vs `secure_ref`?** | **Both, classified by sensitivity — private-by-default for ambiguous/signed pointers.** Non-sensitive external paths/URLs → plain capture `ref` metadata; private cloud links, **signed URLs / token-bearing links**, private paths, keychain items → **`secure_ref`** (opaque locator ≤500, never echoed; `read:secure_refs` stays hard-denied). Signed/token-bearing pointers are forced to secure_ref; the adapter creates the secref itself (needs `write:secure_refs`) for a one-command workflow. |
-| 40 | **Which surface exposes v1 first?** | **A dedicated CLI adapter app — `apps/media-intake`, identity `surface:media-intake`** (mirrors `apps/obsidian-helper`). Not folded into the core `sb` CLI (keeps the adapter optional/separable with a narrower-than-`cli` grant), not dashboard/obsidian. One CLI surface = the minimal usable workflow; dashboard/obsidian integration deferred. |
+| 36 | Minimal transcript input format for v1 | **RESOLVED:** `.txt` + `.md` captured verbatim (the transcriber's prose `transcript.md` is the canonical input). `.srt`/`.vtt` → prose normalization is the deferrable, gate-independent **SB-088** (after the gate path if still small; timestamps NOT kept in the note body unless explicitly documented as non-sensitive metadata). |
+| 37 | Transcripts only, or also pre-register media? | **RESOLVED:** transcripts only; the media reference is recorded **with** the transcript at ingest, never standalone. No media-only pre-registration. |
+| 38 | L0 only, or also a distillation/review path? | **RESOLVED:** L0 verbatim + a thin L1 bridge that **reuses `note promote`** (no new note writer path, no new distillation logic); the transcript enters the existing capture → distill / review flow. |
+| 39 | Media reference: plain `ref` vs `secure_ref`? | **RESOLVED:** both, sensitivity-classified. Signed URLs, token-bearing URLs, private paths, keychain-style locators, and **ambiguous pointers (private-by-default)** become opaque `secure_ref`s; only non-sensitive pointers use plain `ref`. Per amendment B, only the classification (`public_ref`/`signed_url_detected`/`token_detected`/`local_private_path`/`ambiguous_default_private`) is stored — never the raw locator. |
+| 40 | Which surface exposes v1 first? | **RESOLVED:** a dedicated optional `apps/media-intake` CLI adapter, identity `surface:media-intake` — not the core `sb` CLI, not dashboard/Obsidian yet. |
 
 ## Decide later
 

@@ -7,8 +7,14 @@ binding workflow + artifact-store shape), [`security_story_map.md`](security_sto
 [`phase_5_story_map.md`](phase_5_story_map.md) (the surface/secure_ref integration model this epic
 reuses).
 
-**Status (2026-06-12): REFINED — ⏸ STOPPED FOR THE OPEN-DECISION REVIEW (OQ #36–#40).**
-No implementation has started; all 7 stories are `Backlog` per the Ready rule.
+**Status (2026-06-12): DECISION REVIEW PASSED — OQ #36–#40 approved exactly as leaned, with two
+amendments** (recorded in [`open_questions.md`](open_questions.md)): **(A) strict idempotency** —
+same `media_id` + same transcript hash + same media reference is idempotent; same `media_id` with a
+different transcript hash or media reference fails closed as `media_id_conflict` (zero writes);
+**(B) auditable-but-non-leaking classification** — store only the class (`public_ref`/
+`signed_url_detected`/`token_detected`/`local_private_path`/`ambiguous_default_private`), never the
+raw locator. Implementation authorized in dependency order SB-070 → 071 → 072 → 085 → 086 → 087 →
+088, one atomic commit per story; SB-074 + SB-077 + SB-084 re-run inside SB-087.
 
 ## Objective
 

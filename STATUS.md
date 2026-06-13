@@ -2,6 +2,28 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## EPIC-CORE-013 — DECISION REVIEW PASSED (2026-06-12); autonomous implementation session STARTED
+- **Human approved OQ #36–#40 exactly as leaned, with two amendments:** (A) **strict idempotency** —
+  same `media_id` + same transcript hash + same media reference ⇒ idempotent no-op; same `media_id`
+  with a different transcript hash or media reference ⇒ fail closed `media_id_conflict`, ZERO writes.
+  (B) **auditable-but-non-leaking classification** — store only the class (`public_ref`/
+  `signed_url_detected`/`token_detected`/`local_private_path`/`ambiguous_default_private`), never the
+  raw private URL/path/locator anywhere.
+- **Session authorization:** SB-070 → 071 → 072 → 085 → 086 → 087 → 088, one atomic commit per
+  story; guardrails: no media binaries in core; transcript text as content, media as
+  metadata/reference only; secure_ref for private/signed/token/ambiguous pointers
+  (`read:secure_refs` hard-denied); `surface:media-intake` via the enforced dispatch (no bypass);
+  least-privilege grant; `media_id` deterministic from artifact-dir name, strictly validated; v1
+  does not parse `source-metadata.json`/`manifest.json`; L1 reuses `note promote`; SB-074/077/084
+  re-run inside SB-087.
+- **Design note (carried by all cards):** the auditable `media` provenance block — `{media_id,
+  transcript_sha256, ref_class, ref?|secref?}` — rides on the capture (note frontmatter = the
+  queryable idempotency/conflict ledger, scanned via the enforced `note list`/`note get`; capture
+  event carries it for audit). The block is strict `additionalProperties:false` so a raw locator
+  field is unrepresentable by construction; private locators live only inside the secref pointer.
+- **SB-070 → `In Progress`** (dep SB-010 `Done`; decision gate cleared). Scope grew to include the
+  capture-carries-media plumbing so the contract is coherent + independently tested (3 pts).
+
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with
   guardrails: core never stores media binaries (transcript text + references only); private media

@@ -189,7 +189,7 @@ stories promote to `Ready` only after the human confirms (or amends) the leans.
 
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
-| SB-070 | Story | Media intake contract (`transcript` source + `media_reference` schema/types) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-010 (`Done`) |
+| SB-070 | Story | Media intake contract (`transcript` source + `media_reference` schema/types) | EPIC-CORE-013 | P2 | In Progress | 3 | SB-010 (`Done`) |
 | SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Backlog | 2 | SB-069, SB-076 (`Done`) |
 | SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-070, SB-050 (`Done`) |
 | SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-071, SB-072 |
