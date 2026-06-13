@@ -81,3 +81,7 @@ export async function listFacts(workspace: string): Promise<AppResult> {
 export async function invokeAs(argv: string[]): Promise<AppResult> {
   return invoke(argv);
 }
+
+// Workflow modules (each lands in the story that adds its grant scope).
+export { captureClientNote, CaptureClientError, CLIENT_NOTE_TAG } from "./client-capture.js";
+export type { CaptureClientArgs, CaptureClientResult } from "./client-capture.js";
