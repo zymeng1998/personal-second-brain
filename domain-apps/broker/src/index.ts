@@ -87,3 +87,15 @@ export { captureClientNote, CaptureClientError, CLIENT_NOTE_TAG } from "./client
 export type { CaptureClientArgs, CaptureClientResult } from "./client-capture.js";
 export { promoteClient } from "./client-promote.js";
 export type { PromoteClientResult } from "./client-promote.js";
+export {
+  buildPreferenceProposal,
+  acceptPreferenceFacts,
+  PreferenceProposalError,
+  PREFERENCE_KINDS,
+} from "./preference-facts.js";
+export type {
+  ClientPreference,
+  PreferenceKind,
+  ExtractFactsProposal,
+  AcceptFactsResult,
+} from "./preference-facts.js";
