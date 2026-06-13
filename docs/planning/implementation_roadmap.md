@@ -90,6 +90,11 @@ Green at the checkpoint: `pnpm test` **321 tests**, coverage **93.23% lines**, `
 Built entirely on `interfaces` under scoped permissions; validates domain independence. (Any earlier
 interface smoke test uses a generic `domain-apps/example-readonly/`, never broker.)
 - **Done when:** broker reads/writes the core only through scoped contracts; core has zero broker code.
+- **REFINED (2026-06-13)** into 6 ≤3-pt stories (SB-089..094, 14 pts) — see
+  [`broker_story_map.md`](broker_story_map.md). v1 = **client preference tracking** (read-only
+  `domain-app:broker` binding → capture → `note promote` → L3 client-preference facts) + a read-only
+  showing-match summary; grants from `config/grants.json` only (least-privilege); property media
+  reuses `apps/media-intake`. ⏸ Blocked on the OQ #41–#47 decision review.
 
 ## Cross-cutting (every phase)
 

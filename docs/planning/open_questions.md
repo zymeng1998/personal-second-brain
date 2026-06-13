@@ -136,6 +136,34 @@ new writer path); domain-neutral; one atomic commit per story; SB-074/077/084 re
 | 39 | Media reference: plain `ref` vs `secure_ref`? | **RESOLVED:** both, sensitivity-classified. Signed URLs, token-bearing URLs, private paths, keychain-style locators, and **ambiguous pointers (private-by-default)** become opaque `secure_ref`s; only non-sensitive pointers use plain `ref`. Per amendment B, only the classification (`public_ref`/`signed_url_detected`/`token_detected`/`local_private_path`/`ambiguous_default_private`) is stored — never the raw locator. |
 | 40 | Which surface exposes v1 first? | **RESOLVED:** a dedicated optional `apps/media-intake` CLI adapter, identity `surface:media-intake` — not the core `sb` CLI, not dashboard/Obsidian yet. |
 
+## Decide before EPIC-DOMAIN-001 implementation (Broker Domain App)
+
+Filed 2026-06-13 during the EPIC-DOMAIN-001 refinement (SB-089..094, deferrable SB-093 — see
+[`broker_story_map.md`](broker_story_map.md)). **⏸ AWAITING THE DECISION REVIEW — leans recorded;
+human confirms (or amends) → SB-089 goes `Ready`.** Epic-wide guardrails fixed by the refinement
+authorization (not open questions): no broker concepts in `packages/interfaces`, `packages/core`,
+generic schemas, generic surfaces, or generic docs; broker code lives only under
+`domain-apps/broker/`; broker invokes the core only via the enforced dispatch
+(`main(argv, io, "domain-app:broker")`) — never `cli`/`surface:*`, never a second enforcement path;
+grants come only from the workspace `config/grants.json` under the existing domain-app grant model;
+least-privilege, read-only unless a specific story requires a write; `ALWAYS_DENIED_SCOPES`
+(`write:raw`, `delete:*`, `read:secure_refs`) ungrantable; no secrets / client PII / private
+landlord data / signed URLs / secure_ref locators / raw contact details in tests, fixtures,
+snapshots, logs, or docs; sensitive references use the secure_ref pattern; domain-specific
+parsing/storage stays separate from generic core contracts; no WeChat/email/scraping/external
+integration v1; prefer local/imported artifacts first; one atomic commit per story; refinement
+docs-only; SB-074/077/084/087 re-run inside SB-094.
+
+| # | Question | Lean (2026-06-13) |
+|---|---|---|
+| 41 | First broker MVP workflow — preference tracking / property inventory / showing-match summary / viewing-schedule prep / manager report? | **Client preference tracking** — the foundational dataset every later broker workflow reads from; maps directly onto the completed capture → promote → fact pipeline; uses local/imported artifacts (pasted chat export / manual note). Delivered **read-only-first** (SB-089 binding, zero writes), then minimal intake (SB-090/091/092). **Showing-match summary** is the read-only payoff (SB-093, deferrable). Property inventory, viewing-schedule prep, and manager report = named future stories. |
+| 42 | Structured broker-domain data vs ordinary PSB notes/facts? | **Layered onto generic core types.** Verbatim source = generic **L0** capture; reviewable note = **L1** via `note promote`; structured client preferences (budget band, target areas, bedrooms, move-in window, hard constraints) = generic **L3 facts** with broker-meaningful predicates + provenance. The preference vocabulary/parser and any broker-only datasets (property inventory, area normalization) live **only** under `domain-apps/broker/` — never a core note type or schema. |
+| 43 | Broker v1 surface — CLI-only (core `sb`), dashboard extension, or separate domain app CLI? | **Separate domain-app CLI** under `domain-apps/broker/`, identity `domain-app:broker`, invoked via `main(argv, io, caller)` — mirrors `example-readonly` / `apps/media-intake`. **Not** folded into core `sb` (that would put broker in the core); **not** a dashboard extension v1 (a broker dashboard view is a later story). |
+| 44 | What write actions, if any, are needed in v1? | **Read-only binding first** (`read:notes`, `read:facts`); intake then adds, least-privilege per story: `write:capture` → `write:notes` (promote) → `write:facts` + `read:index` (dedup/match read-back). Cumulative v1 grant = `[read:notes, read:facts, read:index, write:capture, write:notes, write:facts]`. **Not** v1: `write:outputs` (deferred saved-summary story), `write:secure_refs` (broker is a media-intake *consumer*, OQ #46), `write:distill`, `rebuild:projections`, `write:index`, `append:events`. `ALWAYS_DENIED` impossible. |
+| 45 | How will PII / private client data be redacted or represented in tests? | **Synthetic-only fixtures** — fictional clients ("Client A"), placeholder areas/budgets, sentinel contact handles (e.g. `wechat:REDACTED_SENTINEL`); no real names, numbers, addresses, or WeChat IDs. Where a test proves a private locator does not leak, it reuses the **secure_ref sentinel pattern** (SB-074/087): a known sentinel lives only inside a secure_ref pointer and is asserted absent from every broker-produced note/event/log/snapshot/output/stdout. Real client PII is never committed. |
+| 46 | How should property media/videos reuse the completed media-intake + secure_ref patterns? | **Broker is a pure consumer.** Property tour videos/photos go through the **existing** `apps/media-intake` (`surface:media-intake`) → transcript L0 + `media_id` + public `ref` or private `secref` handle. Broker (later story) **references** that `media_id`/handle when it reads the resulting note via `read:notes`; broker never stores media binaries, never creates secure_refs in v1, never echoes private locators. |
+| 47 | What remains explicitly out of scope (WeChat live sync, Gmail/Calendar automation, landlord portal scraping, auto-send)? | **All OUT of the first refinement:** WeChat live sync / auto-send (drafts stay manual paste-export; broker may *draft* text for a human to send, never send), Gmail / Calendar automation (the environment calendar MCP is unused), landlord-portal scraping, external-account integration, auto-send messages, commission / financial calculation, rental-application submission, a broker note type/schema in the core, and dashboard broker views. Some are recorded as named future stories. |
+
 ## Decide later
 
 | # | Question | Lean |

@@ -17,4 +17,9 @@ Any pre-Phase-6 interface smoke test uses a generic `domain-apps/example-readonl
 
 ## Status
 
-Docs-only placeholder. See `docs/` (also placeholder). Real work begins after the core is stable.
+Docs-only placeholder. **REFINED 2026-06-13** — the coarse epic stub (SB-900) is decomposed into 6
+≤3-pt stories (SB-089..094); see [`../../docs/planning/broker_story_map.md`](../../docs/planning/broker_story_map.md)
+for the v1 plan (client preference tracking, read-only-first) and
+[`../../docs/planning/open_questions.md`](../../docs/planning/open_questions.md) (OQ #41–#47). **No
+code, schemas, or data models yet** — implementation begins only after the OQ #41–#47 decision
+review confirms the leans and SB-089 goes `Ready`.

@@ -34,7 +34,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Done | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, deep-frozen, absolute first-party precedence) + generic read-only `domain-apps/example-readonly/` binding template. **Gate met 2026-06-11** (SB-077): privileged/shadowing/malformed/duplicate configs all fail closed with zero writes; SB-074 invariants re-asserted with config present. **All 5 stories `Done`** (SB-060/075/076/061/077) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Done | Optional CLI adapter (`apps/media-intake`, `surface:media-intake`) ingesting `psb-media-transcriber` transcripts as L0 captures (text + references only, never media binaries; private pointers use secure_ref; strict `media_id` idempotency; `.srt`/`.vtt`→prose). **Gate met 2026-06-12** (SB-087): idempotency + provenance round-trip + no-binary + no-leak + SB-074/077/084 re-asserted. **All 7 stories `Done`** (SB-070/071/072 + SB-085/086/087/088) — see [`media_intake_story_map.md`](media_intake_story_map.md). |
 | EPIC-CORE-014 | AI Workflows | 4 | P1 | Done | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H) + `sb fact` / L5 `sb output create` confirmed write paths. **Gate met 2026-06-10** (SB-066): propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable. **All 9 stories `Done`** (SB-056..059 + SB-062..066, one autonomous session). |
-| EPIC-DOMAIN-001 | Broker Domain App | 6+ | P3 | **Deferred** | Broker tool, docs-only until core is stable. **Not planned in detail.** |
+| EPIC-DOMAIN-001 | Broker Domain App | 6 | P3 | **Refined** | First domain app (rental broker), built entirely on the completed core via `domain-app:broker` through the enforced dispatch; v1 = **client preference tracking** (capture → promote → L3 facts) + read-only showing-match summary. **REFINED 2026-06-13** into 6 ≤3-pt stories (SB-089..094, 14 pts) — coarse stub SB-900 decomposed; see [`broker_story_map.md`](broker_story_map.md). ⏸ Blocked on the OQ #41–#47 review. No broker code in the core. |
 
 ---
 
@@ -212,7 +212,13 @@ approved (+ amendments); all 7 stories `Done`, SB-087 gate green.
 | SB-069 | Story | First-party caller grants registry | EPIC-CORE-011 | P1 | Done | 3 | SB-068 |
 | SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Done | 3 | SB-069 |
 | SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Done | 2 | SB-067, SB-073 |
-| SB-900 | Epic-stub | Broker domain app | EPIC-DOMAIN-001 | P3 | **Deferred** | — | Core stable + EPIC-CORE-012 |
+| SB-900 | Epic-stub | ~~Broker domain app~~ **DECOMPOSED (2026-06-13)** → SB-089..094 | EPIC-DOMAIN-001 | P3 | Split | — | Core stable + EPIC-CORE-012 |
+| SB-089 | Story | Broker boundary + read-only binding (`domain-app:broker`) | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-061, SB-076 |
+| SB-090 | Story | Client-preference capture → L0 (`write:capture`) | EPIC-DOMAIN-001 | P3 | Backlog | 3 | SB-089 |
+| SB-091 | Story | Client working note via `note promote` (`write:notes`) | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-090 |
+| SB-092 | Story | Client-preference facts via `fact accept` (`write:facts`, `read:index`) | EPIC-DOMAIN-001 | P3 | Backlog | 3 | SB-091 |
+| SB-093 | Story | Showing-match summary (read-only, stdout) — *deferrable* | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-092 |
+| SB-094 | Story | Broker epic gate (boundary + intake round-trip + no-leak + domain-neutral) | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-089, SB-092 |
 
 > Stories marked `5→split` or `8→split` **must be decomposed** into ≤3-point stories during refinement
 > before they can become `Ready` (project split rule). They are intentionally left coarse now.
@@ -2126,6 +2132,138 @@ notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
 
 ---
 
+# EPIC-DOMAIN-001 story cards (Broker Domain App)
+
+Refined 2026-06-13 — see [`broker_story_map.md`](broker_story_map.md) for the objective, fixed
+guardrails, architecture, and the OQ #41–#47 decision review (required before SB-089 goes `Ready`).
+Epic-wide invariants every card inherits: **no broker concepts in the core** (`packages/interfaces`,
+`packages/core`, generic schemas, generic surfaces, generic docs) — broker code lives **only** under
+`domain-apps/broker/`; broker reaches the core **only** through the enforced dispatch
+(`main(argv, io, "domain-app:broker")`) — never `cli`/`surface:*`, never importing core packages,
+never a second enforcement path; grants come **only** from the workspace `config/grants.json` under
+the existing domain-app grant model; least-privilege, **read-only unless a story requires a write**;
+`ALWAYS_DENIED_SCOPES` (`write:raw`, `delete:*`, `read:secure_refs`) ungrantable; **no secrets /
+client PII / private landlord data / signed URLs / secure_ref locators / raw contact details** in
+tests, fixtures, snapshots, logs, or docs (synthetic-only); sensitive references use secure_ref;
+domain parsing/storage stays separate from generic core contracts; prefer local/imported artifacts;
+one atomic commit per story. All six stories are `Backlog` until the OQ review confirms the leans.
+
+## SB-089 — Broker boundary + read-only binding (`domain-app:broker`)
+
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-061 (`Done`), SB-076 (`Done`)
+- **Scope (OQ #43/#44):** turn the docs-only `domain-apps/broker/` placeholder into a real pnpm
+  workspace package mirroring `domain-apps/example-readonly`: `src/index.ts` declaring the **fixed**
+  `domain-app:broker` identity (validated vs `DOMAIN_APP_ID_PATTERN` at load), with invocation
+  **only** through programmatic `main(argv, io, caller)` from `@sb/cli`; a checked-in sample
+  `config/grants.json` granting exactly **`[read:notes, read:facts]`**; README documenting the
+  binding pattern, the cooperative-enforcement honesty note, and the **synthetic-data policy** (real
+  client data only in real workspaces; repo fixtures are synthetic). **No broker workflow logic yet.**
+- **AC (smoke test, Node-only, in root `pnpm test`):** on a populated throwaway workspace with the
+  sample config — (a) `note list`/`note get`/`fact list` succeed under `domain-app:broker`; (b)
+  **every** write/privileged form (capture, note promote, fact add/accept, output create, secref add,
+  rebuild, index, and `read:secure_refs`/`write:raw`/`delete:*`) ⇒ `scope_denied`, workspace
+  byte-identical after the denial sweep (zero writes); (c) ADR-001 domain-neutrality grep of
+  `packages/` + `schemas/` stays clean. **Validation:** new package test in root `pnpm test`.
+- **Files:** `domain-apps/broker/{package.json,tsconfig.json,src/index.ts,test/,README.md}`,
+  `domain-apps/broker/config/grants.json` (or `examples/grants/broker.sample.json`), root workspace
+  wiring, docs, `STATUS.md`.
+- **Out of Scope:** any write scope (added by later stories); any client/property workflow logic;
+  broker vocabulary in the core.
+
+## SB-090 — Client-preference capture → L0 (`write:capture`)
+
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-089
+- **Scope (OQ #41/#42/#44):** `client capture --file <export.md>` (or `--text "…"`): read a pasted
+  client chat export / manual client note **read-only** (extension allowlist `.md`/`.txt`, size cap,
+  path-safety; **never** reads binaries) → route through the enforced `capture` op as
+  `domain-app:broker` → an immutable **L0 raw** note (`source:"import"`), generically tagged (no new
+  note type, no broker schema). Grant += `write:capture`. Synthetic-only fixtures; sentinel contact
+  handles. Mirrors media-intake SB-085's read-then-capture shape (no idempotency ledger required v1).
+- **AC:** a fixture export captures to exactly one L0 + one `captured` event; the verbatim body is
+  preserved; **without** the `write:capture` grant ⇒ `scope_denied`, zero writes; no contact-detail
+  sentinel appears in CLI output or the event payload. **Validation:** package tests; root `pnpm test`.
+- **Files:** `domain-apps/broker/src/client-capture.ts(new)` + dispatch/usage, fixtures, sample
+  config (grant extended), tests, docs, `STATUS.md`.
+- **Out of Scope:** promote/facts (later stories); idempotency ledger; property/media intake; PII in
+  fixtures.
+
+## SB-091 — Client working note via `note promote` (`write:notes`)
+
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-090
+- **Scope (OQ #38-analogue):** `client promote <L0-id>` reuses the enforced **`note promote`** (no new
+  writer path) → an L1 working note in `00_Inbox` citing the L0 client capture, so the client note
+  enters the existing capture → distill / review flow. Grant += `write:notes`. Mirrors media-intake
+  SB-086.
+- **AC:** promoting a captured L0 produces one L1 working note whose `source_ref` resolves to the L0;
+  the L0 is byte-unchanged across the promote; provenance L1 → L0 asserted; **without** `write:notes`
+  ⇒ `scope_denied`, zero writes. **Validation:** package tests; root `pnpm test`.
+- **Files:** `domain-apps/broker/src/client-promote.ts(new)` + dispatch/usage, sample config (grant
+  extended), tests, docs, `STATUS.md`.
+- **Out of Scope:** facts (SB-092); distillation logic; new note types.
+
+## SB-092 — Client-preference facts via `fact accept` (`write:facts`, `read:index`)
+
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-091
+- **Scope (OQ #42):** build a `fact accept --file` proposal (the existing `proposal.schema.json`
+  envelope) from a client working note — structured preference facts (budget band, target areas,
+  bedrooms, move-in window, hard constraints) with provenance (`source_ref` = the L1/L0 id,
+  `observed_at`, `confidence`). The **preference vocabulary + proposal builder live under
+  `domain-apps/broker/`**; the core stores generic facts via the **unchanged** whole-file-validated
+  `fact accept` path (invalid proposal ⇒ nothing written). Grant += `write:facts`, `read:index`
+  (dedup/read-back via `fact list` / `query`). Mirrors the Phase 4 `extract-facts` confirmed-write
+  pattern. Synthetic data only.
+- **AC:** a valid proposal writes exactly the expected provenance-carrying facts, readable via
+  `fact list` and `query`; a malformed/garbled proposal ⇒ `≥1` validation error, **zero** facts
+  written, vault byte-unchanged; **without** `write:facts` ⇒ `scope_denied`, zero writes. **Validation:**
+  package tests; root `pnpm test`.
+- **Files:** `domain-apps/broker/src/preference-facts.ts(new)` + dispatch/usage, fixtures, sample
+  config (grant extended to the full v1 set), tests, docs, `STATUS.md`.
+- **Out of Scope:** auto-dedupe (human picks add/supersede/skip, per OQ #23); matching (SB-093);
+  saved outputs.
+
+## SB-093 — Showing-match summary (read-only, stdout) — *deferrable*
+
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-092
+- **Scope (OQ #41/#46):** `match <client-id>` reads the client-preference facts + any captured
+  property notes/facts (`read:notes` / `read:facts` / `read:index` / `query`) and prints a **ranked
+  match summary to stdout** — **zero writes** (no new write scope beyond the v1 read set). Property
+  media is referenced by `media_id` only (consumer of `apps/media-intake`, OQ #46) — broker stores no
+  binaries and creates no secure_refs. **Deferrable:** the SB-094 gate does not depend on this story.
+- **AC:** matching against synthetic preferences + synthetic property notes produces a deterministic,
+  reproducible ranked summary; a full match pass leaves the vault + events + db byte-identical (zero
+  writes); no private locator / contact sentinel appears in the summary. **Validation:** package
+  tests; root `pnpm test`.
+- **Files:** `domain-apps/broker/src/match.ts(new)` + dispatch/usage, fixtures, tests, docs,
+  `STATUS.md`.
+- **Out of Scope:** saving the summary as an L5 output (`write:outputs` — future story); property
+  inventory intake; auto-scheduling; manager report.
+
+## SB-094 — Broker epic gate (boundary + intake round-trip + no-leak + domain-neutral)
+
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-089, SB-092
+- **Scope:** the epic "Done when" automated (Node-only, in root `pnpm test`): (a) **binding holds** —
+  broker reads succeed under its config grant, every ungranted / `ALWAYS_DENIED` form ⇒ `scope_denied`
+  with the workspace byte-identical for read-only ops; (b) **intake round-trip** — capture → promote →
+  facts writes exactly the expected L0 + L1 + provenance-carrying facts, L0 immutable; (c) **no PII /
+  no private-locator leak** — a synthetic sentinel contact handle + a secure_ref sentinel appear in
+  **no** broker-produced note/event/log/snapshot/output/stdout (full scan); (d) **CORE stays
+  domain-neutral** — ADR-001 grep over `packages/` + `schemas/` + generic docs finds no broker
+  vocabulary; (e) SB-074 / SB-077 / SB-084 / SB-087 invariants re-asserted for `domain-app:broker`
+  (denied outside its grant; `read:secure_refs`/`write:raw`/`delete:*` unobtainable; secure_ref
+  locator never echoed).
+- **AC:** gate green in root `pnpm test`; story map + epics table marked met; coverage baseline
+  (93.19% lines) held. **Validation:** root `pnpm test` + `test:coverage`.
+- **Files:** `domain-apps/broker/test/broker-gate.test.ts(new)`, docs, `STATUS.md`.
+- **Out of Scope:** penetration testing; external integration; dashboard broker views; saved outputs.
+
+---
+
 # Later-epic notes (coarse)
 
 These remain `Backlog`/`Deferred`. Refine (split to ≤3 points + add AC/validation/files) before any
@@ -2164,5 +2302,12 @@ implementation. Detailed cards will be written when each phase is reached.
   idempotent on `media_id`; organize-by-name preserved. Workflow + binding rules in
   [`../workflows/media_transcription_intake.md`](../workflows/media_transcription_intake.md). Blocked on the
   OQ #36–#40 review.
-- **EPIC-DOMAIN-001 Broker (SB-900):** **Deferred.** No detailed stories. Begins only after the core is
-  stable and SB-060/061 are `Done`; lives entirely under `domain-apps/broker/`, core untouched.
+- **EPIC-DOMAIN-001 Broker (SB-900 → SB-089..094):** **REFINED** (2026-06-13) into 6 ≤3-pt stories —
+  see the EPIC-DOMAIN-001 cards above and [`broker_story_map.md`](broker_story_map.md). First domain
+  app (rental broker) built entirely on the completed core via `domain-app:broker` through the
+  enforced dispatch; v1 = **client preference tracking** (read-only binding → capture → `note promote`
+  → L3 client-preference facts) + a read-only **showing-match summary**. Grants from
+  `config/grants.json` only; least-privilege (cumulative v1 `[read:notes, read:facts, read:index,
+  write:capture, write:notes, write:facts]`); property media reuses `apps/media-intake` (broker is a
+  consumer); no broker code in the core. ⏸ Blocked on the OQ #41–#47 review; SB-089 goes `Ready` on
+  confirmation.

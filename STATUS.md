@@ -2,6 +2,38 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## EPIC-DOMAIN-001 (BROKER) REFINED (2026-06-13); ⏸ STOPPED FOR THE OQ #41–#47 REVIEW
+- **Human authorized EPIC-DOMAIN-001 broker refinement** (refinement only — no broker features
+  implemented) with guardrails: no broker concepts in `packages/interfaces`/`packages/core`/generic
+  schemas/surfaces/docs; broker code lives only under `domain-apps/broker/` (mirrors
+  `example-readonly`); broker invokes core only via the enforced dispatch
+  `main(argv, io, "domain-app:broker")`; grants from `config/grants.json` only (never `surface:*`/
+  `cli`); least-privilege, read-only unless a story needs a write; `ALWAYS_DENIED_SCOPES`
+  ungrantable; no secrets/PII/landlord data/signed URLs/secure_ref locators/contact details in
+  tests/fixtures/snapshots/logs/docs (sensitive refs → secure_ref); domain parsing/storage separate
+  from core; no WeChat/email/scraping/external integration v1; prefer local/imported artifacts;
+  atomic ≤3-pt stories; stop after refinement for OQ approval.
+- **Refinement only — no implementation.** Coarse epic-stub **SB-900** decomposed into **6 stories
+  ≤3 pts, 14 pts total** (SB-089..094): SB-089 (broker boundary + read-only binding,
+  `[read:notes, read:facts]`) → SB-090 (client-preference capture → L0, `write:capture`) → SB-091
+  (client working note via `note promote`, `write:notes`) → SB-092 (client-preference facts via
+  `fact accept`, `write:facts`+`read:index`) → SB-093 (showing-match summary, read-only stdout,
+  **deferrable**) → SB-094 (epic gate: boundary + intake round-trip + no-leak + domain-neutral;
+  SB-074/077/084/087 re-asserted). Map: **`broker_story_map.md`** (new); cards + tables in
+  `story_backlog.md`; epics table + roadmap Phase 6 + broker README updated; epic → `Refined`.
+- **v1 = client preference tracking** (the foundational dataset every later broker workflow reads):
+  pasted chat export / manual note → L0 → L1 → L3 facts, all via existing confirmed write paths;
+  showing-match summary is the read-only payoff. Cumulative v1 grant = `[read:notes, read:facts,
+  read:index, write:capture, write:notes, write:facts]`. Property media reuses `apps/media-intake`
+  (broker is a consumer, references `media_id` only — no binaries, no secure_refs in broker v1).
+- **⏸ STOPPED at the decision review: OQ #41–#47 filed** (#41 client preference tracking, read-only-
+  first; #42 generic L0/L1/L3 + broker vocabulary/datasets only under `domain-apps/broker/`; #43
+  separate domain-app CLI; #44 read-only binding then least-privilege writes per story; #45
+  synthetic-only fixtures + secure_ref sentinel leak test; #46 broker is a media-intake consumer;
+  #47 WeChat/Gmail/Calendar/scraping/auto-send all OUT). **Human confirms (or amends) → SB-089
+  `Ready`** → implement SB-089 → 090 → 091 → 092 → 094 (→ 093 optional), one atomic commit each.
+  All 6 stories `Backlog` per the Ready rule.
+
 ## ✅ CORE v0.1 — USABLE CHECKPOINT PASSED (2026-06-13, dogfood pass)
 - **Goal:** validate the completed core is usable end-to-end by a real user **before** any broker
   logic. **Result: PASS** — every documented command was run live against a throwaway workspace;
