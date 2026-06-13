@@ -65,6 +65,14 @@
   L1.source_ref → L0 → media_id → media reference asserted; L0 immutable across the promote; the
   transcript becomes a `distill propose` candidate (enters the existing distill/review flow).
   media-intake **15/15** (+3); root **312 tests**, 0 fail. Next: SB-087 (epic gate).
+- **SB-087 `Done` — EPIC GATE MET** — `media-intake-gate.test.ts` (5 tests): (a) media_id
+  idempotency (double ingest = one L0, byte-identical); (b)+(c) provenance round-trip
+  L1→L0→media_id→media-ref + no media binary in the vault; (d) a private signed-URL sentinel
+  never leaks into any note/event/CLI-output/result — only the secref pointer holds it;
+  (e) domain-neutral grep over `apps/media-intake`; (f) SB-074/077/084 invariants re-asserted
+  (media-intake denied outside its grant; ALWAYS_DENIED incl. read:secure_refs unobtainable for
+  every caller; rogue write sweep). Root `pnpm test` exit 0 — **317 tests**, 0 fail; coverage
+  **93.19% lines** (baseline 92.98% — improved). Next: SB-088 (deferrable `.srt`/`.vtt`).
 
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with

@@ -194,7 +194,7 @@ stories promote to `Ready` only after the human confirms (or amends) the leans.
 | SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Done | 3 | SB-070, SB-050 (`Done`) |
 | SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Done | 3 | SB-071, SB-072 |
 | SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Done | 2 | SB-085 |
-| SB-087 | Story | Media-intake epic gate (idempotency, provenance, no-leak) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085, SB-086 |
+| SB-087 | Story | Media-intake epic gate (idempotency, provenance, no-leak) | EPIC-CORE-013 | P2 | Done | 2 | SB-085, SB-086 |
 | SB-088 | Story | `.srt`/`.vtt` normalization (deferrable, gate-independent) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
 
 ### Later phases (coarse; refine before implementation)
@@ -2084,7 +2084,10 @@ notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
 
 ## SB-087 — Media-intake epic gate (idempotency, provenance, no-leak)
 
-- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Status:** Done
+  — **the epic gate is MET (2026-06-12)**: `apps/media-intake/test/media-intake-gate.test.ts`
+  (Node-only, in root `pnpm test`). Coverage 93.19% lines (baseline 92.98% — improved). The
+  deferrable SB-088 (`.srt`/`.vtt`) is gate-independent and may land after.
 - **Dependencies:** SB-085, SB-086
 - **Scope:** the epic "Done when" automated (one gate test, Node-only, in root `pnpm test`):
   (a) `media_id` idempotency — double ingest writes one L0, second reports existing, workspace
