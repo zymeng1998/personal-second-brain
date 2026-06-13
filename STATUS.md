@@ -46,6 +46,19 @@
   no-write; signed→secref with the sentinel in EXACTLY one file [the secref pointer]; private
   intent forces secref; read:secure_refs not held). Root **302 tests**, 0 fail. Next: SB-085
   (transcript ingest → L0).
+- **SB-085 `Done`** — `apps/media-intake` `ingest` (artifact-dir ⇒ `transcript.md` + media_id =
+  dir name, OR `--transcript`+`--media-id`): guardrails (`.md`/`.txt` allowlist + explicit
+  media-binary denylist [never reads a binary], size cap, file check); reads transcript text,
+  computes `transcript_sha256` + `media_ref_fp`; routes through the enforced `capture`
+  (`source:transcript`) carrying the media block. **Strict idempotency (amendment A):** scan
+  existing raw notes by `media_id` via `note list`/`note get` (dispatch, no bypass) BEFORE any
+  write — same `media_id`+sha+fp ⇒ idempotent no-op (zero writes); differing ⇒ `media_id_conflict`
+  (zero writes). Contract extension: optional one-way `media_ref_fp` [sha256 of the pointer,
+  non-reversible] is the conflict comparator that works for private/secref pointers without
+  leaking. media-intake **12/12** (artifact-dir happy path; idempotent re-ingest snapshot;
+  conflict on differing transcript AND reference; binary refusal + no-binary-in-vault; private
+  signed-URL sentinel in exactly one file; explicit mode + bad media_id; CLI). Root **309 tests**,
+  0 fail. Next: SB-086 (L1 review bridge).
 
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with

@@ -50,6 +50,8 @@ export interface RawMediaReference {
   media_id: string;
   transcript_sha256: string;
   ref_class: string;
+  /** Optional one-way sha256 of the original-media pointer (conflict comparator). */
+  media_ref_fp?: string;
   ref?: string;
   secref?: string;
 }
@@ -110,6 +112,7 @@ function buildFrontmatter(input: WriteRawNoteInput): string {
     lines.push("media:");
     lines.push(`  media_id: ${yamlScalar(media.media_id)}`);
     lines.push(`  transcript_sha256: ${yamlScalar(media.transcript_sha256)}`);
+    if (media.media_ref_fp !== undefined) lines.push(`  media_ref_fp: ${yamlScalar(media.media_ref_fp)}`);
     lines.push(`  ref_class: ${yamlScalar(media.ref_class)}`);
     if (media.ref !== undefined) lines.push(`  ref: ${yamlScalar(media.ref)}`);
     if (media.secref !== undefined) lines.push(`  secref: ${yamlScalar(media.secref)}`);

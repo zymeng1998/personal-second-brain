@@ -97,6 +97,7 @@
       "properties": {
         "media_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{8,128}$" },
         "transcript_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "media_ref_fp": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "ref_class": {
           "type": "string",
           "enum": ["public_ref", "signed_url_detected", "token_detected", "local_private_path", "ambiguous_default_private"]

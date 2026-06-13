@@ -18,6 +18,11 @@
       "pattern": "^[a-f0-9]{64}$",
       "description": "Lowercase hex sha256 of the captured transcript text. Re-ingesting the same media_id with a different value is a media_id_conflict."
     },
+    "media_ref_fp": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Optional one-way sha256 of the original-media pointer (conflict comparator). Non-reversible — carries no locator value, but detects a changed media reference exactly across re-ingests, including private/secref pointers."
+    },
     "ref_class": {
       "type": "string",
       "enum": [

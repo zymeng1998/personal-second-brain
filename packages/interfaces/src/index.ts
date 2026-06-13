@@ -44,6 +44,7 @@ export type {
 export {
   MEDIA_ID_PATTERN,
   TRANSCRIPT_SHA256_PATTERN,
+  MEDIA_REF_FP_PATTERN,
   MEDIA_REF_CLASSES,
   MediaReferenceError,
   parseMediaReference,

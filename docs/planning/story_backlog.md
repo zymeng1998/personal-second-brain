@@ -192,7 +192,7 @@ stories promote to `Ready` only after the human confirms (or amends) the leans.
 | SB-070 | Story | Media intake contract (`transcript` source + `media_reference` schema/types) | EPIC-CORE-013 | P2 | Done | 3 | SB-010 (`Done`) |
 | SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
 | SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Done | 3 | SB-070, SB-050 (`Done`) |
-| SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-071, SB-072 |
+| SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Done | 3 | SB-071, SB-072 |
 | SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
 | SB-087 | Story | Media-intake epic gate (idempotency, provenance, no-leak) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085, SB-086 |
 | SB-088 | Story | `.srt`/`.vtt` normalization (deferrable, gate-independent) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
@@ -2036,7 +2036,12 @@ notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
 
 ## SB-085 — Transcript ingest → L0 (idempotent on `media_id`; no binary)
 
-- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 3 · **Status:** Done
+  (2026-06-12 — autonomous session; amendment A realized: a one-way `media_ref_fp` [sha256 of the
+  pointer — non-reversible, added to the media contract as an OPTIONAL field] is the exact conflict
+  comparator that works for private/secref pointers too; idempotency scan runs BEFORE any secref
+  mint or capture so conflict/no-op writes nothing; the binary refusal is by extension allowlist +
+  an explicit media-extension denylist)
 - **Dependencies:** SB-071, SB-072
 - **Scope:** `apps/media-intake` (`@sb/media-intake`, pattern = `apps/obsidian-helper`): fixed
   `surface:media-intake` identity + an `invoke` wrapper over the enforced dispatch. `ingest`

@@ -27,6 +27,14 @@ export const MEDIA_ID_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
 export const TRANSCRIPT_SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 /**
+ * Lowercase hex sha256 of the normalized original-media pointer (amendment A
+ * conflict comparator). A ONE-WAY hash — non-reversible, so it carries no
+ * locator value (amendment B), yet lets re-ingest detect a changed media
+ * reference exactly, even for private (secref) pointers whose locator is opaque.
+ */
+export const MEDIA_REF_FP_PATTERN = /^[a-f0-9]{64}$/;
+
+/**
  * How the original-media pointer was classified (amendment B). Only the class is
  * ever stored/echoed — never the raw URL/path/locator value.
  * - `public_ref` — a non-sensitive external pointer; carried as a plain `ref`.
@@ -54,6 +62,13 @@ export interface MediaReference {
   media_id: string;
   transcript_sha256: string;
   ref_class: MediaRefClass;
+  /**
+   * Optional one-way sha256 of the original-media pointer (conflict comparator).
+   * Non-reversible: carries no locator value, but identifies the media reference
+   * exactly across re-ingests (including private/secref pointers). Set by the
+   * media-intake adapter; absent on non-transcript captures.
+   */
+  media_ref_fp?: string;
   /** Present iff `ref_class === "public_ref"`: a non-sensitive external pointer. */
   ref?: string;
   /** Present iff `ref_class !== "public_ref"`: a `secref_…` id (opaque locator in the pointer file). */
@@ -77,6 +92,7 @@ export type MediaReferenceInvalidReason =
   | "unknown_property"
   | "media_id_invalid"
   | "transcript_sha256_invalid"
+  | "media_ref_fp_invalid"
   | "ref_class_invalid"
   | "ref_required"
   | "ref_forbidden"
@@ -116,7 +132,7 @@ export function parseMediaReference(value: unknown): MediaReference {
   }
   const record = value as Record<string, unknown>;
   for (const key of Object.keys(record)) {
-    if (!["media_id", "transcript_sha256", "ref_class", "ref", "secref"].includes(key)) {
+    if (!["media_id", "transcript_sha256", "media_ref_fp", "ref_class", "ref", "secref"].includes(key)) {
       throw new MediaReferenceError("unknown_property", key);
     }
   }
@@ -126,6 +142,9 @@ export function parseMediaReference(value: unknown): MediaReference {
   if (!isString(record.transcript_sha256) || !TRANSCRIPT_SHA256_PATTERN.test(record.transcript_sha256)) {
     throw new MediaReferenceError("transcript_sha256_invalid", "transcript_sha256");
   }
+  if ("media_ref_fp" in record && (!isString(record.media_ref_fp) || !MEDIA_REF_FP_PATTERN.test(record.media_ref_fp))) {
+    throw new MediaReferenceError("media_ref_fp_invalid", "media_ref_fp");
+  }
   if (!isString(record.ref_class) || !(MEDIA_REF_CLASSES as readonly string[]).includes(record.ref_class)) {
     throw new MediaReferenceError("ref_class_invalid", "ref_class");
   }
@@ -134,6 +153,7 @@ export function parseMediaReference(value: unknown): MediaReference {
     media_id: record.media_id,
     transcript_sha256: record.transcript_sha256,
     ref_class: refClass,
+    ...(isString(record.media_ref_fp) ? { media_ref_fp: record.media_ref_fp } : {}),
   };
   if (refClass === "public_ref") {
     if (!("ref" in record)) throw new MediaReferenceError("ref_required", "ref");
