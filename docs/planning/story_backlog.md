@@ -191,7 +191,7 @@ stories promote to `Ready` only after the human confirms (or amends) the leans.
 |---|---|---|---|---|---|---|---|
 | SB-070 | Story | Media intake contract (`transcript` source + `media_reference` schema/types) | EPIC-CORE-013 | P2 | Done | 3 | SB-010 (`Done`) |
 | SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
-| SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-070, SB-050 (`Done`) |
+| SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Done | 3 | SB-070, SB-050 (`Done`) |
 | SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-071, SB-072 |
 | SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
 | SB-087 | Story | Media-intake epic gate (idempotency, provenance, no-leak) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085, SB-086 |
@@ -2008,7 +2008,13 @@ notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
 
 ## SB-072 — Media reference recording (public `ref` vs private `secure_ref`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 3 · **Status:** Done
+  (2026-06-12 — autonomous session; created the `apps/media-intake` package skeleton + `invoke`
+  wrapper [`surface:media-intake`]; `classifyMediaPointer` pure [signed/token/private-path
+  detection; private-by-default for ambiguous; public intent OVERRIDDEN to private on red flags];
+  `recordMediaReference` writes the private locator into a secure_ref via the enforced `secref add`
+  and returns only the `secref_…` id — leak test proves the sentinel appears in exactly one file,
+  the secref pointer)
 - **Dependencies:** SB-070, SB-050 (`Done`)
 - **Scope (OQ #39):** a pure classifier + recorder that turns an original-media pointer into a
   **citable handle**: public `--media-ref <external path/URL>` ⇒ a plain `ref` string carried as

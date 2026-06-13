@@ -36,6 +36,16 @@
   documented rationale, frozen. surface-grants test extended (exact table; everything else denied;
   ALWAYS_DENIED unobtainable; config-blind). interfaces **23/23**; root **297**, 0 fail. Next:
   SB-072 (media reference recording).
+- **SB-072 `Done`** — `apps/media-intake` (`@sb/media-intake`) skeleton + `invoke` wrapper
+  (`surface:media-intake` via enforced dispatch). `classifyMediaPointer` (pure): signed-URL /
+  token / private-path detection → private; clean public-intent http(s) URL → `public_ref`;
+  everything else → `ambiguous_default_private`; public intent OVERRIDDEN to private on red flags.
+  `recordMediaReference`: public → `{ref_class, ref}`; private → writes the opaque locator to a
+  secure_ref via the enforced `secref add`, returns `{ref_class, secref_… id}` only — the raw
+  locator never enters the handle/output/errors. Tests 5/5 (classification matrix; public→ref
+  no-write; signed→secref with the sentinel in EXACTLY one file [the secref pointer]; private
+  intent forces secref; read:secure_refs not held). Root **302 tests**, 0 fail. Next: SB-085
+  (transcript ingest → L0).
 
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with

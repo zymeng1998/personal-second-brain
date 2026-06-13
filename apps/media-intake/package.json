@@ -1,0 +1,23 @@
+{
+  "name": "@sb/media-intake",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Optional media-transcription intake CLI adapter (EPIC-CORE-013). Captures psb-media-transcriber transcript TEXT as L0 (source:transcript) with auditable, non-leaking media-reference provenance; private media pointers become opaque secure_refs. Runs as surface:media-intake through the one enforced dispatch; the core never stores media binaries.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/media-ref.test.ts"
+  },
+  "dependencies": {
+    "@sb/cli": "workspace:*",
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}
