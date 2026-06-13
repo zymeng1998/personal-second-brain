@@ -193,7 +193,7 @@ stories promote to `Ready` only after the human confirms (or amends) the leans.
 | SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
 | SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Done | 3 | SB-070, SB-050 (`Done`) |
 | SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Done | 3 | SB-071, SB-072 |
-| SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
+| SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Done | 2 | SB-085 |
 | SB-087 | Story | Media-intake epic gate (idempotency, provenance, no-leak) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085, SB-086 |
 | SB-088 | Story | `.srt`/`.vtt` normalization (deferrable, gate-independent) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
 
@@ -2064,7 +2064,11 @@ notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
 
 ## SB-086 — L1 reviewable bridge (reuse `note promote`)
 
-- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Done
+  (2026-06-12 — autonomous session; `ingest --review` reuses the enforced `note promote` [no new
+  writer]; promotes only on a FRESH ingest so an idempotent no-op never duplicates the L1;
+  provenance chain L1.source_ref → L0 → media_id → media-ref asserted; the transcript becomes a
+  `distill propose` candidate)
 - **Dependencies:** SB-085
 - **Scope (OQ #38):** `ingest --review` (or a `promote` subcommand) seeds an L1 working note in
   `vault/00_Inbox/` referencing the L0 transcript note by **reusing the existing enforced

@@ -34,6 +34,7 @@ Usage:
   --media-ref <pointer>  PUBLIC original-media pointer (non-sensitive). Signed/token/ambiguous ⇒ forced to a secure_ref.
   --media-secref <ptr>   PRIVATE original-media pointer ⇒ stored as an opaque secure_ref (locator never echoed).
   --title <t>            Optional note title.
+  --review               Also seed an L1 working note in 00_Inbox (reuses note promote) for the distill/review flow.
   --workspace <path>     Workspace override; else SECOND_BRAIN_WORKSPACE / .env.
 
 The transcript text is captured verbatim as an immutable L0 note (source:transcript). Re-ingesting the
@@ -81,6 +82,7 @@ export async function main(argv: string[], io: Partial<MediaIntakeIO> = {}): Pro
       else if (arg === "--media-ref") parsed.mediaRef = next();
       else if (arg === "--media-secref") parsed.mediaSecref = next();
       else if (arg === "--title") parsed.title = next();
+      else if (arg === "--review") parsed.review = true;
       else if (arg === "--workspace") parsed.workspace = next();
       else throw new IngestError("bad_arguments", `unknown argument: ${arg}`);
     } catch (e) {
@@ -98,6 +100,7 @@ export async function main(argv: string[], io: Partial<MediaIntakeIO> = {}): Pro
       ...(parsed.mediaRef !== undefined ? { mediaRef: parsed.mediaRef } : {}),
       ...(parsed.mediaSecref !== undefined ? { mediaSecref: parsed.mediaSecref } : {}),
       ...(parsed.title !== undefined ? { title: parsed.title } : {}),
+      ...(parsed.review === true ? { review: true } : {}),
     });
     out(`${JSON.stringify(result)}\n`);
     return 0;

@@ -10,7 +10,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "build": "tsc --noEmit",
-    "test": "node --import tsx --test test/media-ref.test.ts test/ingest.test.ts"
+    "test": "node --import tsx --test test/media-ref.test.ts test/ingest.test.ts test/review-bridge.test.ts"
   },
   "dependencies": {
     "@sb/cli": "workspace:*",

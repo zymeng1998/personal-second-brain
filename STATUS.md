@@ -59,6 +59,12 @@
   conflict on differing transcript AND reference; binary refusal + no-binary-in-vault; private
   signed-URL sentinel in exactly one file; explicit mode + bad media_id; CLI). Root **309 tests**,
   0 fail. Next: SB-086 (L1 review bridge).
+- **SB-086 `Done`** — `ingest --review` reuses the enforced `note promote` (no new writer path) to
+  seed an L1 working note in `00_Inbox` citing the L0 transcript; promotes only on a FRESH ingest
+  (idempotent no-op never duplicates the L1 — `working_note_id` undefined). Provenance chain
+  L1.source_ref → L0 → media_id → media reference asserted; L0 immutable across the promote; the
+  transcript becomes a `distill propose` candidate (enters the existing distill/review flow).
+  media-intake **15/15** (+3); root **312 tests**, 0 fail. Next: SB-087 (epic gate).
 
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with

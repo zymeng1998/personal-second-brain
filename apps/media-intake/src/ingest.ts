@@ -47,6 +47,12 @@ export interface IngestArgs {
   mediaRef?: string;
   mediaSecref?: string;
   title?: string;
+  /**
+   * SB-086: also seed an L1 working note in 00_Inbox (reuses the enforced
+   * `note promote`) so the transcript enters the capture → distill / review
+   * flow. Only promotes on a FRESH ingest; an idempotent no-op never duplicates.
+   */
+  review?: boolean;
 }
 
 export interface IngestResult {
@@ -54,6 +60,8 @@ export interface IngestResult {
   idempotent: boolean;
   note_id: string;
   media_id: string;
+  /** The L1 working note id, when `review` promoted one (fresh ingest only). */
+  working_note_id?: string;
 }
 
 function sha256hex(text: string): string {
@@ -184,5 +192,15 @@ export async function runIngest(args: IngestArgs): Promise<IngestResult> {
   const captured = await invoke(argv);
   if (captured.exitCode !== 0) throw new IngestError("capture_failed", captured.stderr.trim());
   const noteId = (JSON.parse(captured.stdout) as { note_id: string }).note_id;
+
+  if (args.review === true) {
+    // Reuse the enforced `note promote` (no new writer): L0 → L1 working note
+    // in 00_Inbox, citing the L0 as source_ref. The transcript thus enters the
+    // existing capture → distill / review flow; the L0 is never mutated.
+    const promoted = await invoke(["note", "promote", noteId, "--workspace", args.workspace]);
+    if (promoted.exitCode !== 0) throw new IngestError("promote_failed", promoted.stderr.trim());
+    const workingId = (JSON.parse(promoted.stdout) as { note_id: string }).note_id;
+    return { ok: true, idempotent: false, note_id: noteId, media_id: mediaId, working_note_id: workingId };
+  }
   return { ok: true, idempotent: false, note_id: noteId, media_id: mediaId };
 }
