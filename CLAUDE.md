@@ -141,6 +141,16 @@ cross-site/missing-token POSTs fail with zero writes; secure_refs unsurfaced). T
 (both surfaces capture+read via contracts only; denial sweeps byte-identical; locator sentinel
 never leaks; SB-074/077 re-asserted) is green. **Root suite 290 tests; coverage 92.98% lines.**
 
-**Next:** EPIC-CORE-013 (media transcription intake, P2 — needs refinement) or EPIC-DOMAIN-001
-(broker, P3 — stays Deferred). Always follow the backlog workflow above: confirm the story is
-`Ready`, implement in-scope only, validate, stop at `In Review`.
+**EPIC-CORE-013 (Media Transcription Intake) is COMPLETE (2026-06-12)** — OQ #36–#40 approved
+(+ amendments: strict `media_id` idempotency with `media_id_conflict`; auditable-but-non-leaking
+classification): the optional CLI adapter **`apps/media-intake`** (`surface:media-intake`) ingests
+`psb-media-transcriber` transcript **text** as L0 (`source:"transcript"`) with an auditable,
+non-leaking `media` block (`media_id`, `transcript_sha256`, `ref_class`, one-way `media_ref_fp`,
+and a `ref`/`secref` handle) — the media binary never enters the vault; private/signed/token/
+ambiguous pointers become opaque secure_refs; re-ingest is strictly idempotent on `media_id`;
+`--review` seeds an L1 working note via the existing `note promote`; `.srt`/`.vtt` normalize to
+prose. The SB-087 gate is green. **Root suite 321 tests; coverage 93.19% lines.**
+
+**Next:** EPIC-DOMAIN-001 (broker, P3 — stays **Deferred** until explicitly authorized; the core
+is now stable, with all EPIC-CORE epics `Done`). Always follow the backlog workflow above: confirm
+the story is `Ready`, implement in-scope only, validate, stop at `In Review`.

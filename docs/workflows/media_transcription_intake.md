@@ -65,14 +65,17 @@ Any intake/adapter/backfill code MUST:
 ## Status
 
 - **Transcriber:** live and working (v0.1.0) — produces the layout above, including `by-name/`.
-- **Second Brain adapter:** **not built; REFINED 2026-06-12.** EPIC-CORE-013 is decomposed into
-  ≤3-pt stories — see [`../planning/media_intake_story_map.md`](../planning/media_intake_story_map.md)
-  and the cards in [`../planning/story_backlog.md`](../planning/story_backlog.md) (SB-070/071/072 +
-  SB-085/086/087, deferrable SB-088). Planned shape: an optional CLI adapter `apps/media-intake`
-  (identity `surface:media-intake`) that captures the transcript **text** as L0 (`source:"transcript"`)
-  with `media_id` + media-reference provenance — never the media binary; private media pointers use
-  secure_ref. **Blocked on the OQ #36–#40 decision review; no vault writes happen from transcription
-  until the epic is approved and implemented.**
+- **Second Brain adapter:** **BUILT (v1, 2026-06-12).** `apps/media-intake` (`@sb/media-intake`,
+  identity `surface:media-intake`) — `media-intake ingest --artifact-dir <dir>` (or
+  `--transcript <file>`) + `--media-ref` (public) / `--media-secref` (private) [`--review` seeds
+  the L1 bridge]. Captures the transcript **text** verbatim as L0 (`source:"transcript"`) with an
+  auditable, non-leaking media block (`media_id`, `transcript_sha256`, `ref_class`, one-way
+  `media_ref_fp`, and a `ref` or `secref` handle) — never the media binary; private/signed/token/
+  ambiguous pointers become opaque secure_refs. Strict idempotency on `media_id` (re-ingest with a
+  changed transcript or reference ⇒ `media_id_conflict`, zero writes). `.srt`/`.vtt` are normalized
+  to prose (no timestamps in the body). All 7 stories `Done` (SB-070/071/072 + SB-085/086/087/088);
+  the SB-087 epic gate is green. See
+  [`../planning/media_intake_story_map.md`](../planning/media_intake_story_map.md).
 
 ## Out of scope
 

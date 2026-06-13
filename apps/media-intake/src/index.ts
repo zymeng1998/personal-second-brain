@@ -16,6 +16,8 @@ export { classifyMediaPointer, recordMediaReference, MediaRefError } from "./med
 export type { MediaRefHandle } from "./media-ref.js";
 export { runIngest, IngestError } from "./ingest.js";
 export type { IngestArgs, IngestResult } from "./ingest.js";
+export { normalizeTimedTranscript, NormalizeError } from "./normalize.js";
+export type { TimedFormat } from "./normalize.js";
 
 export interface MediaIntakeIO {
   out: (text: string) => void;
@@ -29,7 +31,7 @@ Usage:
   media-intake ingest --transcript <file.md|.txt> --media-id <hash> (--media-ref <pointer> | --media-secref <pointer>) [--title <t>] [--workspace <path>]
 
   --artifact-dir <dir>   Transcriber artifact dir: reads <dir>/transcript.md; media_id = dir name.
-  --transcript <file>    Explicit transcript .md/.txt (with --media-id). Media binaries are refused.
+  --transcript <file>    Explicit transcript .md/.txt/.srt/.vtt (with --media-id). .srt/.vtt are normalized to prose (no timestamps). Media binaries are refused.
   --media-id <hash>      Content hash (with --transcript). Strictly validated.
   --media-ref <pointer>  PUBLIC original-media pointer (non-sensitive). Signed/token/ambiguous ⇒ forced to a secure_ref.
   --media-secref <ptr>   PRIVATE original-media pointer ⇒ stored as an opaque secure_ref (locator never echoed).

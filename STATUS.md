@@ -2,6 +2,33 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) COMPLETE — GATE MET (2026-06-12, one autonomous session)
+- **All 7 stories `Done` + pushed** (SB-070 → 071 → 072 → 085 → 086 → 087 → 088, one atomic
+  commit each). **SB-087 gate green in root `pnpm test`:** media_id idempotency (double ingest =
+  one L0, byte-identical); provenance round-trip L1→L0→media_id→media-ref; no media binary in the
+  vault; a private signed-URL sentinel never leaks into any note/event/CLI-output (only the secref
+  pointer holds it); domain-neutral grep over `apps/media-intake`; SB-074/077/084 invariants
+  re-asserted (media-intake denied outside its grant; ALWAYS_DENIED incl. `read:secure_refs`
+  unobtainable for every caller).
+- **Final counts:** root `pnpm test` exit 0 — **321 tests** (media-intake 24, interfaces 23,
+  cli 85, scripts 26, others unchanged); coverage **93.19% lines** (baseline 92.98% — improved);
+  workflow doc + epics table + story map marked met; CLAUDE.md updated.
+- **Guardrails honored:** core never stores media binaries (transcript TEXT only; binary
+  extensions refused); media reference is metadata-only with the auditable, non-leaking `media`
+  block (`additionalProperties:false` so a raw-locator field is unrepresentable); private/signed/
+  token/ambiguous pointers → secure_ref (opaque, never echoed; `read:secure_refs` hard-denied);
+  intake via the enforced dispatch as `surface:media-intake` (no bypass); least-privilege grant;
+  strict idempotency (amendment A) via the one-way `media_ref_fp`; auditable classification
+  (amendment B) via `ref_class`; L1 reuses `note promote`; `media_id` from the artifact-dir name,
+  strictly validated; no `source-metadata.json`/`manifest.json` parsing; domain-neutral.
+- **Shipped:** `"transcript"` source kind + `media_reference.schema.json` + capture-carries-media
+  plumbing (SB-070); `surface:media-intake` grant (SB-071); media-reference classifier/recorder
+  (SB-072); `apps/media-intake` ingest with strict idempotency (SB-085); L1 review bridge (SB-086);
+  the epic gate (SB-087); `.srt`/`.vtt`→prose normalization (SB-088).
+- **Next:** EPIC-DOMAIN-001 (broker, P3 — stays **Deferred** until explicitly authorized; the core
+  is now stable). No core epics remain open. **Stopped per authorization: the approved
+  EPIC-CORE-013 chain is complete; the next decision review is the human's.**
+
 ## EPIC-CORE-013 — DECISION REVIEW PASSED (2026-06-12); autonomous implementation session STARTED
 - **Human approved OQ #36–#40 exactly as leaned, with two amendments:** (A) **strict idempotency** —
   same `media_id` + same transcript hash + same media reference ⇒ idempotent no-op; same `media_id`

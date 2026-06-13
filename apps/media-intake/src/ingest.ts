@@ -18,6 +18,7 @@ import { MEDIA_ID_PATTERN } from "@sb/interfaces";
 import type { MediaReference } from "@sb/interfaces";
 import { invoke } from "./invoke.js";
 import { recordMediaReference } from "./media-ref.js";
+import { normalizeTimedTranscript } from "./normalize.js";
 
 export class IngestError extends Error {
   readonly code: string;
@@ -28,7 +29,7 @@ export class IngestError extends Error {
   }
 }
 
-const ALLOWED_TRANSCRIPT_EXT = new Set([".md", ".txt"]);
+const ALLOWED_TRANSCRIPT_EXT = new Set([".md", ".txt", ".srt", ".vtt"]);
 // Refused outright — the core never reads a media binary.
 const MEDIA_BINARY_EXT = new Set([
   ".mov", ".mp4", ".m4v", ".m4a", ".wav", ".mp3", ".aac", ".flac",
@@ -114,7 +115,17 @@ async function readTranscript(transcriptPath: string): Promise<string> {
   if (info.size > MAX_TRANSCRIPT_BYTES) {
     throw new IngestError("too_large", `transcript exceeds ${MAX_TRANSCRIPT_BYTES} bytes`);
   }
-  const text = await readFile(transcriptPath, "utf8");
+  const raw = await readFile(transcriptPath, "utf8");
+  // SB-088: timed-caption formats are normalized to prose BEFORE capture
+  // (no timestamps in the note body); the captured content is the prose.
+  let text = raw;
+  if (ext === ".srt" || ext === ".vtt") {
+    try {
+      text = normalizeTimedTranscript(raw, ext === ".srt" ? "srt" : "vtt");
+    } catch (e) {
+      throw new IngestError("bad_transcript", e instanceof Error ? e.message : "could not normalize transcript");
+    }
+  }
   if (text.trim().length === 0) throw new IngestError("empty_transcript", "transcript has no text content");
   return text;
 }
