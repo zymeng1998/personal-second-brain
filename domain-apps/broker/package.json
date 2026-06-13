@@ -1,0 +1,22 @@
+{
+  "name": "@sb-domain/broker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "First real domain app (rental broker), EPIC-DOMAIN-001. Built entirely on the completed core via the fixed domain-app:broker identity through the enforced CLI dispatch; grants come only from the workspace config/grants.json; least-privilege, staged per story. No broker code, schema, or vocabulary in the core.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@sb/cli": "workspace:*",
+    "@sb/interfaces": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}

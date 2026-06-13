@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "grants": [
+    {
+      "app": "domain-app:broker",
+      "allow": ["read:notes", "read:facts"]
+    }
+  ]
+}
