@@ -30,6 +30,12 @@
   3/3 (public block in note+event; private stores class+secref id only, no signed-url artifacts;
   malformed `--media` fails closed zero writes). Root `pnpm test` exit 0 — **297 tests**, 0 fail.
   Next: SB-071 (`surface:media-intake` grant).
+- **SB-071 `Done`** — `surface:media-intake` registry entry, grant `[write:capture, read:notes,
+  write:notes, write:secure_refs]` (capture transcript; read for idempotency; promote L1 bridge;
+  write private media secref — `read:secure_refs` hard-denied; no distill/facts/outputs/index),
+  documented rationale, frozen. surface-grants test extended (exact table; everything else denied;
+  ALWAYS_DENIED unobtainable; config-blind). interfaces **23/23**; root **297**, 0 fail. Next:
+  SB-072 (media reference recording).
 
 ## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
 - **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with

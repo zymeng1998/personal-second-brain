@@ -22,6 +22,7 @@ const ALL_OPERATIONAL: string[] = [
 const SURFACE_TABLES: Record<string, string[]> = {
   "surface:obsidian-helper": ["write:capture", "read:notes"],
   "surface:dashboard": ["read:notes", "read:facts", "read:index", "write:capture", "write:distill", "write:facts"], // SB-083 review-queue extension
+  "surface:media-intake": ["write:capture", "read:notes", "write:notes", "write:secure_refs"], // SB-071 EPIC-CORE-013
 };
 
 test("surface grants match the documented least-privilege tables EXACTLY", () => {

@@ -190,7 +190,7 @@ stories promote to `Ready` only after the human confirms (or amends) the leans.
 | ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
 |---|---|---|---|---|---|---|---|
 | SB-070 | Story | Media intake contract (`transcript` source + `media_reference` schema/types) | EPIC-CORE-013 | P2 | Done | 3 | SB-010 (`Done`) |
-| SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Backlog | 2 | SB-069, SB-076 (`Done`) |
+| SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Done | 2 | SB-069, SB-076 (`Done`) |
 | SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-070, SB-050 (`Done`) |
 | SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-071, SB-072 |
 | SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
@@ -1988,7 +1988,10 @@ notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
 
 ## SB-071 — `surface:media-intake` identity + least-privilege grant
 
-- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Done
+  (2026-06-12 — autonomous session; grant `[write:capture, read:notes, write:notes,
+  write:secure_refs]` with documented rationale; the existing surface-grants test table extended —
+  exact table, everything else denied, ALWAYS_DENIED unobtainable, config-blind, frozen)
 - **Dependencies:** SB-069, SB-076 (both `Done`)
 - **Scope (OQ #40):** add the first-party registry entry `surface:media-intake` with the documented
   least-privilege grant `[write:capture, read:notes, write:notes, write:secure_refs]` — capture the

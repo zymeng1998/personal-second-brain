@@ -17,6 +17,12 @@
  *   CLI: reads the vault for the compat check and routes drafts through the
  *   capture op. Capture + read ONLY — Obsidian is never the writer of record
  *   for distillation/facts/outputs, so none of those scopes exist here.
+ * - `surface:media-intake` (SB-071, EPIC-CORE-013) — the optional media-intake
+ *   CLI adapter: captures a transcript as L0 (`write:capture`), scans existing
+ *   notes for `media_id` idempotency (`read:notes`), promotes the L1 review
+ *   bridge (`write:notes`), and records a PRIVATE original-media pointer as a
+ *   secure_ref (`write:secure_refs` — write-only opaque metadata;
+ *   `read:secure_refs` stays hard-denied). No distill/facts/outputs/index.
  * - `surface:dashboard` (SB-078, OQ #32/#33/#35) — the localhost web
  *   dashboard: read views (notes/facts/index), the capture form, and (SB-083)
  *   the confirmation-gated review queue — `write:distill` + `write:facts`
@@ -62,6 +68,10 @@ const FIRST_PARTY_GRANTS: ReadonlyArray<CapabilityGrant> = Object.freeze([
   freezeGrant({ app: "cli", allow: CLI_SCOPES }),
   freezeGrant({ app: "sidecar:retrieval", allow: ["read:notes", "write:index", "read:index"] }),
   freezeGrant({ app: "surface:obsidian-helper", allow: ["write:capture", "read:notes"] }),
+  freezeGrant({
+    app: "surface:media-intake",
+    allow: ["write:capture", "read:notes", "write:notes", "write:secure_refs"],
+  }),
   freezeGrant({
     app: "surface:dashboard",
     allow: ["read:notes", "read:facts", "read:index", "write:capture", "write:distill", "write:facts"],
