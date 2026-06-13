@@ -30,7 +30,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-010 | Surfaces | 5 | P2 | Done | Obsidian helper companion CLI (check / templates / draft→capture bridge) + zero-dep localhost dashboard (read views, X-SB-CSRF-guarded capture, confirmation-gated review queue), both under fixed `surface:*` least-privilege identities through the ONE enforced dispatch. **Gate met 2026-06-11** (SB-084): both surfaces capture+read via contracts only; denial sweeps byte-identical; locator sentinel never leaks; SB-074/077 re-asserted. **All 7 stories `Done`** (SB-078..084) — see [`phase_5_story_map.md`](phase_5_story_map.md). |
 | EPIC-CORE-011 | Security & Privacy Hardening | cross | P0/P1 | Done | secure_refs pointer primitive + `sb secref` + validation pass; `grantAllows` resolver + first-party grants registry + enforcement at the CLI operations boundary (no env bypass). **Gate met 2026-06-10** (SB-074): under-privileged callers denied on every write op; `ALWAYS_DENIED_SCOPES` unobtainable; secure-ref round-trip leak-free. **All 6 stories `Done`** (SB-050/067/068/069/073/074). |
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Done | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, deep-frozen, absolute first-party precedence) + generic read-only `domain-apps/example-readonly/` binding template. **Gate met 2026-06-11** (SB-077): privileged/shadowing/malformed/duplicate configs all fail closed with zero writes; SB-074 invariants re-asserted with config present. **All 5 stories `Done`** (SB-060/075/076/061/077) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
-| EPIC-CORE-013 | Media Transcription Intake | later | P2 | Backlog | Optional adapter ingesting `psb-media-transcriber` transcripts as L0 captures (SB-070–072, coarse — see "Later-epic notes"). *(Row added 2026-06-10; the epic existed in the notes section only.)* |
+| EPIC-CORE-013 | Media Transcription Intake | later | P2 | Refined | Optional CLI adapter (`apps/media-intake`, `surface:media-intake`) ingesting `psb-media-transcriber` transcripts as L0 captures with media-reference provenance — core stores text + references only, never media binaries; private pointers use secure_ref. **REFINED 2026-06-12** into SB-070/071/072 + SB-085/086/087 (+ deferrable SB-088), ≤3 pts each — see [`media_intake_story_map.md`](media_intake_story_map.md). Blocked on the OQ #36–#40 review. |
 | EPIC-CORE-014 | AI Workflows | 4 | P1 | Done | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H) + `sb fact` / L5 `sb output create` confirmed write paths. **Gate met 2026-06-10** (SB-066): propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable. **All 9 stories `Done`** (SB-056..059 + SB-062..066, one autonomous session). |
 | EPIC-DOMAIN-001 | Broker Domain App | 6+ | P3 | **Deferred** | Broker tool, docs-only until core is stable. **Not planned in detail.** |
 
@@ -179,6 +179,23 @@ the SB-078 identity foundation and the SB-084 epic gate (7 stories, 17 pts). Det
 | SB-082 | Story | Dashboard capture form (`POST /api/capture`) | EPIC-CORE-010 | P2 | Done | 2 | SB-081 |
 | SB-083 | Story | Confirmation-gated review queue (deferrable) | EPIC-CORE-010 | P2 | Done | 3 | SB-082 |
 | SB-084 | Story | Surfaces epic gate (capture+read via contracts only) | EPIC-CORE-010 | P2 | Done | 2 | SB-080, SB-082 |
+
+### EPIC-CORE-013 — Media Transcription Intake (refined; see [`media_intake_story_map.md`](media_intake_story_map.md))
+
+Refined 2026-06-12: the coarse SB-070/071/072 decomposed into 7 atomic stories (≤3 pts; 16 pts
+total). SB-070/071/072 ids retained with narrowed scope; SB-085–088 are new (SB-088 deferrable).
+Detailed cards below ("EPIC-CORE-013 story cards"). **Blocked on the OQ #36–#40 decision review** —
+stories promote to `Ready` only after the human confirms (or amends) the leans.
+
+| ID | Type | Title | Epic | Pri | Status | SP | Dependencies |
+|---|---|---|---|---|---|---|---|
+| SB-070 | Story | Media intake contract (`transcript` source + `media_reference` schema/types) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-010 (`Done`) |
+| SB-071 | Story | `surface:media-intake` identity + least-privilege grant | EPIC-CORE-013 | P2 | Backlog | 2 | SB-069, SB-076 (`Done`) |
+| SB-072 | Story | Media reference recording (public `ref` vs private `secure_ref`) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-070, SB-050 (`Done`) |
+| SB-085 | Story | Transcript ingest → L0 (idempotent on `media_id`; no binary) | EPIC-CORE-013 | P2 | Backlog | 3 | SB-071, SB-072 |
+| SB-086 | Story | L1 reviewable bridge (reuse `note promote`) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
+| SB-087 | Story | Media-intake epic gate (idempotency, provenance, no-leak) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085, SB-086 |
+| SB-088 | Story | `.srt`/`.vtt` normalization (deferrable, gate-independent) | EPIC-CORE-013 | P2 | Backlog | 2 | SB-085 |
 
 ### Later phases (coarse; refine before implementation)
 
@@ -1928,6 +1945,155 @@ invariants untouched; one atomic commit per story.
 
 ---
 
+# EPIC-CORE-013 story cards (Media Transcription Intake)
+
+Refined 2026-06-12 — see [`media_intake_story_map.md`](media_intake_story_map.md) for the
+objective, fixed guardrails, architecture, and the OQ #36–#40 decision review (required before
+SB-070 goes `Ready`), and [`../workflows/media_transcription_intake.md`](../workflows/media_transcription_intake.md)
+for the artifact-store shape + binding conventions. Epic-wide invariants every card inherits: the
+core never stores media binaries (transcript **text** + references only); private media pointers
+(signed URLs, tokens, private paths) use **secure_ref** (opaque locator, never echoed) — only
+non-sensitive pointers use plain capture `ref`; intake goes through the enforced dispatch under the
+fixed `surface:media-intake` identity (never `cli`, never importing core packages, never a second
+enforcement path); re-ingest is idempotent on `media_id`; the transcriber's artifact store is
+read-only and its `<YYYY>/<MM>/<media_id>/` + `by-name/` layout is preserved; no secret bytes in
+notes/events/logs/snapshots/errors; domain-neutral; one atomic commit per story.
+
+## SB-070 — Media intake contract (`transcript` source + `media_reference` schema/types)
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-010 (`Done`)
+- **Scope (OQ #36):** add `"transcript"` to the `CaptureSource` union (`packages/interfaces/src/capture.ts`),
+  the `capture.schema.json` `source` enum, and `RAW_SOURCE_KINDS` (`@sb/note-vault`). New
+  `schemas/markdown/media_reference.schema.json` — frontmatter for a media-reference block:
+  `media_id` (content-hash string), `artifact_ref` (opaque pointer to the artifact dir, non-secret),
+  optional safe `label`/`duration`/`captured_at`; **`additionalProperties:false`, no binary field,
+  no secret/url/token field expressible**. `@sb/interfaces` gains `MediaReference` +
+  `MediaIngestInput` types + a valid example fixture. Contracts only; no behavior, no new dependency.
+- **AC:** schema test (mirrors `proposal_schema.test.ts`): example fixture validates; rejection
+  cases — extra property, missing `media_id`, a `url`/`locator`/binary field present. `"transcript"`
+  accepted by the capture schema + `RAW_SOURCE_KINDS`; throwaway alignment smoke compiles
+  `--strict`. **Validation:** `test:scripts` + interfaces typecheck; root `pnpm test`.
+- **Files:** `packages/interfaces/src/{capture.ts,media-reference.ts(new),index.ts}`,
+  `schemas/json/capture.schema.json`, `schemas/markdown/media_reference.schema.json(new)`,
+  `packages/note-vault/src/raw-note-writer.ts` (kind list), `examples/` fixture, schema test, docs,
+  `STATUS.md`.
+- **Out of Scope:** the adapter app (SB-085); secure_ref handling (SB-072); any ingest behavior.
+
+## SB-071 — `surface:media-intake` identity + least-privilege grant
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-069, SB-076 (both `Done`)
+- **Scope (OQ #40):** add the first-party registry entry `surface:media-intake` with the documented
+  least-privilege grant `[write:capture, read:notes, write:notes, write:secure_refs]` — capture the
+  transcript L0; `read:notes` for the `media_id` idempotency scan; `write:notes` for the L1 promote
+  bridge (SB-086); `write:secure_refs` to record a private media pointer (write-only opaque metadata
+  — `read:secure_refs` stays hard-denied). Least-privilege rationale in `grants.ts`, mirroring the
+  existing `surface:*` entries; frozen like the rest of the registry.
+- **AC:** interfaces tests — exact grant table (allowed scopes pass, EVERYTHING else denied:
+  distill/facts/outputs/index/rebuild); ALWAYS_DENIED unobtainable; `surface:media-intake` never
+  consults config (registry precedence); zero behavior change for existing callers (their tests
+  green, unmodified). **Validation:** interfaces tests; root `pnpm test`.
+- **Files:** `packages/interfaces/src/grants.ts`, interfaces tests, docs, `STATUS.md`.
+- **Out of Scope:** the app/CLI (SB-085); any new scope string; config-grant changes.
+
+## SB-072 — Media reference recording (public `ref` vs private `secure_ref`)
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-070, SB-050 (`Done`)
+- **Scope (OQ #39):** a pure classifier + recorder that turns an original-media pointer into a
+  **citable handle**: public `--media-ref <external path/URL>` ⇒ a plain `ref` string carried as
+  capture metadata; private `--media-secref <locator>` ⇒ `writeSecureRef({kind:"media", locator})`
+  → a `secref_…` id. **Private-by-default:** a locator that is signed/token-bearing (query string
+  with tokens, `?X-Amz-`/`Signature=`/`token=` patterns) or flagged private is **forced** to
+  secure_ref — never stored as a plain `ref`. The handle (plain ref string OR `secref_…` id) is the
+  return value the ingest cites. Errors never echo the locator value (leak-free, like the secref
+  writer). No transcript/capture yet.
+- **AC:** unit tests — public pointer → plain ref handle; private/secref → `secref_…` id (pointer
+  never echoed in stdout/errors); a signed-URL-shaped public pointer is **rejected/forced to
+  secref** (classifier test); the written secref is schema-valid and the locator appears only inside
+  the pointer file. **Validation:** package tests; root `pnpm test`.
+- **Files:** `apps/media-intake/src/media-ref.ts(new)` (+ its package skeleton if not yet created by
+  SB-085 — whichever lands first creates `apps/media-intake/{package.json,tsconfig.json}`), tests,
+  docs, `STATUS.md`.
+- **Out of Scope:** reading transcripts; the capture/L0 write (SB-085); `source-metadata.json`
+  parsing.
+
+## SB-085 — Transcript ingest → L0 (idempotent on `media_id`; no binary)
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 3 · **Status:** Backlog
+- **Dependencies:** SB-071, SB-072
+- **Scope:** `apps/media-intake` (`@sb/media-intake`, pattern = `apps/obsidian-helper`): fixed
+  `surface:media-intake` identity + an `invoke` wrapper over the enforced dispatch. `ingest`
+  reads a transcript **text** file — `--artifact-dir <dir>` ⇒ `<dir>/transcript.md` with `media_id`
+  = dir basename, **or** `--transcript <file> --media-id <hash>` — **read-only** with guardrails:
+  extension allowlist (`.md`/`.txt` only), size cap, path-safety, and a hard refusal to read any
+  media-binary extension (`.mov/.mp4/.wav/.m4a/…`). Routes through the enforced `capture` op → L0
+  verbatim (`source:"transcript"`) carrying `media_id` + the SB-072 media-ref handle (plain `ref`
+  or cited `secref_…` id) as provenance. **Idempotent on `media_id`:** before capture, scan existing
+  capture events; if `media_id` already ingested, report the existing note id and write nothing.
+- **AC:** ingest a `.txt`/`.md` transcript → exactly one L0 raw (verbatim, `source:transcript`,
+  carries `media_id` + media-ref) + one capture event; re-ingest same `media_id` ⇒ zero writes,
+  reports existing id (snapshot byte-identical); a `.mov`/binary path is refused (no read, no
+  write); oversize/traversal paths refused; denial sweep — the adapter is `scope_denied` outside
+  its grant (distill/fact/output/rebuild/index). **Validation:** package tests; root `pnpm test`.
+- **Files:** `apps/media-intake/{package.json,tsconfig.json,src/,test/,README.md}` (new),
+  root workspace wiring, docs, `STATUS.md`.
+- **Out of Scope:** the L1 bridge (SB-086); `.srt`/`.vtt` (SB-088); `manifest.json`/
+  `source-metadata.json` parsing.
+
+## SB-086 — L1 reviewable bridge (reuse `note promote`)
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-085
+- **Scope (OQ #38):** `ingest --review` (or a `promote` subcommand) seeds an L1 working note in
+  `vault/00_Inbox/` referencing the L0 transcript note by **reusing the existing enforced
+  `note promote`** (no new write primitive). The transcript thereby enters the existing capture →
+  distill / review flow unchanged. Provenance chain asserted intact: L1 `source_ref` → L0 ULID; L0
+  carries `media_id` + media-ref → resolves to the artifact dir / original media.
+- **AC:** after ingest+review, an L1 working note exists in `00_Inbox` citing the L0; the L0 stays
+  byte-identical (immutable); `distill propose` now surfaces the transcript candidate; the full
+  L1→L0→`media_id`→media-ref chain resolves in a test. **Validation:** package tests; root
+  `pnpm test`.
+- **Files:** `apps/media-intake/src/*`, tests, README, docs, `STATUS.md`.
+- **Out of Scope:** distillation/L2 logic (existing paths own it); auto-distill.
+
+## SB-087 — Media-intake epic gate (idempotency, provenance, no-leak)
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-085, SB-086
+- **Scope:** the epic "Done when" automated (one gate test, Node-only, in root `pnpm test`):
+  (a) `media_id` idempotency — double ingest writes one L0, second reports existing, workspace
+  byte-identical; (b) provenance round-trip — L1 → L0 → `media_id` → media-ref handle resolves;
+  (c) **no media binary in the vault** — only transcript text files present (extension scan);
+  (d) **no secret leak** — with a private media pointer carrying a signed-URL/sentinel locator, the
+  sentinel appears in NO note/event/log/snapshot/error and the secref locator is never echoed
+  (full workspace + stdout/stderr scan); (e) domain-term grep over `apps/media-intake`;
+  (f) SB-074 + SB-077 + SB-084 invariants re-asserted (surface identity denied outside its grant;
+  ALWAYS_DENIED unobtainable; secure_ref `read` hard-denied).
+- **AC:** gate green in root `pnpm test`; workflow doc + epics table + story map marked met;
+  coverage baseline (≈92.9% lines) held. **Validation:** root `pnpm test` + `test:coverage`.
+- **Files:** `apps/media-intake/test/media-intake-gate.test.ts(new)`, docs, `STATUS.md`.
+- **Out of Scope:** penetration testing; transcription/transcode correctness (transcriber owns it).
+
+## SB-088 — `.srt`/`.vtt` normalization (deferrable, gate-independent)
+
+- **Type:** Story · **Epic:** EPIC-CORE-013 · **Priority:** P2 · **Points:** 2 · **Status:** Backlog
+- **Dependencies:** SB-085
+- **Scope (OQ #36):** add `.srt`/`.vtt` to the ingest input formats by **normalizing to clean prose
+  before capture** — strip cue indices, `HH:MM:SS,mmm --> …` timestamp lines, and (optionally)
+  `<v Speaker>` labels; collapse cue text into paragraphs; capture the normalized prose verbatim as
+  L0 (still `source:"transcript"`, same provenance + idempotency). The raw timed file is read
+  read-only and never stored. Pure normalizer + a thin format dispatch in `ingest`.
+- **AC:** a sample `.srt` and `.vtt` normalize to the expected prose (cue/timestamp/index stripped);
+  malformed cues fail closed (nothing captured); normalized ingest carries the same
+  `media_id`/provenance + idempotency as the `.md` path. **Validation:** package tests; root
+  `pnpm test`. **Deferrable:** the SB-087 gate does not depend on this story.
+- **Files:** `apps/media-intake/src/normalize.ts(new)` + ingest dispatch, tests, docs, `STATUS.md`.
+- **Out of Scope:** speaker diarization, segment-level notes, `.segments.json` parsing.
+
+---
+
 # Later-epic notes (coarse)
 
 These remain `Backlog`/`Deferred`. Refine (split to ≤3 points + add AC/validation/files) before any
@@ -1957,12 +2123,14 @@ implementation. Detailed cards will be written when each phase is reached.
   `config/grants.json` (schema + loader + config-aware resolution, first-party precedence
   absolute, ALWAYS_DENIED ungrantable) + a **generic** `domain-apps/example-readonly/` read-only
   smoke test (never broker) proving interface-only access. Blocked on the OQ #29–#31 review.
-- **EPIC-CORE-013 Media Transcription Intake (SB-070–072):** **Backlog.** Optional adapter that ingests
-  transcripts from the standalone `psb-media-transcriber` artifact store (`~/PersonalSecondBrainMediaArtifacts/`,
-  layout `<YYYY>/<MM>/<media_id>/` + `by-name/`) as L0 captures via `interfaces` only. MUST read the artifact
-  store read-only, carry `media_id` + artifact-dir ref as provenance, be idempotent on `media_id`, and preserve
-  the organize-**by-name** convention. Workflow + binding rules documented in
-  [`../workflows/media_transcription_intake.md`](../workflows/media_transcription_intake.md). Refine + split
-  (≤3 pts: read/list artifacts → capture-with-provenance → idempotent re-ingest) before implementation.
+- **EPIC-CORE-013 Media Transcription Intake:** **REFINED** (2026-06-12) into ≤3-pt stories — see the
+  EPIC-CORE-013 table above and detailed cards, plus
+  [`media_intake_story_map.md`](media_intake_story_map.md). Optional CLI adapter (`apps/media-intake`,
+  `surface:media-intake`) ingesting `psb-media-transcriber` transcripts (`~/PersonalSecondBrainMediaArtifacts/`,
+  layout `<YYYY>/<MM>/<media_id>/` + `by-name/`, read-only) as L0 captures with `media_id` + media-reference
+  provenance — core stores transcript text + references only (never binaries); private pointers use secure_ref;
+  idempotent on `media_id`; organize-by-name preserved. Workflow + binding rules in
+  [`../workflows/media_transcription_intake.md`](../workflows/media_transcription_intake.md). Blocked on the
+  OQ #36–#40 review.
 - **EPIC-DOMAIN-001 Broker (SB-900):** **Deferred.** No detailed stories. Begins only after the core is
   stable and SB-060/061 are `Done`; lives entirely under `domain-apps/broker/`, core untouched.

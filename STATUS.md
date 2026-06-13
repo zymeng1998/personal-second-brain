@@ -2,6 +2,32 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## EPIC-CORE-013 (MEDIA TRANSCRIPTION INTAKE) REFINED (2026-06-12); ⏸ STOPPED FOR THE OQ #36–#40 REVIEW
+- **Human chose EPIC-CORE-013 refinement next** (EPIC-DOMAIN-001 broker stays Deferred) with
+  guardrails: core never stores media binaries (transcript text + references only); private media
+  pointers (signed URLs/tokens/private paths) use secure_ref; no secret/locator leak anywhere;
+  reuse capture/provenance/confirmation/security boundary; surfaces never bypass resolver/enforcer;
+  domain-neutral (no broker); ≤3-pt atomic stories; stop after refinement for OQ approval.
+- **Refinement only — no implementation.** Coarse SB-070/071/072 decomposed into **7 stories ≤3
+  pts, 16 pts total** (SB-070/071/072 narrowed + SB-085/086/087 new + deferrable SB-088):
+  SB-070 (contract: `"transcript"` source kind + `media_reference.schema.json` — no binary/secret
+  fields) → SB-071 (`surface:media-intake` identity + least-privilege grant
+  [write:capture, read:notes, write:notes, write:secure_refs]) → SB-072 (media reference recording:
+  public `ref` vs private `secure_ref`, private-by-default for signed/token pointers → citable
+  handle) → SB-085 (`apps/media-intake` `ingest`: transcript `.txt`/`.md` read-only → L0 verbatim
+  `source:transcript` carrying `media_id` + media-ref; idempotent on `media_id`; never reads media
+  binaries) → SB-086 (L1 review bridge reusing `note promote` → enters distill/review flow) →
+  SB-087 (epic gate: idempotency, provenance round-trip, no-binary, no-leak scan, domain-neutral,
+  SB-074/077/084 re-asserted) → SB-088 (deferrable `.srt`/`.vtt` → prose normalization,
+  gate-independent). Map: **`media_intake_story_map.md`** (new); cards + tables in
+  `story_backlog.md`; workflow-doc status updated; epic → `Refined`.
+- **⏸ STOPPED at the decision review: OQ #36–#40 filed** (#36 `.txt`/`.md` verbatim v1, srt/vtt
+  deferred to SB-088; #37 transcripts-only, media ref recorded with the transcript; #38 L0 +
+  thin L1 bridge via existing promote; #39 dual-mode media reference, secure_ref for private/signed,
+  private-by-default; #40 dedicated `apps/media-intake` CLI surface, not core `cli`/dashboard).
+  **Human confirms (or amends) → SB-070 `Ready`** → implement SB-070 → 071 → 072 → 085 → 086 →
+  087 (→ 088 optional), one atomic commit each. All 7 stories `Backlog` per the Ready rule.
+
 ## ✅ PHASE 5 (SURFACES, EPIC-CORE-010) COMPLETE — GATE MET (2026-06-11, one autonomous session)
 - **All 7 stories `Done` + pushed** (SB-078 → 079 → 080 → 081 → 082 → 083 → 084, one atomic
   commit each). **SB-084 gate green in root `pnpm test`:** (a) BOTH surfaces capture+read

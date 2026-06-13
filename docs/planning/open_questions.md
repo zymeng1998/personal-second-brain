@@ -108,6 +108,26 @@ atomic commit per story; SB-074 + SB-077 re-run inside SB-084.
 | 34 | **Obsidian helper shape** — real plugin vs companion CLI? | **No plugin this phase** (ADR-003: plugins stay optional; headless-testable). `apps/obsidian-helper` companion CLI: `check` (read-only compat report: frontmatter validity, dangling wikilinks, folder layout), `templates install` (domain-neutral, `vault/90_System/`, never overwrites), `capture --file <draft.md>` (draft → enforced capture op, L0 + event, draft byte-untouched). Obsidian remains never-the-writer-of-record. |
 | 35 | **Dashboard v1 write surface** — which writes, gated how? | **Capture only** (SB-082) for the roadmap gate; the review queue (SB-083, deferrable) is a confirmation-gated front over the UNCHANGED Phase 4 accept paths: read-only candidates + paste/upload of a human-reviewed proposal JSON passed verbatim into whole-file-validated `distill accept`/`fact accept` (invalid ⇒ nothing written). Explicit button-press = the confirmation; no server-side proposal generation/editing; no auto-accept; no AI in surfaces. |
 
+## Decide before EPIC-CORE-013 implementation (Media Transcription Intake)
+
+Filed 2026-06-12 during the EPIC-CORE-013 refinement (SB-070/071/072 + SB-085/086/087, deferrable
+SB-088 — see [`media_intake_story_map.md`](media_intake_story_map.md)). **PENDING human review** —
+SB-070 goes `Ready` only after these are approved (or amended). Epic-wide guardrails fixed by the
+authorization (not open): the core never stores media binaries (transcript text + references only);
+private media pointers (signed URLs, tokens, private paths) use secure_ref (opaque, never echoed);
+no secret/signed-URL/locator leak in notes/events/logs/snapshots/errors; intake reuses the enforced
+dispatch under a fixed least-privilege `surface:*` identity (never `cli`); re-ingest idempotent on
+`media_id`; the transcriber's artifact store is read-only and its layout + organize-by-name
+preserved; domain-neutral; one atomic commit per story; SB-074/077/084 re-run inside SB-087.
+
+| # | Question | Lean |
+|---|---|---|
+| 36 | **Minimal transcript input format for v1** — `.txt`, `.srt`/`.vtt`, or both? | **`.txt` + `.md` captured verbatim** (the transcriber already emits prose `transcript.md` — the canonical input). `.srt`/`.vtt` cue-index/timestamp stripping is a distinct parsing concern handled by a dedicated **gate-independent SB-088** (deferrable) that normalizes to prose. Minimal core path = text/markdown verbatim; timed-caption support is a separate optional story. |
+| 37 | **Transcripts only, or also register media before a transcript exists?** | **Transcripts only for v1.** The media reference is recorded **together with** the transcript at ingest (provenance), not standalone — an L0 raw requires real content; a bodiless "media stub" adds little value. Pre-registering media before a transcript exists is deferred. |
+| 38 | **L0 only, or also a distillation/review path?** | **L0 raw (verbatim) + a thin L1 review bridge.** Ingest always writes L0; SB-086 seeds an L1 working note in `00_Inbox` by **reusing the existing `note promote`**, so the transcript enters the existing capture → distill / review pipeline. No new distillation logic — Phase 1H/Phase 4 handle L2+ unchanged. |
+| 39 | **Media reference: external path/link metadata vs `secure_ref`?** | **Both, classified by sensitivity — private-by-default for ambiguous/signed pointers.** Non-sensitive external paths/URLs → plain capture `ref` metadata; private cloud links, **signed URLs / token-bearing links**, private paths, keychain items → **`secure_ref`** (opaque locator ≤500, never echoed; `read:secure_refs` stays hard-denied). Signed/token-bearing pointers are forced to secure_ref; the adapter creates the secref itself (needs `write:secure_refs`) for a one-command workflow. |
+| 40 | **Which surface exposes v1 first?** | **A dedicated CLI adapter app — `apps/media-intake`, identity `surface:media-intake`** (mirrors `apps/obsidian-helper`). Not folded into the core `sb` CLI (keeps the adapter optional/separable with a narrower-than-`cli` grant), not dashboard/obsidian. One CLI surface = the minimal usable workflow; dashboard/obsidian integration deferred. |
+
 ## Decide later
 
 | # | Question | Lean |

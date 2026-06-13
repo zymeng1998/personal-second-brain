@@ -65,9 +65,14 @@ Any intake/adapter/backfill code MUST:
 ## Status
 
 - **Transcriber:** live and working (v0.1.0) — produces the layout above, including `by-name/`.
-- **Second Brain adapter:** **not built.** Tracked in
-  [`../planning/story_backlog.md`](../planning/story_backlog.md) (EPIC-CORE-013, coarse). No vault
-  writes happen from transcription until that epic is refined and implemented.
+- **Second Brain adapter:** **not built; REFINED 2026-06-12.** EPIC-CORE-013 is decomposed into
+  ≤3-pt stories — see [`../planning/media_intake_story_map.md`](../planning/media_intake_story_map.md)
+  and the cards in [`../planning/story_backlog.md`](../planning/story_backlog.md) (SB-070/071/072 +
+  SB-085/086/087, deferrable SB-088). Planned shape: an optional CLI adapter `apps/media-intake`
+  (identity `surface:media-intake`) that captures the transcript **text** as L0 (`source:"transcript"`)
+  with `media_id` + media-reference provenance — never the media binary; private media pointers use
+  secure_ref. **Blocked on the OQ #36–#40 decision review; no vault writes happen from transcription
+  until the epic is approved and implemented.**
 
 ## Out of scope
 
