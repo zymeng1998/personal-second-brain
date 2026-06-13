@@ -3,7 +3,7 @@
   "grants": [
     {
       "app": "domain-app:broker",
-      "allow": ["read:notes", "read:facts", "write:capture"]
+      "allow": ["read:notes", "read:facts", "write:capture", "write:notes"]
     }
   ]
 }
