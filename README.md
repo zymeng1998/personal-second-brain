@@ -6,14 +6,14 @@ It captures messy information, organizes it (PARA + Tiago Forte's CODE), distill
 reusable notes, projects queryable facts, and generates outputs — all over plain Markdown,
 YAML frontmatter, an append-only JSON event log, and rebuildable SQLite/DuckDB projections.
 
-> **Status:** **Phase 1 (MVP core), Phase 1H (distillation), and Phase 2 (projections) all complete.**
-> CLI `capture` writes immutable L0 raw notes + an append-only capture event; the vault read API
-> (`note list` / `note get`) and frontmatter validation work; raw immutability is enforced and test-locked.
-> The human-confirmed **`distill`** workflow (L1→L2 note + memory event) ships, and **L3 projections**
-> (fact-store ADD-only, entity-graph + manual merges, task-store) build in rebuildable SQLite via
-> `sb rebuild` — dropping `db/` and replaying the event log reproduces row-identical projections.
-> **130 tests passing.** **Next: Phase 3 — retrieval** (DuckDB + BGE-M3 over a Python sidecar).
-> See [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md).
+> **Status:** **Complete — Core v0.1 + the first domain app (broker).** Every core epic ships:
+> capture → read → validate → media-intake → human-confirmed `distill` → L3 projections
+> (rebuildable SQLite) → retrieval sidecar → obsidian-helper + dashboard surfaces, all behind one
+> enforced permission boundary. **EPIC-DOMAIN-001** — the rental-broker domain app — is built
+> entirely on the core through that boundary, with zero broker concepts in the core (ADR-001).
+> **340 core tests + 19 broker tests passing**; `pnpm run smoke` exercises the full core path
+> end-to-end. See [`docs/PROJECT_HANDOFF.md`](docs/PROJECT_HANDOFF.md) to run it from a fresh clone,
+> and [`docs/planning/implementation_roadmap.md`](docs/planning/implementation_roadmap.md) for the phase history.
 
 ## Core principle: domain independence
 
@@ -55,7 +55,7 @@ apps/         cli ✅, dashboard ✅, obsidian-helper ✅, media-intake ✅
 packages/     interfaces ✅, note-vault ✅, event-log ✅, memory-kernel ✅, fact-store ✅,
               entity-graph ✅, task-store ✅, retrieval ✅; adapters/surfaces/ai (reserved)
 sidecars/     retrieval ✅ (Python: DuckDB FTS+VSS, stdio JSONL), ai (boundary docs only)
-domain-apps/  example-readonly ✅ (generic interface smoke test); broker (docs-only, Deferred)
+domain-apps/  example-readonly ✅ (generic interface smoke test); broker ✅ (EPIC-DOMAIN-001, client preference tracking)
 schemas/      markdown, json, sql
 examples/     notes, captures, entities, projects, outputs, grants, media
 scripts/      init_workspace ✅, validate_notes ✅, index_vault ✅, query_memory ✅, smoke_core_v0.1 ✅

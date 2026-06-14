@@ -101,14 +101,17 @@ bypasses the resolver/enforcer, and `secure_refs` are never surfaced.
 ## 8. Verify the whole thing
 
 ```bash
-pnpm test            # 321 tests (immutability, replay, security, surface, media-intake gates)
+pnpm test            # 340 core tests (immutability, replay, security, surface, media-intake gates)
 pnpm run test:coverage   # ~93% lines (non-blocking; target ≥80%)
 pnpm run test:sidecar    # env-gated TS↔Python real-sidecar E2E (needs uv; SKIPs visibly otherwise)
 pnpm run smoke           # this quickstart, end-to-end, against a throwaway workspace
 ```
 
-## What's NOT here yet
+## Beyond the core
 
-Domain-specific logic (the broker app, EPIC-DOMAIN-001) is intentionally **deferred** — it will be
-built entirely on `packages/interfaces` under scoped permissions, with zero broker concepts in the
-core. The generic `domain-apps/example-readonly/` shows the integration pattern.
+This quickstart is deliberately **core-only** — every command above runs before any domain logic.
+The first real domain app, the rental broker (**EPIC-DOMAIN-001**), is now built entirely on
+`packages/interfaces` under scoped permissions, with zero broker concepts in the core. See the
+broker workflow in [`../domain-apps/broker/README.md`](../domain-apps/broker/README.md) and the
+end-to-end usage in [`PROJECT_HANDOFF.md`](PROJECT_HANDOFF.md). The generic
+`domain-apps/example-readonly/` shows the minimal integration pattern.

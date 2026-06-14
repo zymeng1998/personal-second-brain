@@ -83,18 +83,22 @@ distill → projections → retrieval → obsidian-helper + dashboard read paths
 [`../CORE_V0.1_QUICKSTART.md`](../CORE_V0.1_QUICKSTART.md) and proven reproducible by
 `pnpm run smoke` ([`../../scripts/smoke_core_v0.1.sh`](../../scripts/smoke_core_v0.1.sh)).
 Green at the checkpoint: `pnpm test` **321 tests**, coverage **93.23% lines**, `test:sidecar`
-**3/3** (real Python sidecar). **Next:** EPIC-DOMAIN-001 broker — still Deferred until authorized.
+**3/3** (real Python sidecar). EPIC-DOMAIN-001 broker followed — now **complete** (see Phase 6).
 
-## Phase 6 — First domain app (broker)
+## Phase 6 — First domain app (broker) ✅
 
 Built entirely on `interfaces` under scoped permissions; validates domain independence. (Any earlier
 interface smoke test uses a generic `domain-apps/example-readonly/`, never broker.)
 - **Done when:** broker reads/writes the core only through scoped contracts; core has zero broker code.
+  **MET 2026-06-13** (SB-094 gate; ADR-001 grep green).
 - **REFINED (2026-06-13)** into 6 ≤3-pt stories (SB-089..094, 14 pts) — see
   [`broker_story_map.md`](broker_story_map.md). v1 = **client preference tracking** (read-only
   `domain-app:broker` binding → capture → `note promote` → L3 client-preference facts) + a read-only
   showing-match summary; grants from `config/grants.json` only (least-privilege); property media
-  reuses `apps/media-intake`. ⏸ Blocked on the OQ #41–#47 decision review.
+  reuses `apps/media-intake`.
+- **COMPLETE 2026-06-13** — OQ #41–#47 approved (2 amendments: staged per-story grants;
+  client-preference facts confirmation-gated through the unchanged `fact accept`). All 6 stories
+  `Done`; `domain-apps/broker` (`@sb-domain/broker`) ships **19 tests**; root suite **340 tests**.
 
 ## Cross-cutting (every phase)
 

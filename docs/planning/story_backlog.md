@@ -12,7 +12,9 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 > **Status snapshot (Core v0.1 — usable, 2026-06-13).** ALL core epics are `Done`
 > (EPIC-CORE-001..014, across Phases 0–5 + the cross-phase Security/Domain-Boundary/Media-Intake
 > epics). The core is usable end-to-end — see [`../CORE_V0.1_QUICKSTART.md`](../CORE_V0.1_QUICKSTART.md)
-> (`pnpm run smoke`). The only open item is **`EPIC-DOMAIN-001` (broker), `Deferred`** until authorized.
+> (`pnpm run smoke`). **`EPIC-DOMAIN-001` (broker) is also `Done`** (2026-06-13) — the first domain
+> app, built entirely on the core via `domain-app:broker` through the enforced dispatch (SB-094 gate;
+> see [`broker_story_map.md`](broker_story_map.md)). **No open epics remain.**
 
 ---
 
@@ -2146,11 +2148,13 @@ the existing domain-app grant model; least-privilege, **read-only unless a story
 client PII / private landlord data / signed URLs / secure_ref locators / raw contact details** in
 tests, fixtures, snapshots, logs, or docs (synthetic-only); sensitive references use secure_ref;
 domain parsing/storage stays separate from generic core contracts; prefer local/imported artifacts;
-one atomic commit per story. All six stories are `Backlog` until the OQ review confirms the leans.
+one atomic commit per story. **All six stories are `Done` (2026-06-13)** — OQ #41–#47 approved with
+two amendments (staged per-story grants; client-preference facts confirmation-gated through the
+unchanged `fact accept`); SB-094 gate met.
 
 ## SB-089 — Broker boundary + read-only binding (`domain-app:broker`)
 
-- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-061 (`Done`), SB-076 (`Done`)
 - **Scope (OQ #43/#44):** turn the docs-only `domain-apps/broker/` placeholder into a real pnpm
   workspace package mirroring `domain-apps/example-readonly`: `src/index.ts` declaring the **fixed**
@@ -2173,7 +2177,7 @@ one atomic commit per story. All six stories are `Backlog` until the OQ review c
 
 ## SB-090 — Client-preference capture → L0 (`write:capture`)
 
-- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-089
 - **Scope (OQ #41/#42/#44):** `client capture --file <export.md>` (or `--text "…"`): read a pasted
   client chat export / manual client note **read-only** (extension allowlist `.md`/`.txt`, size cap,
@@ -2191,7 +2195,7 @@ one atomic commit per story. All six stories are `Backlog` until the OQ review c
 
 ## SB-091 — Client working note via `note promote` (`write:notes`)
 
-- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-090
 - **Scope (OQ #38-analogue):** `client promote <L0-id>` reuses the enforced **`note promote`** (no new
   writer path) → an L1 working note in `00_Inbox` citing the L0 client capture, so the client note
@@ -2206,7 +2210,7 @@ one atomic commit per story. All six stories are `Backlog` until the OQ review c
 
 ## SB-092 — Client-preference facts via `fact accept` (`write:facts`, `read:index`)
 
-- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 3 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 3 · **Status:** Done
 - **Dependencies:** SB-091
 - **Scope (OQ #42):** build a `fact accept --file` proposal (the existing `proposal.schema.json`
   envelope) from a client working note — structured preference facts (budget band, target areas,
@@ -2227,7 +2231,7 @@ one atomic commit per story. All six stories are `Backlog` until the OQ review c
 
 ## SB-093 — Showing-match summary (read-only, stdout) — *deferrable*
 
-- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-092
 - **Scope (OQ #41/#46):** `match <client-id>` reads the client-preference facts + any captured
   property notes/facts (`read:notes` / `read:facts` / `read:index` / `query`) and prints a **ranked
@@ -2245,7 +2249,7 @@ one atomic commit per story. All six stories are `Backlog` until the OQ review c
 
 ## SB-094 — Broker epic gate (boundary + intake round-trip + no-leak + domain-neutral)
 
-- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Backlog
+- **Type:** Story · **Epic:** EPIC-DOMAIN-001 · **Priority:** P3 · **Points:** 2 · **Status:** Done
 - **Dependencies:** SB-089, SB-092
 - **Scope:** the epic "Done when" automated (Node-only, in root `pnpm test`): (a) **binding holds** —
   broker reads succeed under its config grant, every ungranted / `ALWAYS_DENIED` form ⇒ `scope_denied`
@@ -2309,5 +2313,5 @@ implementation. Detailed cards will be written when each phase is reached.
   → L3 client-preference facts) + a read-only **showing-match summary**. Grants from
   `config/grants.json` only; least-privilege (cumulative v1 `[read:notes, read:facts, read:index,
   write:capture, write:notes, write:facts]`); property media reuses `apps/media-intake` (broker is a
-  consumer); no broker code in the core. ⏸ Blocked on the OQ #41–#47 review; SB-089 goes `Ready` on
-  confirmation.
+  consumer); no broker code in the core. **COMPLETE 2026-06-13** — OQ #41–#47 approved (2 amendments);
+  all 6 stories `Done`; SB-094 gate met; broker package **19 tests**, root suite **340 tests**.
