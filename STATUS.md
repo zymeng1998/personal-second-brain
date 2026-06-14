@@ -2,6 +2,39 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ EPIC-DOMAIN-001 (BROKER) — GATE MET (2026-06-13, one session)
+- **Human approved OQ #41–#47 with two amendments** and authorized implementation in dependency
+  order SB-089 → 090 → 091 → 092 → 094 (one atomic commit each), with SB-093 after the gate if still
+  small/clean. **Amendments honored:** (A) the broker grant expands ONLY in the story that needs the
+  scope — SB-089 `[read:notes, read:facts]`, SB-090 +`write:capture`, SB-091 +`write:notes`, SB-092
+  +`write:facts`+`read:index`; the cumulative v1 set is never granted up front. (B) client-preference
+  facts are confirmation-gated through the EXISTING `fact accept` path — no auto-extraction, no new
+  fact writer, no broker-specific core fact schema.
+- **First the docs-only refinement was committed** (86c9f75), then the 5 implementation commits:
+  - **SB-089 `Done`** (9fb5924) — `domain-apps/broker` pnpm package mirroring `example-readonly`:
+    fixed `domain-app:broker` identity, invocation only via the enforced dispatch, read helpers; sample
+    grant `[read:notes, read:facts]`. Smoke 3/3 (reads work; every write denied byte-identical; ADR grep).
+  - **SB-090 `Done`** (76763a9) — `captureClientNote`: local `.md`/`.txt` artifact (media-binary
+    denylist, 1 MiB cap) or inline text → enforced `capture` → L0 `source:"import"`, tagged
+    `client-intake`. +`write:capture`. Tests 4/4.
+  - **SB-091 `Done`** (dace2b8) — `promoteClient`: reuses enforced `note promote` → L1 in `00_Inbox`
+    citing the L0; L0 immutable. +`write:notes`. Tests 2/2.
+  - **SB-092 `Done`** (550ba01) — `buildPreferenceProposal` (broker vocabulary) + `acceptPreferenceFacts`
+    forwarding a human-reviewed proposal through the unchanged `fact accept` (whole-file validated) →
+    generic L3 facts with provenance. +`write:facts`,`read:index`. Tests 4/4.
+  - **SB-094 `Done`** — gate (`broker-gate.test.ts`, 5): (a) binding holds, out-of-grant forms denied,
+    read-only byte-identical; (b) intake round-trip L0+L1(cites L0)+provenance facts, L0 immutable;
+    (c) secref locator sentinel only in the secref pointer, never in broker output, contacts kept out
+    of structured facts; (d) ADR-001 core domain-neutral; (e) SB-074/077/084/087 re-asserted for
+    `domain-app:broker` (write:secure_refs/read:secure_refs unobtainable; privileged + duplicate
+    configs fail closed).
+- **Counts:** broker package **18/18**; root `pnpm test` exit 0 — **339 tests** (was 321; +18 broker),
+  0 fail. Property media reuses `apps/media-intake` (broker is a consumer; never writes secure_refs).
+  Synthetic fixtures only; no real PII anywhere.
+- **Next:** SB-093 (read-only showing-match summary, stdout, zero writes — gate-independent) if still
+  small/clean, then EPIC-DOMAIN-001 fully complete. Inventory / viewing-schedule / manager-report /
+  WeChat / Gmail / Calendar / scraping remain future/out-of-scope (OQ #47).
+
 ## EPIC-DOMAIN-001 (BROKER) REFINED (2026-06-13); ⏸ STOPPED FOR THE OQ #41–#47 REVIEW
 - **Human authorized EPIC-DOMAIN-001 broker refinement** (refinement only — no broker features
   implemented) with guardrails: no broker concepts in `packages/interfaces`/`packages/core`/generic

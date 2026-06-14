@@ -34,7 +34,7 @@ Phase 1 sequencing: [`phase_1_story_map.md`](phase_1_story_map.md).
 | EPIC-CORE-012 | Domain App Boundary | 4–6 | P1 | Done | Config-loaded domain-app grants (`config/grants.json`, strict + fail-closed, deep-frozen, absolute first-party precedence) + generic read-only `domain-apps/example-readonly/` binding template. **Gate met 2026-06-11** (SB-077): privileged/shadowing/malformed/duplicate configs all fail closed with zero writes; SB-074 invariants re-asserted with config present. **All 5 stories `Done`** (SB-060/075/076/061/077) — see [`domain_boundary_story_map.md`](domain_boundary_story_map.md). |
 | EPIC-CORE-013 | Media Transcription Intake | later | P2 | Done | Optional CLI adapter (`apps/media-intake`, `surface:media-intake`) ingesting `psb-media-transcriber` transcripts as L0 captures (text + references only, never media binaries; private pointers use secure_ref; strict `media_id` idempotency; `.srt`/`.vtt`→prose). **Gate met 2026-06-12** (SB-087): idempotency + provenance round-trip + no-binary + no-leak + SB-074/077/084 re-asserted. **All 7 stories `Done`** (SB-070/071/072 + SB-085/086/087/088) — see [`media_intake_story_map.md`](media_intake_story_map.md). |
 | EPIC-CORE-014 | AI Workflows | 4 | P1 | Done | Skills for braindump/extract-facts/review/compose-output (distill shipped in 1H) + `sb fact` / L5 `sb output create` confirmed write paths. **Gate met 2026-06-10** (SB-066): propose-without-accept writes nothing; accepted writes carry provenance; L0/L1 immutable. **All 9 stories `Done`** (SB-056..059 + SB-062..066, one autonomous session). |
-| EPIC-DOMAIN-001 | Broker Domain App | 6 | P3 | **Refined** | First domain app (rental broker), built entirely on the completed core via `domain-app:broker` through the enforced dispatch; v1 = **client preference tracking** (capture → promote → L3 facts) + read-only showing-match summary. **REFINED 2026-06-13** into 6 ≤3-pt stories (SB-089..094, 14 pts) — coarse stub SB-900 decomposed; see [`broker_story_map.md`](broker_story_map.md). ⏸ Blocked on the OQ #41–#47 review. No broker code in the core. |
+| EPIC-DOMAIN-001 | Broker Domain App | 6 | P3 | **Gate met** | First domain app (rental broker), built entirely on the completed core via `domain-app:broker` through the enforced dispatch; v1 = **client preference tracking** (capture → promote → L3 facts). **OQ #41–#47 approved (2 amendments)**; **gate met 2026-06-13** (SB-094): binding holds, intake round-trip writes L0+L1+provenance facts with L0 immutable, no secret/locator leak, ADR-001 core stays domain-neutral, SB-074/077/084/087 re-asserted. SB-089/090/091/092/094 `Done`; SB-093 (read-only match summary) optional. See [`broker_story_map.md`](broker_story_map.md). No broker code in the core. |
 
 ---
 
@@ -213,12 +213,12 @@ approved (+ amendments); all 7 stories `Done`, SB-087 gate green.
 | SB-073 | Story | Scope enforcement at the operations boundary | EPIC-CORE-011 | P1 | Done | 3 | SB-069 |
 | SB-074 | Story | Security epic gate (over-scope rejected; secure-ref round-trip) | EPIC-CORE-011 | P1 | Done | 2 | SB-067, SB-073 |
 | SB-900 | Epic-stub | ~~Broker domain app~~ **DECOMPOSED (2026-06-13)** → SB-089..094 | EPIC-DOMAIN-001 | P3 | Split | — | Core stable + EPIC-CORE-012 |
-| SB-089 | Story | Broker boundary + read-only binding (`domain-app:broker`) | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-061, SB-076 |
-| SB-090 | Story | Client-preference capture → L0 (`write:capture`) | EPIC-DOMAIN-001 | P3 | Backlog | 3 | SB-089 |
-| SB-091 | Story | Client working note via `note promote` (`write:notes`) | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-090 |
-| SB-092 | Story | Client-preference facts via `fact accept` (`write:facts`, `read:index`) | EPIC-DOMAIN-001 | P3 | Backlog | 3 | SB-091 |
+| SB-089 | Story | Broker boundary + read-only binding (`domain-app:broker`) | EPIC-DOMAIN-001 | P3 | Done | 2 | SB-061, SB-076 |
+| SB-090 | Story | Client-preference capture → L0 (`write:capture`) | EPIC-DOMAIN-001 | P3 | Done | 3 | SB-089 |
+| SB-091 | Story | Client working note via `note promote` (`write:notes`) | EPIC-DOMAIN-001 | P3 | Done | 2 | SB-090 |
+| SB-092 | Story | Client-preference facts via `fact accept` (`write:facts`, `read:index`) | EPIC-DOMAIN-001 | P3 | Done | 3 | SB-091 |
 | SB-093 | Story | Showing-match summary (read-only, stdout) — *deferrable* | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-092 |
-| SB-094 | Story | Broker epic gate (boundary + intake round-trip + no-leak + domain-neutral) | EPIC-DOMAIN-001 | P3 | Backlog | 2 | SB-089, SB-092 |
+| SB-094 | Story | Broker epic gate (boundary + intake round-trip + no-leak + domain-neutral) | EPIC-DOMAIN-001 | P3 | Done | 2 | SB-089, SB-092 |
 
 > Stories marked `5→split` or `8→split` **must be decomposed** into ≤3-point stories during refinement
 > before they can become `Ready` (project split rule). They are intentionally left coarse now.

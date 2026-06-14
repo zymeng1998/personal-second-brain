@@ -9,9 +9,11 @@ binding pattern proven by [`domain_boundary_story_map.md`](domain_boundary_story
 [`phase_5_story_map.md`](phase_5_story_map.md), and the media/secure_ref reuse of
 [`media_intake_story_map.md`](media_intake_story_map.md).
 
-**Status (2026-06-13): ⏸ REFINED — STOPPED FOR THE OQ #41–#47 DECISION REVIEW.** Refinement only;
-no broker code, schemas, data models, or implementation yet. All 6 stories are `Backlog`; SB-089
-goes `Ready` only after the human confirms (or amends) OQ #41–#47.
+**Status (2026-06-13): ✅ EPIC GATE MET (SB-094).** OQ #41–#47 approved with two amendments
+(staged per-story grants — the cumulative v1 set is never granted at once; client-preference facts
+confirmation-gated through the unchanged `fact accept`). Implemented in order **SB-089 → 090 → 091 →
+092 → 094**, one atomic commit each; the SB-094 gate is green in root `pnpm test` (339 tests). The
+read-only showing-match summary **SB-093** is the one remaining optional story (gate-independent).
 
 ## Objective
 
