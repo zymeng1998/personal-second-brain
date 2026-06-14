@@ -99,3 +99,5 @@ export type {
   ExtractFactsProposal,
   AcceptFactsResult,
 } from "./preference-facts.js";
+export { matchClient, renderMatchSummary, PROPERTY_NOTE_TAG } from "./match.js";
+export type { MatchResult, PropertyMatch } from "./match.js";

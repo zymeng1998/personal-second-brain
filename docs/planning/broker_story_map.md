@@ -9,11 +9,12 @@ binding pattern proven by [`domain_boundary_story_map.md`](domain_boundary_story
 [`phase_5_story_map.md`](phase_5_story_map.md), and the media/secure_ref reuse of
 [`media_intake_story_map.md`](media_intake_story_map.md).
 
-**Status (2026-06-13): ✅ EPIC GATE MET (SB-094).** OQ #41–#47 approved with two amendments
-(staged per-story grants — the cumulative v1 set is never granted at once; client-preference facts
-confirmation-gated through the unchanged `fact accept`). Implemented in order **SB-089 → 090 → 091 →
-092 → 094**, one atomic commit each; the SB-094 gate is green in root `pnpm test` (339 tests). The
-read-only showing-match summary **SB-093** is the one remaining optional story (gate-independent).
+**Status (2026-06-13): ✅ COMPLETE — all 6 stories `Done`.** OQ #41–#47 approved with two
+amendments (staged per-story grants — the cumulative v1 set is never granted at once; client-
+preference facts confirmation-gated through the unchanged `fact accept`). Implemented in order
+**SB-089 → 090 → 091 → 092 → 094 → 093**, one atomic commit each; the SB-094 gate is green in root
+`pnpm test` (**340 tests**; 18+1 broker). Property media reuses `apps/media-intake` (broker is a
+consumer); no broker code in the core; synthetic fixtures only.
 
 ## Objective
 

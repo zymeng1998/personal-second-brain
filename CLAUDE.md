@@ -151,6 +151,20 @@ ambiguous pointers become opaque secure_refs; re-ingest is strictly idempotent o
 `--review` seeds an L1 working note via the existing `note promote`; `.srt`/`.vtt` normalize to
 prose. The SB-087 gate is green. **Root suite 321 tests; coverage 93.19% lines.**
 
-**Next:** EPIC-DOMAIN-001 (broker, P3 — stays **Deferred** until explicitly authorized; the core
-is now stable, with all EPIC-CORE epics `Done`). Always follow the backlog workflow above: confirm
-the story is `Ready`, implement in-scope only, validate, stop at `In Review`.
+**EPIC-DOMAIN-001 (Broker Domain App) is COMPLETE (2026-06-13)** — OQ #41–#47 approved (2
+amendments: staged per-story grants; client-preference facts confirmation-gated through the unchanged
+`fact accept`): the **first real domain app** `domain-apps/broker` (`@sb-domain/broker`), built
+**entirely on the completed core** via a fixed `domain-app:broker` identity through the enforced
+dispatch — no broker code, schema, type, or vocabulary in the core (ADR-001 grep green). v1 = **client
+preference tracking**: read-only binding → `captureClientNote` (L0 `source:"import"`) →
+`promoteClient` (L1 via `note promote`) → human-reviewed `acceptPreferenceFacts` (generic L3 facts via
+the unchanged `fact accept`) → read-only `matchClient` showing-match summary (stdout, zero writes).
+Grants come only from `config/grants.json`, expanded per story (least-privilege; cumulative v1
+`[read:notes, read:facts, read:index, write:capture, write:notes, write:facts]`); `write:secure_refs`
+never granted (property media reuses `apps/media-intake`, broker is a consumer). The SB-094 gate is
+green. **Root suite 340 tests.**
+
+**Next:** no open epics — all EPIC-CORE and EPIC-DOMAIN-001 are `Done`. Future broker work (property
+inventory, viewing-schedule prep, manager reports) and external integrations (WeChat/Gmail/Calendar)
+are out of scope until separately refined. Always follow the backlog workflow above: confirm the
+story is `Ready`, implement in-scope only, validate, stop at `In Review`.

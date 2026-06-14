@@ -2,7 +2,7 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
-## ✅ EPIC-DOMAIN-001 (BROKER) — GATE MET (2026-06-13, one session)
+## ✅ EPIC-DOMAIN-001 (BROKER) — COMPLETE (2026-06-13, one session)
 - **Human approved OQ #41–#47 with two amendments** and authorized implementation in dependency
   order SB-089 → 090 → 091 → 092 → 094 (one atomic commit each), with SB-093 after the gate if still
   small/clean. **Amendments honored:** (A) the broker grant expands ONLY in the story that needs the
@@ -31,9 +31,16 @@
 - **Counts:** broker package **18/18**; root `pnpm test` exit 0 — **339 tests** (was 321; +18 broker),
   0 fail. Property media reuses `apps/media-intake` (broker is a consumer; never writes secure_refs).
   Synthetic fixtures only; no real PII anywhere.
-- **Next:** SB-093 (read-only showing-match summary, stdout, zero writes — gate-independent) if still
-  small/clean, then EPIC-DOMAIN-001 fully complete. Inventory / viewing-schedule / manager-report /
-  WeChat / Gmail / Calendar / scraping remain future/out-of-scope (OQ #47).
+- **SB-093 `Done`** (read-only showing-match summary) — `matchClient`/`renderMatchSummary` read the
+  client-preference facts (`fact list`) + captured property notes tagged `property-note`
+  (`note list`/`note get`) and produce a deterministic ranked summary to stdout; **zero writes**, no
+  write scope (runs under a read-only `[read:notes, read:facts]` grant in-test). Property media is
+  referenced by `media_id` only. Test 1/1 (matching property ranks first, reproducible,
+  byte-identical workspace). Root `pnpm test` exit 0 — **340 tests**, 0 fail.
+- **EPIC-DOMAIN-001 COMPLETE — all 6 stories `Done`.** Inventory / viewing-schedule prep /
+  manager-report / property-inventory intake remain named future work; WeChat sync/auto-send, Gmail /
+  Calendar automation, landlord-portal scraping, external accounts, and auto-send are out of scope
+  (OQ #47). The core stays domain-neutral (ADR-001 grep green). **Next decision review is the human's.**
 
 ## EPIC-DOMAIN-001 (BROKER) REFINED (2026-06-13); ⏸ STOPPED FOR THE OQ #41–#47 REVIEW
 - **Human authorized EPIC-DOMAIN-001 broker refinement** (refinement only — no broker features
