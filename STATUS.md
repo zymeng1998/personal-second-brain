@@ -2,6 +2,19 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ v0.1 HANDOFF CHECKPOINT — operational pilot ready (2026-06-13)
+- **Final repo state verified:** clean working tree; `pnpm test` exit 0 (**340 core tests**);
+  `pnpm run smoke` PASS; `pnpm run test:sidecar` 2/2 (real Python sidecar); broker package 19/19.
+  Branch `main` is **9 commits ahead of `origin/main` (unpushed)** — awaiting human go-ahead to push.
+- **Handoff doc added:** [`docs/PROJECT_HANDOFF.md`](docs/PROJECT_HANDOFF.md) — fresh-clone usage,
+  completed epics, exact commands for every workflow (core, media-intake, dashboard, obsidian-helper,
+  broker), known limitations, and a named-only future backlog. No secrets/PII/locators (synthetic only).
+- **Stale docs refreshed** (commit `5e5683f`): README status block + repo map, CORE_V0.1_QUICKSTART
+  (test count + "Beyond the core"), implementation_roadmap (Phase 6 COMPLETE), story_backlog
+  (snapshot + SB-089..094 cards Backlog→Done). Two atomic docs commits (`5e5683f`, `fa04a2a`).
+- **No code changed; no new domain logic; ADR-001 still green.** Suggested (not applied) release tag:
+  `v0.1-core-broker`. **Next decision is the human's** — push, tag, and/or open a future feature epic.
+
 ## ✅ EPIC-DOMAIN-001 (BROKER) — COMPLETE (2026-06-13, one session)
 - **Human approved OQ #41–#47 with two amendments** and authorized implementation in dependency
   order SB-089 → 090 → 091 → 092 → 094 (one atomic commit each), with SB-093 after the gate if still
