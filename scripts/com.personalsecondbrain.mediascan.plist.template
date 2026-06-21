@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LaunchAgent template — periodic Google Drive media scan.
+
+  Setup:
+    1. Replace the THREE __PLACEHOLDER__ values below.
+       __DRIVE_MEDIA_INBOX__ embeds your account email — this filled-in plist is
+       PRIVATE; do NOT commit it.
+    2. Copy (filled in) to:
+         ~/Library/LaunchAgents/com.personalsecondbrain.mediascan.plist
+    3. Load it:
+         launchctl load ~/Library/LaunchAgents/com.personalsecondbrain.mediascan.plist
+       Unload with: launchctl unload ~/Library/LaunchAgents/com.personalsecondbrain.mediascan.plist
+    4. macOS may prompt for Files-and-Folders / Full Disk Access the first time it
+       reads the CloudStorage folder — grant it in System Settings → Privacy & Security.
+
+  Runs every 900s (15 min). The scanner itself hardens PATH and resolves absolute
+  tool paths, so the minimal LaunchAgent environment is fine.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.personalsecondbrain.mediascan</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO_ROOT__/scripts/media_drive_scan.sh</string>
+        <string>--once</string>
+        <string>--notify</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>DRIVE_MEDIA_INBOX</key>
+        <string>__DRIVE_MEDIA_INBOX__</string>
+        <key>MEDIA_ARTIFACT_ROOT</key>
+        <string>__HOME__/PersonalSecondBrainMediaArtifacts</string>
+        <key>SECOND_BRAIN_WORKSPACE</key>
+        <string>/Users/mengziyue/PersonalSecondBrain/PersonalSecondBrainWorkspace</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:__HOME__/.local/bin</string>
+    </dict>
+
+    <key>StartInterval</key>
+    <integer>900</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Scanner already writes per-run logs under MEDIA_ARTIFACT_ROOT/_logs;
+         these capture launchd-level stdout/stderr only (locator-free). -->
+    <key>StandardOutPath</key>
+    <string>__HOME__/PersonalSecondBrainMediaArtifacts/_logs/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/PersonalSecondBrainMediaArtifacts/_logs/launchd.err.log</string>
+</dict>
+</plist>
