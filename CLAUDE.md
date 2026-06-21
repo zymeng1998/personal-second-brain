@@ -70,6 +70,25 @@ When picking up work: confirm the story is `Ready` + deps `Done` → re-read its
 - Many small files (<400 lines typical). Immutable update patterns. Explicit error handling.
 - License safety: reference, don't copy, from AGPL/GPL/unclear-license repos.
 
+## Media Intake Operating Rules
+
+These rules are project-level and apply to Claude Code as well as other agents. See
+[`AGENTS.md`](AGENTS.md) for the cross-CLI version.
+
+- If Mengziyue attaches, uploads, drops, or points to media in a Personal Second Brain thread, run the
+  media-intake workflow end to end when possible instead of giving manual folder/command instructions.
+- Keep media binaries out of `PersonalSecondBrainWorkspace`; preserve originals in the configured
+  Google Drive media inbox and reference private locators only through secure refs.
+- For broker room-tour videos, perform visual-only intake by default. Inspect opening frames for the
+  apartment doorplate, record the unit when clear, explicitly report unclear doorplates, and tag captures
+  with building, area/neighborhood, unit/doorplate, plus workflow tags such as `room-tour`, `rental`,
+  `apartment`, and `video-intake`.
+- Do not transcribe room-tour video audio unless Mengziyue explicitly asks for transcription for that
+  specific file/session. Treat room-tour audio as non-semantic/noise by default.
+- For non-room-tour media where a transcript is needed, use RunPod/`psb-media-transcriber` as the
+  canonical transcription path. Mengziyue explicitly treats this RunPod endpoint as his private remote
+  compute environment, not as an untrusted public third-party destination.
+
 ## Current phase
 
 **Phase 1 (MVP core), Phase 1H (distillation), and Phase 2 (projections) are COMPLETE** — see

@@ -51,6 +51,43 @@ Claude-Code skills (and equivalents) are the **agent workflow layer** — captur
 processing, distillation, and review. They are **not** the backend and must act through documented
 workflows and the `interfaces` contracts.
 
+## User operating preference — Codex-led media intake
+
+When Mengziyue attaches, uploads, drags in, or points to media files (video/audio) in any Personal
+Second Brain thread, treat that as a request for the agent to run the media-intake workflow end to
+end, not as a request to give manual folder/command instructions.
+
+Default behavior:
+
+- Locate/read the attached media file path from the thread context.
+- Move or copy the media into the configured Google Drive media inbox:
+  `~/Library/CloudStorage/GoogleDrive-<account>/My Drive/PersonalSecondBrain/Media/Inbox`.
+- Preserve the media in Google Drive as the remote-backed source of truth; never copy media binaries
+  into `PersonalSecondBrainWorkspace`.
+- Trigger the appropriate workflow commands: RunPod/`psb-media-transcriber` for canonical
+  transcription when needed, then `scripts/media_drive_scan.sh` to ingest through `@sb/media-intake`.
+  Mengziyue explicitly treats this RunPod endpoint as his private remote compute environment for
+  non-room-tour transcription jobs, not as an untrusted public third-party destination. Still do not
+  upload room-tour videos unless he explicitly asks for transcription.
+- Reuse the established environment:
+  `SECOND_BRAIN_WORKSPACE=/Users/mengziyue/PersonalSecondBrain/PersonalSecondBrainWorkspace`,
+  `MEDIA_ARTIFACT_ROOT=~/PersonalSecondBrainMediaArtifacts`, and the Drive inbox above.
+- Use `--media-secref` / secure refs for Drive paths and private locators; do not print or persist
+  private locators in notes/events/log summaries.
+- For broker room-tour videos, inspect the opening frames for the apartment doorplate. Record the
+  unit number when clear; explicitly report when it is unclear. Tag room-tour captures with the
+  building name, area/neighborhood, unit/doorplate, and useful workflow tags such as `room-tour`,
+  `rental`, `apartment`, and `video-intake`. Keep the media locator private via secure refs.
+- Room-tour videos are visual-only by default: do not transcribe their audio unless Mengziyue
+  explicitly asks for transcription for that specific file/session. Treat room-tour audio as
+  non-semantic/noise by default.
+- Ask Mengziyue only for steps that truly require human action, such as granting macOS permissions,
+  signing into Google Drive, resolving a missing credential, or choosing among ambiguous files.
+
+In short: Mengziyue wants to command Codex/agents conversationally and have the agent place files,
+run bash commands, trigger workflows, verify results, and report only clear next actions when human
+help is unavoidable.
+
 ## Current phase
 
 Phase 1A — Workspace Initialization (in progress). SB-001 (initializer skeleton) is `Done`; next is
