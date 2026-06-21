@@ -2,6 +2,184 @@
 
 **Project:** personal-second-brain (Second Brain Core)
 
+## ✅ Docs/privacy consistency fixes (review follow-up) — DONE (2026-06-21)
+
+**No scanner logic changed** — docs + privacy wording only.
+
+1. **Removed the real Google account from tracked repo files.** Replaced the real account-embedded
+   Drive locator (and two near-placeholder variants — an ellipsis form and a wildcard-glob form) with
+   the `GoogleDrive-<account>` placeholder, plus a provider-agnostic `~/Library/CloudStorage/*/…`
+   discovery glob, in: `AGENTS.md`, `STATUS.md`, `docs/workflows/google_drive_media_storage.md`,
+   `docs/planning/post_v0.1_expansion_design.md`. The external
+   `/Users/mengziyue/PersonalSecondBrain/AGENTS.md` (untracked, outside the repo) keeps exact paths by design.
+2. **Doc now matches the hardened marker contract** (`docs/workflows/google_drive_media_storage.md`):
+   the scan-flow bullet, the marker section (new "Marker contract (hardened)" note), and the four-state
+   table all state that `VISUAL_PROCESSED` requires `status: "visual_processed"` **AND** a `media_id`
+   equal to the computed `media_id`; a missing/mismatched `media_id` **warns + falls back to PENDING**,
+   never silently skips; `status` alone is never sufficient.
+3. **STATUS consistency:** the older "Visual-only room-tour media intake" section now carries a
+   superseded-by-hardening banner and its skip description references the `media_id` match — no
+   contradictory wording.
+
+**Validation (this session):**
+- The reviewer's `rg` account/email/path heuristic over `AGENTS.md CLAUDE.md STATUS.md docs scripts`
+  → **no matches** (exit 1 = clean).
+- `bash -n scripts/media_drive_scan.sh` / `…smoke.sh` → OK.
+- `bash scripts/media_drive_scan.smoke.sh` → **PASS, 51/51**.
+- Real-inbox `--dry-run` → `media=3 ingested=0 idempotent=0 visual=3 pending=0 failed=0`; the 3 room
+  tours still `VISUAL_PROCESSED (room_tour, unit …)` for all three; inbox locator withheld.
+
+Not committed (per instruction). Files touched: `AGENTS.md`, `STATUS.md`,
+`docs/workflows/google_drive_media_storage.md`, `docs/planning/post_v0.1_expansion_design.md`.
+
+## ✅ Visual-only skip hardening (media_id match) — DONE (2026-06-21)
+
+**Change:** `scripts/media_drive_scan.sh` now requires **BOTH** conditions to skip a file as
+`VISUAL_PROCESSED`:
+1. `visual-intake.json` has `status: "visual_processed"`, **and**
+2. the marker's `media_id` **exactly equals** the artifact dir's computed `media_id`.
+
+If the marker's `media_id` is **missing** or **mismatched**, the scanner does **not** silently skip:
+it `warn`s (e.g. `visual-intake.json media_id mismatch (marker=…, dir=…); NOT skipping`) and **falls
+back to normal handling** — which becomes PENDING for a room tour (a visible signal, never a silent
+suppression of ingest). A stray/copied/hand-edited marker can no longer suppress the wrong file.
+
+**Smoke extended** (`scripts/media_drive_scan.smoke.sh`): added **10b** (mismatched `media_id`) and
+**10c** (missing `media_id`) — both assert the file is NOT skipped (warn + PENDING fallback, not
+ingested, no locator leak) while a valid marker still skips (no regression).
+
+**Validation (this session):**
+- `bash scripts/media_drive_scan.smoke.sh` → **PASS, 51/51** (37 prior + 14 new for mismatch/missing).
+- Real-inbox `scripts/media_drive_scan.sh --dry-run` →
+  `media=3 ingested=0 idempotent=0 visual=3 pending=0 failed=0` — the 3 backfilled room tours still
+  match their `media_id` and report `VISUAL_PROCESSED (room_tour, unit …)` for all three; locator withheld.
+- `~/.local/bin/pnpm --filter @sb/media-intake test` → **24/24** (adapter untouched).
+
+Not committed (per instruction). Changed: `scripts/media_drive_scan.sh`,
+`scripts/media_drive_scan.smoke.sh`, `STATUS.md`.
+
+## ✅ Visual-only room-tour media intake — DONE (2026-06-21)
+
+> **Note:** the skip condition below was later **hardened** — see the "Visual-only skip hardening
+> (media_id match)" section above. `VISUAL_PROCESSED` now requires the marker's `media_id` to match
+> the computed `media_id`, not just `status: "visual_processed"`. Where this section says "status",
+> read it as "status **and** matching media_id".
+
+**Goal:** broker room-tour videos are **visual-only** — do not transcribe their audio. Add a
+workflow/script-level state marker so the scanner recognizes them as complete and skips them, and
+backfill the three existing room tours. **No core/schema changes** (domain independence preserved);
+all broker/room-tour vocabulary stays at script + doc + artifact-file level.
+
+**What changed (small, atomic):**
+- **`scripts/media_drive_scan.sh`** — new **visual-only skip**: if
+  `<artifact_dir>/visual-intake.json` has `status: "visual_processed"` (**and**, per the hardening
+  above, a `media_id` matching the computed `media_id`), the scanner reports
+  `VISUAL_PROCESSED (kind, unit N) — skipped`, does **not** print PENDING, and does **not** ingest
+  (even with `--transcribe`). Checked right after canon-dir resolution, *before* the manifest rewrite,
+  so a skip mutates nothing. New `N_VISUAL` counter in the summary + notify. Transcript path for
+  non-room-tour media is unchanged. Locator privacy unchanged (only `media_ref_fp`/labels printed).
+- **`visual-intake.json` backfill** for the three existing room tours (no media moved, no L0 notes
+  mutated, no secure_refs rewritten; files validated as JSON, locator-free). The per-tour mapping
+  (media_id / filename / unit / note_id / secure_ref) lives only in the **external artifact store**
+  (`MEDIA_ARTIFACT_ROOT/<YYYY>/<MM>/<media_id>/visual-intake.json`) — kept out of this repo per
+  AGENTS.md rule #7 (no real client/property data in the repo).
+- **Drive layout** — created `Media/Library`, `Media/Library/RoomTours`, `Media/NeedsReview`
+  (Inbox unchanged; **no files moved** — moving processed tours to Library is a future decision).
+- **`docs/workflows/google_drive_media_storage.md`** — new "Media kinds: transcript vs visual-only"
+  section: `visual-intake.json` schema, the four scanner states (VISUAL_PROCESSED / INGESTED /
+  PENDING / new), why the Inbox can safely hold old videos (recognized by `media_id` +
+  `visual-intake.json`), and the Drive folder layout.
+- **`scripts/media_drive_scan.smoke.sh`** — added a synthetic visual-only room-tour fixture; asserts
+  VISUAL_PROCESSED/skipped, never PENDING, never ingested, and no locator leak (stdout / manifest /
+  visual-intake.json). All prior assertions preserved.
+
+**Validation (this session):**
+- `bash scripts/media_drive_scan.smoke.sh` → **PASS, 37/37** (25 prior + 12 new visual-only).
+- Real-inbox `scripts/media_drive_scan.sh --dry-run` →
+  `media=3 ingested=0 idempotent=0 visual=3 pending=0 failed=0`; the 3 room tours report
+  `VISUAL_PROCESSED (room_tour, unit …)` for all three; inbox locator withheld; scan log locator-free.
+- `~/.local/pnpm --filter @sb/media-intake test` → **24/24** (adapter untouched, still green).
+- Integrity: L0 notes + secure_refs untouched (mtimes unchanged); room-tour manifests not rewritten
+  (`transcript_present: false`); no stray repo files.
+
+**Remaining risks / next action:**
+- `visual-intake.json` is a script/doc convention (not validated by core `validate_notes`); a malformed
+  marker simply won't match `status: "visual_processed"` and the file falls back to PENDING — fail-safe.
+- Future (out of scope here): auto-move processed tours `Inbox → Library/RoomTours`; an explicit
+  `--transcribe-room-tour` override flag if a specific room tour ever needs audio; a tiny visual-intake
+  helper so new room tours get the marker without manual JSON.
+- Not committed (per instruction). Uncommitted repo files: `scripts/media_drive_scan.sh`,
+  `scripts/media_drive_scan.smoke.sh`, `docs/workflows/google_drive_media_storage.md`, `STATUS.md`.
+
+## ✅ Google Drive media storage + scanner automation — DONE + re-verified (2026-06-21)
+
+**Goal:** fastest robust path to store media in Google Drive and auto-prepare/ingest transcript
+artifacts into the existing Second Brain workflow — core stays media-binary-free.
+
+**Toolchain:** node `/usr/local/bin/node` v22.20.0; pnpm `~/.local/bin/pnpm` 9.0.0 (**not** on default
+Automator PATH — script adds `~/.local/bin`); ffmpeg/whisper/uv/python3/shasum present.
+
+**Drive setup (DONE on this machine, 2026-06-21):** Google Drive for Desktop installed + signed in;
+root `~/Library/CloudStorage/GoogleDrive-<account>`; inbox `…/My Drive/PersonalSecondBrain/
+Media/Inbox` marked **Available offline** (DriveFS `subscribed=1`). **Drive-for-Desktop local-folder
+sync only — no Drive API / OAuth / service account / rclone for v1.**
+
+**User operating preference (persisted 2026-06-21):** when media files are attached/uploaded/dropped
+into a Personal Second Brain Codex thread, the agent should place them in the Drive inbox, trigger the
+needed transcription/scanner/ingest workflow, verify results, and only ask the user for truly manual
+steps. This is now recorded in both `/Users/mengziyue/PersonalSecondBrain/AGENTS.md` and repo
+`AGENTS.md`.
+
+**Key interop fix (2026-06-21):** scanner `media_id` changed `sha256[:32]` → **`sha256[:16]`** to match
+**`psb-media-transcriber`** (`/Users/mengziyue/psb-media-transcriber`, `hashing.py: sha256[:16]`). Both
+now resolve the SAME `<media_id>` artifact dir, so RunPod's `transcript.md` is found by the scanner.
+
+**Delivered (new files only — no core/TS changes; ADR-001 untouched):**
+- [`scripts/media_drive_scan.sh`](scripts/media_drive_scan.sh) — PATH-hardened idempotent scanner.
+  Hashes each inbox media file → `media_id` (`sha256[:16]`; matches transcriber + `MEDIA_ID_PATTERN`),
+  builds the external store `MEDIA_ARTIFACT_ROOT/<YYYY>/<MM>/<media_id>/` with `by-id/` + `by-name/`
+  symlinks + `manifest.json` + `job.log` (`find -name <media_id>` resolves the dir regardless of which
+  YYYY/MM the transcriber dated it under). If `transcript.md` exists → ingests via
+  `@sb/media-intake ingest --artifact-dir … --media-secref <drive path> --review`; else clear PENDING.
+  Opt-in `--transcribe` (local whisper, fallback only), `--dry-run`, `--no-review`, `--notify`.
+  **Private locator never reaches stdout/log/notes/events** — only a `media_ref_fp`.
+- [`scripts/media_drive_scan.smoke.sh`](scripts/media_drive_scan.smoke.sh) — synthetic-fixture smoke
+  (Unicode+spaces filename), **27/27 PASS**.
+- [`docs/workflows/google_drive_media_storage.md`](docs/workflows/google_drive_media_storage.md) —
+  setup, exact RunPod + scanner commands, security model, troubleshooting, automation.
+- [`scripts/media_drive_scan.command`](scripts/media_drive_scan.command) (double-click) +
+  [`scripts/com.personalsecondbrain.mediascan.plist.template`](scripts/com.personalsecondbrain.mediascan.plist.template)
+  (15-min LaunchAgent).
+
+**Re-verification this session (2026-06-21, after the 16-char fix):**
+- `scripts/media_drive_scan.smoke.sh` was PATH-hardened like the scanner itself, so it resolves
+  `pnpm` from the Automator/LaunchAgent-safe PATH (`~/.local/bin` included) instead of relying on an
+  interactive shell.
+- `bash scripts/media_drive_scan.smoke.sh` → **PASS (exit 0), 27/27** (media_id now 16 hex e.g. `ad67176316344523`).
+- `pnpm --filter @sb/media-intake test` → **24/24**.
+- Real-inbox `scripts/media_drive_scan.sh --dry-run` against the actual Drive folder →
+  `media=0 ingested=0 idempotent=0 pending=0 failed=0`; inbox path withheld from stdout. Inbox currently
+  empty, so no live ingest yet.
+
+**Transcription = canonical remote RunPod** via `psb-media-transcriber`
+(`psb-transcribe transcribe <file>` or the Finder "Transcribe with RunPod" Quick Action), which writes
+`transcript.md` into the shared artifact dir; the scanner then ingests. Local `--transcribe` (whisper)
+is a quick/offline fallback only. Persisted to long-term memory (`psb-transcription-runpod.md`).
+
+**Next step (first real test — needs a media file in the inbox):**
+```bash
+# 0) drop a small audio/video file into the Drive inbox (Finder)
+cd /Users/mengziyue/psb-media-transcriber && source .venv/bin/activate
+psb-transcribe transcribe "$HOME/Library/CloudStorage/GoogleDrive-<account>/My Drive/PersonalSecondBrain/Media/Inbox/<file>"
+# then ingest:
+cd /Users/mengziyue/PersonalSecondBrain/personal-second-brain
+export SECOND_BRAIN_WORKSPACE="/Users/mengziyue/PersonalSecondBrain/PersonalSecondBrainWorkspace"
+export DRIVE_MEDIA_INBOX="$HOME/Library/CloudStorage/GoogleDrive-<account>/My Drive/PersonalSecondBrain/Media/Inbox"
+export MEDIA_ARTIFACT_ROOT="$HOME/PersonalSecondBrainMediaArtifacts"
+scripts/media_drive_scan.sh
+```
+New files are **uncommitted** pending review (do not commit unless asked).
+
 ## ✅ v0.1 HANDOFF CHECKPOINT — operational pilot ready (2026-06-13)
 - **Final repo state verified:** clean working tree; `pnpm test` exit 0 (**340 core tests**);
   `pnpm run smoke` PASS; `pnpm run test:sidecar` 2/2 (real Python sidecar); broker package 19/19.
